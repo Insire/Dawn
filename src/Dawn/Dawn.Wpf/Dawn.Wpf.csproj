@@ -15,4 +15,8 @@
     <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.56-gf4de9b24e9" />
     <PackageReference Include="Serilog" Version="2.9.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ookii-dialogs-wpf\src\Ookii.Dialogs.Wpf.NETCore\Ookii.Dialogs.Wpf.NETCore.csproj" />
+  </ItemGroup>
 </Project>

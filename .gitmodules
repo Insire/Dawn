@@ -1,0 +1,3 @@
+[submodule "ookii-dialogs-wpf"]
+	path = ookii-dialogs-wpf
+	url = https://github.com/Insire/ookii-dialogs-wpf.git
