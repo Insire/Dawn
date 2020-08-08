@@ -1,0 +1,168 @@
+﻿<controls:AdonisWindow x:Class="Dawn.Wpf.Shell"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+                       xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                       xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                       xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                       xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
+                       Title="{Binding Title}"
+                       Width="800"
+                       Height="450"
+                       AllowDrop="True"
+                       Drop="OnDrop"
+                       IconVisibility="Collapsed"
+                       mc:Ignorable="d">
+
+    <!--  DataContext: ShellViewModel  -->
+
+    <controls:AdonisWindow.TitleBarContent>
+        <DockPanel>
+            <Button Click="OpenConfiguration"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}">
+                <icons:FontAwesome Kind="CogSolid" />
+            </Button>
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding Configuration.TargetFolder, StringFormat='{} ActiveFolder {0}}', TargetNullValue=''}" />
+        </DockPanel>
+    </controls:AdonisWindow.TitleBarContent>
+
+    <Grid>
+        <Grid.Resources>
+            <mvvm:BindingProxy x:Key="UpdatesProxy" Data="{Binding Updates}" />
+
+            <CollectionViewSource x:Key="Updates" Source="{Binding Updates.Items}">
+                <CollectionViewSource.SortDescriptions>
+                    <componentmodel:SortDescription Direction="Descending" PropertyName="Name" />
+                </CollectionViewSource.SortDescriptions>
+            </CollectionViewSource>
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="8" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="8" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
+        </Grid.RowDefinitions>
+
+        <ItemsControl Grid.Row="1"
+                      Grid.RowSpan="3"
+                      Grid.Column="1"
+                      ItemsSource="{Binding Source={StaticResource Updates}}">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding Updates.LoadCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:UpdateViewModel}">
+                    <GroupBox Width="200"
+                              Height="100"
+                              Margin="8"
+                              Header="{Binding Name}"
+                              HeaderStringFormat="{}Backup: {0}">
+                        <DockPanel>
+
+                            <Button Command="{Binding Data.RevertCommand, Source={StaticResource UpdatesProxy}}"
+                                    Content="Revert"
+                                    DockPanel.Dock="Bottom" />
+
+                            <TextBlock Text="{Binding Count, StringFormat='{}Files: {0}'}">
+                                <TextBlock.ToolTip>
+                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <VirtualizingStackPanel IsItemsHost="True" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Value}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </DockPanel>
+                    </GroupBox>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Expander Grid.Row="3"
+                  Grid.Column="1"
+                  VerticalAlignment="Bottom"
+                  HorizontalContentAlignment="Stretch"
+                  ExpandDirection="Up">
+            <Expander.Style>
+                <Style BasedOn="{StaticResource {x:Type Expander}}" TargetType="{x:Type Expander}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Stagings.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Expander.Style>
+            <Expander.Header>
+                <DockPanel>
+                    <Button Margin="8,0"
+                            Padding="8"
+                            HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}"
+                            DockPanel.Dock="Right"
+                            Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
+                            ToolTip="Apply Updates">
+                        <icons:FontAwesome Kind="FileUploadSolid" />
+                    </Button>
+                    <Button Padding="8"
+                            Command="{Binding Stagings.ClearCommand}"
+                            DockPanel.Dock="Right"
+                            ToolTip="Clear">
+                        <icons:FontAwesome Kind="TrashSolid" />
+                    </Button>
+                    <TextBlock VerticalAlignment="Center" Text="Staging" />
+                </DockPanel>
+            </Expander.Header>
+
+            <DockPanel>
+                <ScrollViewer adonisExtensions:ScrollViewerExtension.HideScrollBarsUntilMouseOver="True">
+                    <ItemsControl ItemsSource="{Binding Stagings.Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel IsItemsHost="True" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:StagingViewModel}">
+                                <TextBlock Text="{Binding Path}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Expander>
+    </Grid>
+</controls:AdonisWindow>
