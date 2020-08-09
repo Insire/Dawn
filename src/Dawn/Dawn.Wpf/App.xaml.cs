@@ -34,6 +34,8 @@ namespace Dawn.Wpf
             _tracker.PersistAll();
             _configurationService.Save();
 
+            _container.Dispose();
+
             base.OnExit(e);
         }
     }

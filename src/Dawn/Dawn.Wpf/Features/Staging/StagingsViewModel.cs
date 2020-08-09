@@ -58,12 +58,6 @@ namespace Dawn.Wpf
 
             await _logViewModel.Clear(token).ConfigureAwait(false);
 
-            _log.Write(Serilog.Events.LogEventLevel.Debug, "Debug");
-            _log.Write(Serilog.Events.LogEventLevel.Information, "Information");
-            _log.Write(Serilog.Events.LogEventLevel.Warning, "Warning");
-            _log.Write(Serilog.Events.LogEventLevel.Error, "Error");
-            _log.Write(Serilog.Events.LogEventLevel.Fatal, "Fatal");
-
             var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
 
             var t2 = Task.Run(() =>

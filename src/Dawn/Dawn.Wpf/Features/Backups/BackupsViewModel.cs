@@ -12,16 +12,22 @@ namespace Dawn.Wpf
     /// <summary>
     /// displays past updates
     /// </summary>
-    public sealed class UpdatesViewModel : BusinessViewModelListBase<UpdateViewModel>
+    public sealed class BackupsViewModel : BusinessViewModelListBase<BackupViewModel>
     {
         private readonly ConfigurationViewModel _configuration;
 
         public ICommand RevertCommand { get; }
 
-        public UpdatesViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configuration)
+        public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configuration)
             : base(commandBuilder)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+
+            RevertCommand = commandBuilder
+                .Create(Revert, CanRevert)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
         }
 
         protected override async Task RefreshInternal(CancellationToken token)
@@ -31,7 +37,7 @@ namespace Dawn.Wpf
                 return;
             }
 
-            var lookup = new Dictionary<string, UpdateViewModel>();
+            var lookup = new Dictionary<string, BackupViewModel>();
             var files = await Task.Run(() => Directory.GetFiles(_configuration.BackupFolder, "*_bak*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
             foreach (var file in files)
@@ -59,7 +65,7 @@ namespace Dawn.Wpf
                             key = date.ToString("yyyy.MM.dd");
                             if (!lookup.ContainsKey(key))
                             {
-                                var group = new UpdateViewModel(CommandBuilder, key);
+                                var group = new BackupViewModel(CommandBuilder, key);
                                 await group.Add(new ViewModelContainer<string>(file)).ConfigureAwait(false);
 
                                 lookup.Add(key, group);
@@ -77,6 +83,19 @@ namespace Dawn.Wpf
             }
 
             await AddRange(lookup.Values).ConfigureAwait(false);
+        }
+
+        private async Task Revert(CancellationToken token)
+        {
+            // check for existing backup of todays files
+            // backup files if there is none
+            // copy files back
+            // set lastwrite timestamp
+        }
+
+        private bool CanRevert()
+        {
+            return false;
         }
     }
 }

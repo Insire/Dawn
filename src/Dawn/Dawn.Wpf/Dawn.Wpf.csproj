@@ -4,17 +4,24 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AdonisUI" Version="1.16.0" />
     <PackageReference Include="AdonisUI.ClassicTheme" Version="1.16.0" />
     <PackageReference Include="DryIoc.dll" Version="4.3.1" />
-    <PackageReference Include="FluentValidation" Version="9.1.0" />
+    <PackageReference Include="FluentValidation" Version="9.1.1" />
     <PackageReference Include="Jot" Version="2.1.7" />
     <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.4.0" />
     <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.56-gf4de9b24e9" />
     <PackageReference Include="Serilog" Version="2.9.0" />
+
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.2.31">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

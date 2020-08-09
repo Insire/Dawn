@@ -9,22 +9,22 @@ namespace Dawn.Wpf
         public string Title { get; }
 
         public ConfigurationViewModel Configuration { get; }
-        public UpdatesViewModel Updates { get; }
+        public BackupsViewModel Updates { get; }
 
         public StagingsViewModel Stagings { get; }
 
-        public ShellViewModel(ConfigurationViewModel configuration, UpdatesViewModel updates, StagingsViewModel stagings, Assembly assembly)
+        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, Assembly assembly)
         {
             if (assembly is null)
             {
                 throw new ArgumentNullException(nameof(assembly));
             }
 
-            Configuration = configuration ?? throw new System.ArgumentNullException(nameof(configuration));
-            Updates = updates ?? throw new System.ArgumentNullException(nameof(updates));
-            Stagings = stagings ?? throw new System.ArgumentNullException(nameof(stagings));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Updates = updates ?? throw new ArgumentNullException(nameof(updates));
+            Stagings = stagings ?? throw new ArgumentNullException(nameof(stagings));
 
-            Title = $"Dawn - v{assembly.GetName().Version}";
+            Title = $"Dawn v{assembly.GetName().Version}";
         }
     }
 }

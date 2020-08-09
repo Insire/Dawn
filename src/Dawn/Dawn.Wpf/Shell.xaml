@@ -111,7 +111,7 @@
             </ItemsControl.ItemsPanel>
 
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:UpdateViewModel}">
+                <DataTemplate DataType="{x:Type local:BackupViewModel}">
                     <GroupBox Width="200"
                               Height="100"
                               Margin="8"
@@ -120,7 +120,7 @@
                         <DockPanel>
 
                             <Button Command="{Binding Data.RevertCommand, Source={StaticResource UpdatesProxy}}"
-                                    Content="Revert"
+                                    Content="Apply Backup"
                                     DockPanel.Dock="Bottom" />
 
                             <TextBlock Text="{Binding Count, StringFormat='{}Files: {0}'}">

@@ -18,6 +18,9 @@
                        WindowStartupLocation="CenterOwner"
                        WindowStyle="ToolWindow"
                        mc:Ignorable="d">
+
+    <!--  DataContext: ConfigurationViewModel  -->
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8" />

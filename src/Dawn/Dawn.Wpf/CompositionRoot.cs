@@ -46,7 +46,7 @@ namespace Dawn.Wpf
             c.Register<ConfigurationViewModel>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<StagingsViewModel>(Reuse.Singleton);
-            c.Register<UpdatesViewModel>(Reuse.Singleton);
+            c.Register<BackupsViewModel>(Reuse.Singleton);
 
             c.UseInstance(ScarletCommandBuilder.Default);
             c.UseInstance(ScarletDispatcher.Default);
