@@ -165,6 +165,7 @@
                 <DockPanel Margin="0,8,8,8">
                     <Button Padding="8"
                             HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}"
+                            Command="{Binding Stagings.ApplyCommand}"
                             DockPanel.Dock="Right"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
                             ToolTip="Apply Updates">

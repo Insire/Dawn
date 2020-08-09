@@ -17,15 +17,18 @@ namespace Dawn.Wpf
     {
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly ILogger _log;
+        private readonly LogViewModel _logViewModel;
 
         public ICommand ApplyCommand { get; }
 
-        public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log)
+        public Action OnApplyingStagings { get; set; }
+
+        public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _log = log ?? throw new ArgumentNullException(nameof(log));
-
+            _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             ApplyCommand = commandBuilder.Create(Apply, CanApply)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
@@ -47,13 +50,23 @@ namespace Dawn.Wpf
             }
         }
 
-        public Task Apply(CancellationToken token)
+        public async Task Apply(CancellationToken token)
         {
             var targetPath = _configurationViewModel.BackupFolder;
             var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
             var pattern = _configurationViewModel.FilePattern;
 
-            return Task.Run(() =>
+            await _logViewModel.Clear(token).ConfigureAwait(false);
+
+            _log.Write(Serilog.Events.LogEventLevel.Debug, "Debug");
+            _log.Write(Serilog.Events.LogEventLevel.Information, "Information");
+            _log.Write(Serilog.Events.LogEventLevel.Warning, "Warning");
+            _log.Write(Serilog.Events.LogEventLevel.Error, "Error");
+            _log.Write(Serilog.Events.LogEventLevel.Fatal, "Fatal");
+
+            var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
+
+            var t2 = Task.Run(() =>
             {
                 try
                 {
@@ -106,6 +119,10 @@ namespace Dawn.Wpf
                     _log.Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
                 }
             }, token);
+
+            await Task.WhenAll(t1, t2).ConfigureAwait(false);
+
+            await Clear(token).ConfigureAwait(false);
         }
 
         private bool CanApply()
