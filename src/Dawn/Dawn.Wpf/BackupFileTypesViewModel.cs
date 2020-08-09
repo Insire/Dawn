@@ -5,12 +5,16 @@ namespace Dawn.Wpf
 {
     public sealed class BackupFileTypesViewModel : ViewModelListBase<BackupFileTypeViewModel>
     {
-        public BackupFileTypesViewModel(in IScarletCommandBuilder commandBuilder)
+        public BackupFileTypesViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationModel model)
             : base(commandBuilder)
         {
-            AddUnchecked(new BackupFileTypeViewModel("DLL", ".dll"));
-            AddUnchecked(new BackupFileTypeViewModel("LST", ".lst"));
-            AddUnchecked(new BackupFileTypeViewModel("EXE", ".exe"));
+            if (model.BackupFileTypes != null)
+            {
+                foreach (var type in model.BackupFileTypes)
+                {
+                    AddUnchecked(new BackupFileTypeViewModel(type));
+                }
+            }
         }
     }
 }

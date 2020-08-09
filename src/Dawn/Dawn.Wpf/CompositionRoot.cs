@@ -1,4 +1,5 @@
 ﻿using DryIoc;
+using FluentValidation;
 using Jot;
 using Jot.Storage;
 using MvvmScarletToolkit;
@@ -27,6 +28,7 @@ namespace Dawn.Wpf
             c.UseInstance(Assembly.GetAssembly(typeof(CompositionRoot)));
 
             c.Register<Shell>(Reuse.Singleton);
+            c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
 
             var tracker = new Tracker(new JsonFileStore(perUser: true));
             tracker.Configure<Shell>()

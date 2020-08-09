@@ -1,4 +1,5 @@
-﻿using MvvmScarletToolkit;
+﻿using FluentValidation;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using System;
 
@@ -29,24 +30,22 @@ namespace Dawn.Wpf
             set { SetValue(ref _filePattern, value, onChanged: () => _model.FilePattern = value); }
         }
 
-        private bool _isValid;
-        public bool IsValid
-        {
-            get { return _isValid; }
-            private set { SetValue(ref _isValid, value); }
-        }
-
         public BackupFileTypesViewModel BackupFileTypes { get; }
 
-        public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, BackupFileTypesViewModel backupFileTypes, ConfigurationModel model)
+        public ValidationConfigurationViewModel Validation { get; }
+
+        public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, ConfigurationModel model, IValidator<ConfigurationViewModel> validator)
             : base(commandBuilder)
         {
-            BackupFileTypes = backupFileTypes ?? throw new ArgumentNullException(nameof(backupFileTypes));
             _model = model ?? throw new ArgumentNullException(nameof(model));
 
             _targetFolder = _model.TargetFolder;
             _backupFolder = _model.BackupFolder;
             _filePattern = _model.FilePattern;
+
+            BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
+
+            Validation = new ValidationConfigurationViewModel(validator, this);
         }
     }
 }

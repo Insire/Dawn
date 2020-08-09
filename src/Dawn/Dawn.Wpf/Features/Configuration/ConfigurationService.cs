@@ -23,7 +23,13 @@ namespace Dawn.Wpf
             {
                 TargetFolder = @"D:\Drop\Desktop\Neuer Ordner",
                 BackupFolder = Path.Combine(assembly.Location, "Backups"),
-                FilePattern = $"_bak{DateTime.Now:ddMMyyyy}"
+                FilePattern = $"_bak{DateTime.Now:ddMMyyyy}",
+                BackupFileTypes = new System.Collections.Generic.List<BackupFileTypeModel>()
+                {
+                    new BackupFileTypeModel("DLL", ".dll",true),
+                    new BackupFileTypeModel("LST", ".lst",true),
+                    new BackupFileTypeModel("EXE", ".exe",true)
+                }
             };
         }
 

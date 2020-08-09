@@ -1,6 +1,10 @@
-﻿using Ookii.Dialogs.Wpf;
+﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit.Commands;
+using Ookii.Dialogs.Wpf;
 using System;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Dawn.Wpf
 {
@@ -8,11 +12,25 @@ namespace Dawn.Wpf
     {
         private readonly ConfigurationViewModel _configurationViewModel;
 
+        public ICommand CloseCommand { get; }
+
         public ConfigurationWindow(ConfigurationViewModel configurationViewModel)
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
 
+            CloseCommand = new RelayCommand(ScarletCommandBuilder.Default, CloseInternal, CanClose);
+
             InitializeComponent();
+        }
+
+        private void CloseInternal()
+        {
+            DialogResult = true;
+        }
+
+        private bool CanClose()
+        {
+            return _configurationViewModel.Validation.IsValid && !_configurationViewModel.IsBusy;
         }
 
         public bool TrySelectFolder(out string folder)
@@ -40,8 +58,7 @@ namespace Dawn.Wpf
 
         private void SelectTargetFolder(object sender, RoutedEventArgs e)
         {
-            var folder = _configurationViewModel.TargetFolder;
-            if (TrySelectFolder(out folder))
+            if (TrySelectFolder(out var folder))
             {
                 _configurationViewModel.TargetFolder = folder;
             }
@@ -49,11 +66,20 @@ namespace Dawn.Wpf
 
         private void SelectBackupFolder(object sender, RoutedEventArgs e)
         {
-            var folder = _configurationViewModel.BackupFolder;
-            if (TrySelectFolder(out folder))
+            if (TrySelectFolder(out var folder))
             {
                 _configurationViewModel.BackupFolder = folder;
             }
+        }
+
+        private void OnClosing(object sender, CancelEventArgs e)
+        {
+            if (_configurationViewModel.Validation.IsValid && !_configurationViewModel.IsBusy)
+            {
+                return;
+            }
+
+            e.Cancel = true;
         }
     }
 }

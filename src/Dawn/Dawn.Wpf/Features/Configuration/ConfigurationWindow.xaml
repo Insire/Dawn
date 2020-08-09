@@ -8,8 +8,10 @@
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       x:Name="rootView"
                        Title="Configuration"
                        Width="600"
+                       Closing="OnClosing"
                        IconVisibility="Collapsed"
                        ResizeMode="NoResize"
                        SizeToContent="Height"
@@ -47,8 +49,11 @@
 
         <TextBox Grid.Row="1"
                  Grid.Column="3"
+                 adonisExtensions:ValidationExtension.ErrorMessagePlacement="Bottom"
+                 adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True"
+                 adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True"
                  adonisExtensions:WatermarkExtension.Watermark="Select the folder to update ..."
-                 Text="{Binding TargetFolder}"
+                 Text="{Binding Validation.TargetFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Select the folder to update" />
         <Button Grid.Row="1"
                 Grid.Column="5"
@@ -63,8 +68,11 @@
 
         <TextBox Grid.Row="3"
                  Grid.Column="3"
+                 adonisExtensions:ValidationExtension.ErrorMessagePlacement="Bottom"
+                 adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True"
+                 adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True"
                  adonisExtensions:WatermarkExtension.Watermark="Select a backup folder ..."
-                 Text="{Binding BackupFolder}"
+                 Text="{Binding Validation.BackupFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Select a backup folder" />
         <Button Grid.Row="3"
                 Grid.Column="5"
@@ -80,7 +88,8 @@
         <TextBox Grid.Row="5"
                  Grid.Column="3"
                  adonisExtensions:WatermarkExtension.Watermark="Pattern ..."
-                 Text="{Binding FilePattern}"
+                 IsReadOnly="True"
+                 Text="{Binding Validation.FilePattern, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Pattern" />
 
         <ItemsControl Grid.Row="7"
@@ -97,7 +106,7 @@
                 <DataTemplate DataType="{x:Type local:BackupFileTypeViewModel}">
                     <StackPanel Margin="0,0,8,0" Orientation="Horizontal">
                         <CheckBox />
-                        <TextBlock Text="{Binding Type}" />
+                        <TextBlock Text="{Binding Name}" />
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -108,6 +117,7 @@
                 Grid.ColumnSpan="3"
                 Padding="8"
                 HorizontalAlignment="Right"
+                Command="{Binding CloseCommand, ElementName=rootView}"
                 Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
                 ToolTip="OK">
             <icons:FontAwesome Kind="CheckSolid" />

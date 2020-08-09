@@ -22,15 +22,12 @@
     <!--  DataContext: ShellViewModel  -->
 
     <controls:AdonisWindow.TitleBarContent>
-        <DockPanel>
+        <DockPanel LastChildFill="False">
             <Button Click="OpenConfiguration"
                     DockPanel.Dock="Right"
                     Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}">
                 <icons:FontAwesome Kind="CogSolid" />
             </Button>
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Text="{Binding Configuration.TargetFolder, StringFormat='{} ActiveFolder {0}}', TargetNullValue=''}" />
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 
@@ -59,10 +56,47 @@
             <RowDefinition Height="8" />
         </Grid.RowDefinitions>
 
+        <DockPanel Grid.Row="1"
+                   Grid.RowSpan="3"
+                   Grid.Column="1"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center">
+            <DockPanel.Style>
+                <Style TargetType="{x:Type DockPanel}">
+                    <Setter Property="Visibility" Value="Hidden" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Stagings.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DockPanel.Style>
+            <TextBlock VerticalAlignment="Center"
+                       DockPanel.Dock="Top"
+                       TextAlignment="Center">
+                <Run Text="This looks rather empty ..." />
+                <LineBreak />
+                <Run Text="Why not drop some files here?" />
+            </TextBlock>
+            <icons:PackIconFontAwesome Margin="8"
+                                       HorizontalAlignment="Center"
+                                       Kind="ChevronDownSolid" />
+        </DockPanel>
+
         <ItemsControl Grid.Row="1"
                       Grid.RowSpan="3"
                       Grid.Column="1"
                       ItemsSource="{Binding Source={StaticResource Updates}}">
+
+            <ItemsControl.Style>
+                <Style BasedOn="{StaticResource {x:Type ItemsControl}}" TargetType="{x:Type ItemsControl}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Updates.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ItemsControl.Style>
 
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
@@ -128,22 +162,24 @@
                 </Style>
             </Expander.Style>
             <Expander.Header>
-                <DockPanel>
-                    <Button Margin="8,0"
-                            Padding="8"
+                <DockPanel Margin="0,8,8,8">
+                    <Button Padding="8"
                             HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}"
                             DockPanel.Dock="Right"
                             Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
                             ToolTip="Apply Updates">
                         <icons:FontAwesome Kind="FileUploadSolid" />
                     </Button>
-                    <Button Padding="8"
+
+                    <Button Margin="8,0"
+                            Padding="8"
                             Command="{Binding Stagings.ClearCommand}"
                             DockPanel.Dock="Right"
-                            ToolTip="Clear">
+                            ToolTip="Unstage everything">
                         <icons:FontAwesome Kind="TrashSolid" />
                     </Button>
-                    <TextBlock VerticalAlignment="Center" Text="Staging" />
+
+                    <TextBlock VerticalAlignment="Center" Text="Staging Area" />
                 </DockPanel>
             </Expander.Header>
 
