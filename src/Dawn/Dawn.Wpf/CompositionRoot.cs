@@ -5,6 +5,7 @@ using Jot.Storage;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
+using System;
 using System.Reflection;
 using System.Windows;
 
@@ -30,7 +31,7 @@ namespace Dawn.Wpf
             c.Register<Shell>(Reuse.Singleton);
             c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
 
-            var tracker = new Tracker(new JsonFileStore(perUser: true));
+            var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
             tracker.Configure<Shell>()
                 .Id(w => $"[Width={SystemParameters.VirtualScreenWidth},Height{SystemParameters.VirtualScreenHeight}]")
                 .Properties(w => new { w.Height, w.Width, w.Left, w.Top, w.WindowState })
