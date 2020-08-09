@@ -19,16 +19,19 @@ namespace Dawn.Wpf
 
             _settingsFilePath = Path.Combine(assembly.Location.Replace(Path.GetFileName(assembly.Location), ""), "Dawn.Wpf.Settings.json");
 
+            var location = assembly.Location.Replace(Path.GetFileName(assembly.Location), "");
+
             _configuration = new ConfigurationModel()
             {
                 TargetFolder = @"D:\Drop\Desktop\Neuer Ordner",
-                BackupFolder = Path.Combine(assembly.Location, "Backups"),
+                BackupFolder = Path.Combine(location, "Backups"),
                 FilePattern = $"_bak{DateTime.Now:ddMMyyyy}",
+                FirstStart = true,
                 BackupFileTypes = new System.Collections.Generic.List<BackupFileTypeModel>()
                 {
-                    new BackupFileTypeModel("DLL", ".dll",true),
-                    new BackupFileTypeModel("LST", ".lst",true),
-                    new BackupFileTypeModel("EXE", ".exe",true)
+                    new BackupFileTypeModel( ".dll","DLL",true),
+                    new BackupFileTypeModel( ".lst","LST",true),
+                    new BackupFileTypeModel( ".exe","EXE",true)
                 }
             };
         }
@@ -50,6 +53,7 @@ namespace Dawn.Wpf
             {
                 var temp = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath));
 
+                _configuration.FirstStart = false;
                 _configuration.TargetFolder = temp.TargetFolder;
                 _configuration.BackupFolder = temp.BackupFolder;
                 _configuration.FilePattern = temp.FilePattern;

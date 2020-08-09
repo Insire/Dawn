@@ -8,6 +8,8 @@ namespace Dawn.Wpf
         public string BackupFolder { get; set; }
         public string FilePattern { get; set; }
 
+        public bool FirstStart { get; set; }
+
         public List<BackupFileTypeModel> BackupFileTypes { get; set; }
     }
 }

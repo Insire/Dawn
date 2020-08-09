@@ -52,6 +52,10 @@ namespace Dawn.Wpf
                         int.TryParse(key.Substring(2, 2), out var months);
                         int.TryParse(key.Substring(4, 4), out var years);
 
+                        int.TryParse(key.Substring(8, 2), out var hours);
+                        int.TryParse(key.Substring(10, 2), out var minutes);
+                        int.TryParse(key.Substring(12, 2), out var seconds);
+
                         days--;
                         months--;
                         years--;
@@ -61,8 +65,11 @@ namespace Dawn.Wpf
                             var date = DateTime.MinValue.AddDays(days);
                             date = date.AddMonths(months);
                             date = date.AddYears(years);
+                            date = date.AddHours(hours);
+                            date = date.AddMinutes(minutes);
+                            date = date.AddSeconds(seconds);
 
-                            key = date.ToString("yyyy.MM.dd");
+                            key = date.ToString("yyyy.MM.dd hh:mm:ss");
                             if (!lookup.ContainsKey(key))
                             {
                                 var group = new BackupViewModel(CommandBuilder, key);
