@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Dawn.Wpf
@@ -12,17 +12,14 @@ namespace Dawn.Wpf
         private readonly ConfigurationModel _configuration;
         private readonly ILogger _log;
 
-        public ConfigurationService(Assembly assembly, ILogger log)
+        public ConfigurationService(ILogger log)
         {
-            if (assembly is null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
             _log = log ?? throw new ArgumentNullException(nameof(log));
 
-            _settingsFilePath = Path.Combine(assembly.Location.Replace(Path.GetFileName(assembly.Location), ""), "Dawn.Wpf.Settings.json");
+            var path = Process.GetCurrentProcess().MainModule.FileName;
+            var location = path.Replace(Path.GetFileName(path), "");
 
-            var location = assembly.Location.Replace(Path.GetFileName(assembly.Location), "");
+            _settingsFilePath = Path.Combine(location, "Dawn.Wpf.Settings.json");
 
             _configuration = new ConfigurationModel()
             {
