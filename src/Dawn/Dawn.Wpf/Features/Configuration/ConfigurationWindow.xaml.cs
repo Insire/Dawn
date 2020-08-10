@@ -60,7 +60,7 @@ namespace Dawn.Wpf
         {
             if (TrySelectFolder(out var folder))
             {
-                _configurationViewModel.TargetFolder = folder;
+                _configurationViewModel.DeploymentFolder = folder;
             }
         }
 

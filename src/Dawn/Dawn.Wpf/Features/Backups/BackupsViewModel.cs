@@ -1,8 +1,10 @@
 ﻿using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -14,17 +16,30 @@ namespace Dawn.Wpf
     /// </summary>
     public sealed class BackupsViewModel : BusinessViewModelListBase<BackupViewModel>
     {
-        private readonly ConfigurationViewModel _configuration;
+        private readonly ConfigurationViewModel _configurationViewModel;
+        private readonly ILogger _log;
 
         public ICommand RevertCommand { get; }
 
-        public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configuration)
+        public ICommand DeleteAllCommand { get; }
+
+        public Func<bool> OnDeleteAllRequested { get; set; }
+        public Func<bool> OnDeleteRequested { get; set; }
+
+        public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log)
             : base(commandBuilder)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
 
             RevertCommand = commandBuilder
-                .Create(Revert, CanRevert)
+                .Create<BackupViewModel>(Revert, CanRevert)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
+
+            DeleteAllCommand = commandBuilder
+                .Create(DeleteAll, CanDeleteAll)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
@@ -32,59 +47,67 @@ namespace Dawn.Wpf
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
-            if (!Directory.Exists(_configuration.BackupFolder))
+            if (!Directory.Exists(_configurationViewModel.BackupFolder))
             {
                 return;
             }
 
             var lookup = new Dictionary<string, BackupViewModel>();
-            var files = await Task.Run(() => Directory.GetFiles(_configuration.BackupFolder, "*_bak*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
+            var directories = await Task.Run(() => Directory.GetDirectories(_configurationViewModel.BackupFolder, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
-            foreach (var file in files)
+            foreach (var directory in directories)
             {
-                var split = file.Split("bak");
-                if (split.Length == 2)
+                var key = Path.GetFileName(directory);
+                if (key.Length >= 8)
                 {
-                    var key = split[1];
-                    if (key.Length >= 8)
+                    try
                     {
-                        int.TryParse(key.Substring(0, 2), out var days);
-                        int.TryParse(key.Substring(2, 2), out var months);
-                        int.TryParse(key.Substring(4, 4), out var years);
+                        if (!int.TryParse(key.Substring(0, 2), out var days))
+                            days = 1;
+                        if (!int.TryParse(key.Substring(2, 2), out var months))
+                            months = 1;
+                        if (!int.TryParse(key.Substring(4, 4), out var years))
+                            years = 2001;
 
-                        int.TryParse(key.Substring(8, 2), out var hours);
-                        int.TryParse(key.Substring(10, 2), out var minutes);
-                        int.TryParse(key.Substring(12, 2), out var seconds);
+                        var hours = 0;
+                        var minutes = 0;
+                        var seconds = 0;
+
+                        if (key.Length >= 10)
+                            int.TryParse(key.Substring(8, 2), out hours);
+                        if (key.Length >= 12)
+                            int.TryParse(key.Substring(10, 2), out minutes);
+                        if (key.Length >= 14)
+                            int.TryParse(key.Substring(12, 2), out seconds);
 
                         days--;
                         months--;
                         years--;
 
-                        try
-                        {
-                            var date = DateTime.MinValue.AddDays(days);
-                            date = date.AddMonths(months);
-                            date = date.AddYears(years);
-                            date = date.AddHours(hours);
-                            date = date.AddMinutes(minutes);
-                            date = date.AddSeconds(seconds);
+                        var date = DateTime.MinValue.AddDays(days);
+                        date = date.AddMonths(months);
+                        date = date.AddYears(years);
+                        date = date.AddHours(hours);
+                        date = date.AddMinutes(minutes);
+                        date = date.AddSeconds(seconds);
 
-                            key = date.ToString("yyyy.MM.dd hh:mm:ss");
-                            if (!lookup.ContainsKey(key))
-                            {
-                                var group = new BackupViewModel(CommandBuilder, key);
-                                await group.Add(new ViewModelContainer<string>(file)).ConfigureAwait(false);
-
-                                lookup.Add(key, group);
-                            }
-                            else
-                            {
-                                await lookup[key].Add(new ViewModelContainer<string>(file)).ConfigureAwait(false);
-                            }
-                        }
-                        catch
+                        key = date.ToString("yyyy.MM.dd hh:mm:ss");
+                        if (!lookup.ContainsKey(key))
                         {
+                            var group = new BackupViewModel(CommandBuilder, directory, key, date, this, () => OnDeleteRequested?.Invoke() ?? false);
+                            var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
+
+                            await group.AddRange(files.Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
+
+                            lookup.Add(key, group);
                         }
+                        else
+                        {
+                            await lookup[key].Add(new ViewModelContainer<string>(directory)).ConfigureAwait(false);
+                        }
+                    }
+                    catch
+                    {
                     }
                 }
             }
@@ -92,17 +115,73 @@ namespace Dawn.Wpf
             await AddRange(lookup.Values).ConfigureAwait(false);
         }
 
-        private async Task Revert(CancellationToken token)
+        private async Task DeleteAll(CancellationToken token)
         {
-            // check for existing backup of todays files
-            // backup files if there is none
-            // copy files back
-            // set lastwrite timestamp
+            var shouldDeleteAll = OnDeleteAllRequested?.Invoke() ?? false;
+
+            if (!shouldDeleteAll)
+            {
+                return;
+            }
+
+            foreach (var item in Items)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await item.Delete();
+            }
+
+            await Refresh(token);
         }
 
-        private bool CanRevert()
+        private bool CanDeleteAll()
         {
-            return false;
+            return !IsBusy && Items.Count > 0;
+        }
+
+        private Task Revert(BackupViewModel backupViewModel, CancellationToken token)
+        {
+            var deploymentFolder = _configurationViewModel.DeploymentFolder;
+            var backupFolder = _configurationViewModel.BackupFolder;
+            var now = DateTime.Now;
+
+            return Task.Run(() =>
+            {
+                foreach (var file in backupViewModel.Items.ToArray())
+                {
+                    var fileName = Path.GetFileName(file.Value);
+                    var restoreFileName = Path.Combine(deploymentFolder, fileName);
+
+                    Restore(file.Value, restoreFileName);
+
+                    File.SetLastWriteTime(restoreFileName, now);
+                }
+            });
+        }
+
+        private void Restore(string from, string to)
+        {
+            if (Copy(from, to))
+            {
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {targetFile} @ {copy}", from, to);
+            }
+        }
+
+        private bool CanRevert(BackupViewModel backupViewModel)
+        {
+            return !IsBusy
+                && _configurationViewModel.BackupFolder != null
+                && _configurationViewModel.BackupFolder.Length > 0
+                && _configurationViewModel.DeploymentFolder != null
+                && _configurationViewModel.DeploymentFolder.Length > 0;
+        }
+
+        private bool Copy(string from, string to)
+        {
+            return FileUtils.Copy(from, to, _log, true);
         }
     }
 }

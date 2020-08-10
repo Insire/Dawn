@@ -135,7 +135,7 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator />
-                    <MenuItem Command="{Binding Updates.ClearCommand}" Header="Delete all backups">
+                    <MenuItem Command="{Binding Updates.DeleteAllCommand}" Header="Delete all backups">
                         <MenuItem.Icon>
                             <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" Kind="TrashSolid" />
                         </MenuItem.Icon>
@@ -175,6 +175,7 @@
                                             </Button>
 
                                             <Button Margin="8,0"
+                                                    Command="{Binding DeleteCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Delete backup">
                                                 <icons:PackIconFontAwesome Kind="TrashSolid" />
@@ -347,6 +348,11 @@
                         ToolTip="Unstage everything">
                     <icons:PackIconFontAwesome Kind="TrashSolid" />
                 </Button>
+
+                <ToggleButton Content="Reuse latest Backup"
+                              DockPanel.Dock="Right"
+                              IsChecked="{Binding Stagings.ReuseLastBackup}"
+                              Style="{StaticResource {x:Static adonisUi:Styles.ToggleSwitch}}" />
 
                 <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Count, StringFormat='{} Staging Area ({0} Files)'}" />
             </DockPanel>

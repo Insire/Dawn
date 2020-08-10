@@ -6,7 +6,7 @@ namespace Dawn.Wpf
     {
         public static string FormatAsBackup(this DateTime dateTime)
         {
-            return $"_bak{dateTime:ddMMyyyyhhmmss}";
+            return $"{dateTime:ddMMyyyyhhmmss}";
         }
     }
 }

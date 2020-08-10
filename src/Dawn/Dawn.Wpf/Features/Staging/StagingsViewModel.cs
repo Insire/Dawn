@@ -1,8 +1,10 @@
 ﻿using AdonisUI.Converters;
+using ImTools;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -20,6 +22,13 @@ namespace Dawn.Wpf
         private readonly ILogger _log;
         private readonly LogViewModel _logViewModel;
         private readonly BackupsViewModel _backupsViewModel;
+
+        private bool _reuseLastBackup;
+        public bool ReuseLastBackup
+        {
+            get { return _reuseLastBackup; }
+            set { SetValue(ref _reuseLastBackup, value); }
+        }
 
         public ICommand ApplyCommand { get; }
 
@@ -56,12 +65,15 @@ namespace Dawn.Wpf
 
         public async Task Apply(CancellationToken token)
         {
-            var now = DateTime.Now;
-            var targetFolder = _configurationViewModel.TargetFolder;
-            var targetPath = _configurationViewModel.BackupFolder;
+            var reuseLastBackup = ReuseLastBackup;
+            var deploymentFolder = _configurationViewModel.DeploymentFolder;
+            var backupFolder = _configurationViewModel.BackupFolder;
             var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
-            var pattern = now.FormatAsBackup();
-            var backUpPattern = now.AddSeconds(1).FormatAsBackup();
+            var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
+
+            Directory.CreateDirectory(deploymentFolder);
+            Directory.CreateDirectory(backupFolder);
+            Directory.CreateDirectory(backupFileFolder);
 
             await _logViewModel.Clear(token).ConfigureAwait(false);
 
@@ -79,36 +91,16 @@ namespace Dawn.Wpf
                         }
 
                         var fileName = Path.GetFileName(newfile.Path);
-                        var tobeUpdated = Path.Combine(targetFolder, fileName);
-
-                        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+                        var deploymentFileName = Path.Combine(deploymentFolder, fileName);
+                        var backupFileName = Path.Combine(backupFileFolder, fileName);
 
                         // backup existing files
-                        if (backupTypes.Contains(extension))
+                        if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                         {
-                            var tobeUpdatedBackup = $"{Path.Combine(targetPath, fileName.Replace(extension, ""))}{pattern}{extension}";
-                            if (File.Exists(tobeUpdatedBackup))
-                            {
-                                _log.Write(Serilog.Events.LogEventLevel.Warning, "Backup exists already for {targetFile} @  {copy}", tobeUpdated, tobeUpdatedBackup);
-                            }
-                            else
-                            {
-                                if (File.Exists(tobeUpdated))
-                                {
-                                    Backup(tobeUpdated, tobeUpdatedBackup);
-                                }
-                                else
-                                {
-                                    _log.Write(Serilog.Events.LogEventLevel.Debug, "{targetFile} is a new file. No backup for existing file required", tobeUpdated);
-                                }
-                            }
-
-                            // backup new files
-
-                            Backup(newfile.Path, $"{Path.Combine(targetPath, fileName.Replace(extension, ""))}{backUpPattern}{extension}");
+                            Backup(newfile.Path, backupFileName, reuseLastBackup);
                         }
 
-                        Update(newfile.Path, tobeUpdated);
+                        Update(newfile.Path, deploymentFileName);
                     }
                 }
                 catch (Exception ex)
@@ -124,9 +116,26 @@ namespace Dawn.Wpf
             await _backupsViewModel.Refresh(token).ConfigureAwait(false);
         }
 
+        private string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)
+        {
+            if (reuseLastBackup)
+            {
+                var reuseBackup = backups.OrderByDescending(p => p.TimeStamp).First();
+                return Path.Combine(rootFolder, reuseBackup.TimeStamp.FormatAsBackup());
+            }
+            else
+            {
+                return Path.Combine(rootFolder, DateTime.Now.FormatAsBackup());
+            }
+        }
+
         private bool CanApply()
         {
-            return !IsBusy;
+            return !IsBusy
+                && _configurationViewModel.BackupFolder != null
+                && _configurationViewModel.BackupFolder.Length > 0
+                 && _configurationViewModel.DeploymentFolder != null
+                && _configurationViewModel.DeploymentFolder.Length > 0;
         }
 
         private void Update(string from, string to)
@@ -137,9 +146,9 @@ namespace Dawn.Wpf
             }
         }
 
-        private void Backup(string from, string to)
+        private void Backup(string from, string to, bool overwrite)
         {
-            if (Copy(from, to))
+            if (Copy(from, to, overwrite))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
             }
@@ -147,17 +156,7 @@ namespace Dawn.Wpf
 
         private bool Copy(string from, string to, bool overwrite = false)
         {
-            try
-            {
-                File.Copy(from, to, overwrite);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
-            }
-
-            return false;
+            return FileUtils.Copy(from, to, _log, overwrite);
         }
     }
 }

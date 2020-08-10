@@ -9,11 +9,11 @@ namespace Dawn.Wpf
     {
         private readonly ConfigurationModel _model;
 
-        private string _targetFolder;
-        public string TargetFolder
+        private string _deploymentFolder;
+        public string DeploymentFolder
         {
-            get { return _targetFolder; }
-            set { SetValue(ref _targetFolder, value, onChanged: () => _model.TargetFolder = value); }
+            get { return _deploymentFolder; }
+            set { SetValue(ref _deploymentFolder, value, onChanged: () => _model.DeploymentFolder = value); }
         }
 
         private string _backupFolder;
@@ -21,13 +21,6 @@ namespace Dawn.Wpf
         {
             get { return _backupFolder; }
             set { SetValue(ref _backupFolder, value, onChanged: () => _model.BackupFolder = value); }
-        }
-
-        private string _filePattern;
-        public string FilePattern
-        {
-            get { return _filePattern; }
-            set { SetValue(ref _filePattern, value, onChanged: () => _model.FilePattern = value); }
         }
 
         public BackupFileTypesViewModel BackupFileTypes { get; }
@@ -39,9 +32,8 @@ namespace Dawn.Wpf
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
 
-            _targetFolder = _model.TargetFolder;
+            _deploymentFolder = _model.DeploymentFolder;
             _backupFolder = _model.BackupFolder;
-            _filePattern = _model.FilePattern;
 
             BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
 

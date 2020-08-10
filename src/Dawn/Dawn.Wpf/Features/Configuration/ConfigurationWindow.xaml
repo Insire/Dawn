@@ -42,8 +42,6 @@
             <RowDefinition Height="8" />
             <RowDefinition Height="32" />
             <RowDefinition Height="8" />
-            <RowDefinition Height="32" />
-            <RowDefinition Height="8" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="1"
@@ -56,7 +54,7 @@
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True"
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True"
                  adonisExtensions:WatermarkExtension.Watermark="Select the folder to update ..."
-                 Text="{Binding Validation.TargetFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding Validation.DeploymentFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Select the folder to update" />
         <Button Grid.Row="1"
                 Grid.Column="5"
@@ -84,18 +82,7 @@
             <icons:FontAwesome Kind="SearchSolid" />
         </Button>
 
-        <TextBlock Grid.Row="5"
-                   Grid.Column="1"
-                   Text="Pattern" />
-
-        <TextBox Grid.Row="5"
-                 Grid.Column="3"
-                 adonisExtensions:WatermarkExtension.Watermark="Pattern ..."
-                 IsReadOnly="True"
-                 Text="{Binding Validation.FilePattern, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip="Pattern" />
-
-        <ItemsControl Grid.Row="7"
+        <ItemsControl Grid.Row="5"
                       Grid.Column="3"
                       adonisExtensions:WatermarkExtension.Watermark="Filetypes to backup ..."
                       ItemsSource="{Binding BackupFileTypes.Items}"
@@ -108,14 +95,14 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:BackupFileTypeViewModel}">
                     <StackPanel Margin="0,0,8,0" Orientation="Horizontal">
-                        <CheckBox />
+                        <CheckBox IsChecked="{Binding IsEnabled}" />
                         <TextBlock Text="{Binding Name}" />
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Button Grid.Row="9"
+        <Button Grid.Row="7"
                 Grid.Column="3"
                 Grid.ColumnSpan="3"
                 Padding="8"

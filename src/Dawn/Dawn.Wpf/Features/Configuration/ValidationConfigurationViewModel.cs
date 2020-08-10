@@ -4,16 +4,16 @@ namespace Dawn.Wpf
 {
     public sealed class ValidationConfigurationViewModel : ValidationViewModel<ConfigurationViewModel>
     {
-        public string TargetFolder
+        public string DeploymentFolder
         {
             get
             {
-                return ViewModel.TargetFolder;
+                return ViewModel.DeploymentFolder;
             }
             set
             {
-                ViewModel.TargetFolder = value;
-                _ = Run().ContinueWith(t => OnPropertyChanged(nameof(TargetFolder)));
+                ViewModel.DeploymentFolder = value;
+                _ = Run().ContinueWith(t => OnPropertyChanged(nameof(DeploymentFolder)));
             }
         }
 
@@ -27,19 +27,6 @@ namespace Dawn.Wpf
             {
                 ViewModel.BackupFolder = value;
                 _ = Run().ContinueWith(t => OnPropertyChanged(nameof(BackupFolder)));
-            }
-        }
-
-        public string FilePattern
-        {
-            get
-            {
-                return ViewModel.FilePattern;
-            }
-            set
-            {
-                ViewModel.FilePattern = value;
-                _ = Run().ContinueWith(t => OnPropertyChanged(nameof(FilePattern)));
             }
         }
 

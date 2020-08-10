@@ -1,4 +1,5 @@
-﻿using Jot;
+﻿using AdonisUI.Controls;
+using Jot;
 using System;
 using System.Windows;
 
@@ -25,6 +26,22 @@ namespace Dawn.Wpf
             tracker.Track(this);
 
             _shellViewModel.Stagings.OnApplyingStagings += OnApplyingStagings;
+
+            _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            {
+                Text = "This will delete all files in this backup folder. \r\nThis can not be undone.",
+                Caption = "Are you sure?",
+                Icon = AdonisUI.Controls.MessageBoxImage.Warning,
+                Buttons = MessageBoxButtons.YesNo(),
+            }) == AdonisUI.Controls.MessageBoxResult.Yes;
+
+            _shellViewModel.Updates.OnDeleteAllRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            {
+                Text = "This will delete every backup. \r\nThis can not be undone.",
+                Caption = "Are you really sure?",
+                Icon = AdonisUI.Controls.MessageBoxImage.Stop,
+                Buttons = MessageBoxButtons.YesNo(),
+            }) == AdonisUI.Controls.MessageBoxResult.Yes;
         }
 
         private async void OnDrop(object sender, DragEventArgs e)

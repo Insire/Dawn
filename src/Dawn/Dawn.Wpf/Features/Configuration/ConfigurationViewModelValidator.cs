@@ -7,8 +7,7 @@ namespace Dawn.Wpf
         public ConfigurationViewModelValidator()
         {
             RuleFor(p => p.BackupFolder).NotEmpty();
-            RuleFor(p => p.TargetFolder).NotEmpty();
-            RuleFor(p => p.FilePattern).NotEmpty();
+            RuleFor(p => p.DeploymentFolder).NotEmpty();
         }
     }
 }

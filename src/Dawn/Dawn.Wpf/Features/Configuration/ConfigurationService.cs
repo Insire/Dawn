@@ -23,15 +23,18 @@ namespace Dawn.Wpf
 
             _configuration = new ConfigurationModel()
             {
-                TargetFolder = @"D:\Drop\Desktop\Neuer Ordner",
+                DeploymentFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "TestDeployment"),
                 BackupFolder = Path.Combine(location, "Backups"),
-                FilePattern = $"_bak{DateTime.Now:ddMMyyyy}",
                 FirstStart = true,
                 BackupFileTypes = new System.Collections.Generic.List<BackupFileTypeModel>()
                 {
                     new BackupFileTypeModel( ".dll","DLL",true),
                     new BackupFileTypeModel( ".lst","LST",true),
-                    new BackupFileTypeModel( ".exe","EXE",true)
+                    new BackupFileTypeModel( ".exe","EXE",true),
+                    new BackupFileTypeModel( ".json","JSON",true),
+                    new BackupFileTypeModel( ".xml","XML",false),
+                    new BackupFileTypeModel( ".config","CONFIG",true),
+                    new BackupFileTypeModel( ".pdb","PDB",false),
                 }
             };
         }
@@ -54,9 +57,8 @@ namespace Dawn.Wpf
                 var temp = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath));
 
                 _configuration.FirstStart = false;
-                _configuration.TargetFolder = temp.TargetFolder;
+                _configuration.DeploymentFolder = temp.DeploymentFolder;
                 _configuration.BackupFolder = temp.BackupFolder;
-                _configuration.FilePattern = temp.FilePattern;
             }
 
             Directory.CreateDirectory(_configuration.BackupFolder);
