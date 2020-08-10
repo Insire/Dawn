@@ -5,6 +5,7 @@ using Jot.Storage;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
+using Serilog.Filters;
 using System;
 using System.Reflection;
 using System.Windows;
@@ -22,7 +23,12 @@ namespace Dawn.Wpf
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
-                .WriteTo.Sink(logViewModel, LogEventLevel.Verbose);
+                .WriteTo.Logger(lc =>
+                    lc.Filter.ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
+                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
+                    || Matching.FromSource<BackupViewModel>().Invoke(o))
+                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
+                .WriteTo.RollingFile("./logs/log-{Date}.txt", buffered: false);
 
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);

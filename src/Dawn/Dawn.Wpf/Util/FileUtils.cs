@@ -6,7 +6,7 @@ namespace Dawn.Wpf
 {
     public static class FileUtils
     {
-        public static bool Copy(string from, string to, ILogger log, bool overwrite = false)
+        public static bool CopyFor<T>(string from, string to, ILogger log, bool overwrite = false)
         {
             try
             {
@@ -15,7 +15,7 @@ namespace Dawn.Wpf
             }
             catch (Exception ex)
             {
-                log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
             }
 
             return false;

@@ -23,11 +23,11 @@
     <controls:AdonisWindow.TitleBarContent>
         <DockPanel IsEnabled="{Binding Updates.IsBusy, Converter={mvvm:InvertBooleanConverter}}" LastChildFill="False">
 
-            <Button DockPanel.Dock="Right"
+            <!--<Button DockPanel.Dock="Right"
                     Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
                     ToolTip="Backups may have been changed">
                 <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Kind="AsteriskSolid" />
-            </Button>
+            </Button>-->
 
             <Button Click="OpenConfiguration"
                     DockPanel.Dock="Right"
@@ -65,11 +65,11 @@
                 </ToggleButton.Style>
             </ToggleButton>
 
-            <Button DockPanel.Dock="Right"
+            <!--<Button DockPanel.Dock="Right"
                     Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
                     ToolTip="Update available">
                 <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" Kind="BirthdayCakeSolid" />
-            </Button>
+            </Button>-->
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 
@@ -164,7 +164,8 @@
                                               HeaderStringFormat="{}Backup: {0}">
                                         <DockPanel>
                                             <Button Margin="0,8,0,0"
-                                                    Command="{Binding Data.RevertCommand, Source={StaticResource UpdatesProxy}}"
+                                                    Command="{Binding Data.RestoreCommand, Source={StaticResource UpdatesProxy}}"
+                                                    CommandParameter="{Binding}"
                                                     DockPanel.Dock="Bottom"
                                                     ToolTip="Restore backup">
                                                 <icons:PackIconFontAwesome Kind="PlaySolid" />
@@ -232,12 +233,14 @@
                                                 </Button>
 
                                                 <Button Margin="8,0"
+                                                        Command="{Binding DeleteCommand}"
                                                         DockPanel.Dock="Right"
                                                         ToolTip="Delete backup">
                                                     <icons:PackIconFontAwesome Kind="TrashSolid" />
                                                 </Button>
 
-                                                <Button Command="{Binding Data.RevertCommand, Source={StaticResource UpdatesProxy}}"
+                                                <Button Command="{Binding Data.RestoreCommand, Source={StaticResource UpdatesProxy}}"
+                                                        CommandParameter="{Binding}"
                                                         DockPanel.Dock="Right"
                                                         ToolTip="Restore backup">
                                                     <icons:PackIconFontAwesome Kind="PlaySolid" />

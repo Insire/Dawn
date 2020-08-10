@@ -25,7 +25,10 @@ namespace Dawn.Wpf
 
             tracker.Track(this);
 
-            _shellViewModel.Stagings.OnApplyingStagings += OnApplyingStagings;
+            _shellViewModel.Stagings.OnApplyingStagings += ShowLog;
+            _shellViewModel.Updates.OnDeleting += ShowLog;
+            _shellViewModel.Updates.OnDeletingAll += ShowLog;
+            _shellViewModel.Updates.OnRestoring += ShowLog;
 
             _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
@@ -67,7 +70,7 @@ namespace Dawn.Wpf
             dlg.ShowDialog();
         }
 
-        private void OnApplyingStagings()
+        private void ShowLog()
         {
             var dlg = new LoggingWindow(_logViewModel)
             {

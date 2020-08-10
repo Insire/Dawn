@@ -1,5 +1,4 @@
-﻿using AdonisUI.Converters;
-using ImTools;
+﻿using ImTools;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
@@ -65,55 +64,61 @@ namespace Dawn.Wpf
 
         public async Task Apply(CancellationToken token)
         {
-            var reuseLastBackup = ReuseLastBackup;
-            var deploymentFolder = _configurationViewModel.DeploymentFolder;
-            var backupFolder = _configurationViewModel.BackupFolder;
-            var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
-            var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
-
-            Directory.CreateDirectory(deploymentFolder);
-            Directory.CreateDirectory(backupFolder);
-            Directory.CreateDirectory(backupFileFolder);
-
-            await _logViewModel.Clear(token).ConfigureAwait(false);
-
-            var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
-
-            var t2 = Task.Run(() =>
+            try
             {
-                try
+                var reuseLastBackup = ReuseLastBackup;
+                var deploymentFolder = _configurationViewModel.DeploymentFolder;
+                var backupFolder = _configurationViewModel.BackupFolder;
+                var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
+                var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
+
+                Directory.CreateDirectory(deploymentFolder);
+                Directory.CreateDirectory(backupFolder);
+                Directory.CreateDirectory(backupFileFolder);
+
+                await _logViewModel.Clear(token).ConfigureAwait(false);
+
+                var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
+
+                var t2 = Task.Run(() =>
                 {
-                    foreach (var newfile in Items)
+                    try
                     {
-                        if (token.IsCancellationRequested)
+                        foreach (var newfile in Items)
                         {
-                            return;
+                            if (token.IsCancellationRequested)
+                            {
+                                return;
+                            }
+
+                            var fileName = Path.GetFileName(newfile.Path);
+                            var deploymentFileName = Path.Combine(deploymentFolder, fileName);
+                            var backupFileName = Path.Combine(backupFileFolder, fileName);
+
+                            if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
+                            {
+                                Backup(newfile.Path, backupFileName, reuseLastBackup);
+                            }
+
+                            Update(newfile.Path, deploymentFileName);
                         }
-
-                        var fileName = Path.GetFileName(newfile.Path);
-                        var deploymentFileName = Path.Combine(deploymentFolder, fileName);
-                        var backupFileName = Path.Combine(backupFileFolder, fileName);
-
-                        // backup existing files
-                        if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
-                        {
-                            Backup(newfile.Path, backupFileName, reuseLastBackup);
-                        }
-
-                        Update(newfile.Path, deploymentFileName);
                     }
-                }
-                catch (Exception ex)
-                {
-                    _log.Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
-                }
-            }, token);
+                    catch (Exception ex)
+                    {
+                        _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
+                    }
+                }, token);
 
-            await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                await Task.WhenAll(t1, t2).ConfigureAwait(false);
 
-            await Clear(token).ConfigureAwait(false);
+                await Clear(token).ConfigureAwait(false);
 
-            await _backupsViewModel.Refresh(token).ConfigureAwait(false);
+                await _backupsViewModel.Refresh(token).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+            }
         }
 
         private string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)
@@ -134,7 +139,7 @@ namespace Dawn.Wpf
             return !IsBusy
                 && _configurationViewModel.BackupFolder != null
                 && _configurationViewModel.BackupFolder.Length > 0
-                 && _configurationViewModel.DeploymentFolder != null
+                && _configurationViewModel.DeploymentFolder != null
                 && _configurationViewModel.DeploymentFolder.Length > 0;
         }
 
@@ -142,7 +147,7 @@ namespace Dawn.Wpf
         {
             if (Copy(from, to, true))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
+                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
             }
         }
 
@@ -150,13 +155,13 @@ namespace Dawn.Wpf
         {
             if (Copy(from, to, overwrite))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
+                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
             }
         }
 
         private bool Copy(string from, string to, bool overwrite = false)
         {
-            return FileUtils.Copy(from, to, _log, overwrite);
+            return FileUtils.CopyFor<StagingsViewModel>(from, to, _log, overwrite);
         }
     }
 }

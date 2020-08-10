@@ -1,5 +1,6 @@
 ﻿using DryIoc;
 using Jot;
+using Serilog;
 using System.Windows;
 
 namespace Dawn.Wpf
@@ -33,6 +34,8 @@ namespace Dawn.Wpf
         {
             _tracker.PersistAll();
             _configurationService.Save();
+
+            Log.CloseAndFlush();
 
             _container.Dispose();
 
