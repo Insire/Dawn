@@ -37,7 +37,7 @@ namespace Dawn.Wpf
 
             BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
 
-            Validation = new ValidationConfigurationViewModel(validator, this);
+            Validation = new ValidationConfigurationViewModel(commandBuilder, validator, this);
         }
     }
 }

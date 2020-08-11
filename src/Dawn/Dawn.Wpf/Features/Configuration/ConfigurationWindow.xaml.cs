@@ -2,7 +2,6 @@
 using MvvmScarletToolkit.Commands;
 using Ookii.Dialogs.Wpf;
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
@@ -70,16 +69,6 @@ namespace Dawn.Wpf
             {
                 _configurationViewModel.BackupFolder = folder;
             }
-        }
-
-        private void OnClosing(object sender, CancelEventArgs e)
-        {
-            if (_configurationViewModel.Validation.IsValid && !_configurationViewModel.IsBusy)
-            {
-                return;
-            }
-
-            e.Cancel = true;
         }
     }
 }

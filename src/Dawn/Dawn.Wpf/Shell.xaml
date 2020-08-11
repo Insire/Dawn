@@ -23,6 +23,12 @@
     <controls:AdonisWindow.TitleBarContent>
         <DockPanel IsEnabled="{Binding Updates.IsBusy, Converter={mvvm:InvertBooleanConverter}}" LastChildFill="False">
 
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding Configuration.Validation.ValidateCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
             <!--<Button DockPanel.Dock="Right"
                     Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
                     ToolTip="Backups may have been changed">
@@ -31,8 +37,16 @@
 
             <Button Click="OpenConfiguration"
                     DockPanel.Dock="Right"
-                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
                     ToolTip="Open configuration">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Configuration.Validation.IsValid}" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
                 <icons:PackIconFontAwesome Kind="CogSolid" />
             </Button>
 

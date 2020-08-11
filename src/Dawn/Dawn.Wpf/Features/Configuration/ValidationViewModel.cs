@@ -1,21 +1,24 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Dawn.Wpf
 {
-    public abstract class ValidationViewModel<T> : ObservableObject, INotifyDataErrorInfo
+    public abstract class ValidationViewModel<T> : ViewModelBase, INotifyDataErrorInfo
         where T : class, INotifyPropertyChanged
     {
         private readonly IValidator<T> _validator;
         private ValidationResult _result;
 
-        public T ViewModel { get; }
+        protected T ViewModel { get; }
 
         private bool _hasErrors;
         public bool HasErrors
@@ -33,14 +36,21 @@ namespace Dawn.Wpf
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-        protected ValidationViewModel(IValidator<T> validator, T viewModel)
+        public ICommand ValidateCommand { get; }
+
+        protected ValidationViewModel(in IScarletCommandBuilder commandBuilder, IValidator<T> validator, T viewModel)
+            : base(commandBuilder)
         {
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
             ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
 
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-            IsValid = true;
+            ValidateCommand = commandBuilder
+                .Create(Validate, CanValidate)
+                .WithAsyncCancellation()
+                .WithSingleExecution()
+                .Build();
         }
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -53,9 +63,9 @@ namespace Dawn.Wpf
             return _result?.Errors.Where(p => p.PropertyName == propertyName).Select(p => p.ErrorMessage) ?? Enumerable.Empty<string>();
         }
 
-        public async Task Run()
+        protected async Task Validate(CancellationToken token)
         {
-            _result = await _validator.ValidateAsync<T>(ViewModel);
+            _result = await _validator.ValidateAsync(ViewModel, options => options.IncludeAllRuleSets(), token);
 
             HasErrors = !_result.IsValid;
             IsValid = _result.IsValid;
@@ -64,6 +74,11 @@ namespace Dawn.Wpf
             {
                 ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(_result.Errors[i].PropertyName));
             }
+        }
+
+        private bool CanValidate()
+        {
+            return !IsBusy;
         }
     }
 }

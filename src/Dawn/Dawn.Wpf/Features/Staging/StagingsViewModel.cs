@@ -137,10 +137,7 @@ namespace Dawn.Wpf
         private bool CanApply()
         {
             return !IsBusy
-                && _configurationViewModel.BackupFolder != null
-                && _configurationViewModel.BackupFolder.Length > 0
-                && _configurationViewModel.DeploymentFolder != null
-                && _configurationViewModel.DeploymentFolder.Length > 0;
+                && _configurationViewModel.Validation.IsValid;
         }
 
         private void Update(string from, string to)

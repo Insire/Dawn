@@ -18,7 +18,9 @@ namespace Dawn.Wpf
     {
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly LogViewModel _logViewModel;
+        private readonly BackupViewModelFactory _viewModelFactory;
         private readonly ILogger _log;
+
         private bool _isMassDeleting;
 
         public ICommand RestoreCommand { get; }
@@ -34,12 +36,13 @@ namespace Dawn.Wpf
 
         public Action OnRestoring { get; set; }
 
-        public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel)
+        public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupViewModelFactory viewModelFactory)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
+            _viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
 
             RestoreCommand = commandBuilder
                 .Create<BackupViewModel>(Restore, CanRestore)
@@ -105,7 +108,12 @@ namespace Dawn.Wpf
                             key = date.ToString("yyyy.MM.dd hh:mm:ss");
                             if (!lookup.ContainsKey(key))
                             {
-                                var group = new BackupViewModel(CommandBuilder, directory, key, date, this, _logViewModel, _log, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); });
+                                var group = _viewModelFactory.Get(new BackupModel()
+                                {
+                                    FullPath = directory,
+                                    Name = key,
+                                    TimeStamp = date
+                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); });
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
                                 await group.AddRange(files.Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
@@ -129,6 +137,12 @@ namespace Dawn.Wpf
             {
                 _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
             }
+        }
+
+        public override bool CanRefresh()
+        {
+            return _configurationViewModel.Validation.IsValid
+                && base.CanRefresh();
         }
 
         private async Task DeleteAll(CancellationToken token)
@@ -183,7 +197,9 @@ namespace Dawn.Wpf
 
         private bool CanDeleteAll()
         {
-            return !IsBusy && Items.Count > 0;
+            return !IsBusy
+                && _configurationViewModel.Validation.IsValid
+                && Items.Count > 0;
         }
 
         private async Task Restore(BackupViewModel backupViewModel, CancellationToken token)
@@ -233,10 +249,7 @@ namespace Dawn.Wpf
         {
             return !IsBusy
                 && backupViewModel != null
-                && _configurationViewModel.BackupFolder != null
-                && _configurationViewModel.BackupFolder.Length > 0
-                && _configurationViewModel.DeploymentFolder != null
-                && _configurationViewModel.DeploymentFolder.Length > 0;
+                && _configurationViewModel.Validation.IsValid;
         }
 
         private bool Copy(string from, string to)

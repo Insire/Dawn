@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using MvvmScarletToolkit;
+using System.Threading;
 
 namespace Dawn.Wpf
 {
@@ -13,7 +15,7 @@ namespace Dawn.Wpf
             set
             {
                 ViewModel.DeploymentFolder = value;
-                _ = Run().ContinueWith(t => OnPropertyChanged(nameof(DeploymentFolder)));
+                _ = Validate(CancellationToken.None).ContinueWith(t => OnPropertyChanged(nameof(DeploymentFolder)));
             }
         }
 
@@ -26,12 +28,12 @@ namespace Dawn.Wpf
             set
             {
                 ViewModel.BackupFolder = value;
-                _ = Run().ContinueWith(t => OnPropertyChanged(nameof(BackupFolder)));
+                _ = Validate(CancellationToken.None).ContinueWith(t => OnPropertyChanged(nameof(BackupFolder)));
             }
         }
 
-        public ValidationConfigurationViewModel(IValidator<ConfigurationViewModel> validator, ConfigurationViewModel viewModel)
-            : base(validator, viewModel)
+        public ValidationConfigurationViewModel(in IScarletCommandBuilder commandBuilder, IValidator<ConfigurationViewModel> validator, ConfigurationViewModel viewModel)
+            : base(commandBuilder, validator, viewModel)
         {
         }
     }

@@ -49,11 +49,12 @@ namespace Dawn.Wpf
 
             c.UseInstance(tracker);
 
-            c.Register<BackupFileTypesViewModel>(Reuse.Singleton);
-            c.Register<ConfigurationViewModel>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
+            c.Register<ConfigurationViewModel>(Reuse.Singleton);
             c.Register<StagingsViewModel>(Reuse.Singleton);
             c.Register<BackupsViewModel>(Reuse.Singleton);
+            c.Register<BackupFileTypesViewModel>(Reuse.Singleton);
+            c.Register<BackupViewModelFactory>(Reuse.Singleton);
 
             c.UseInstance(ScarletCommandBuilder.Default);
             c.UseInstance(ScarletDispatcher.Default);

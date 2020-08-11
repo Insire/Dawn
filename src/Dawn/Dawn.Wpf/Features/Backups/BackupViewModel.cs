@@ -14,6 +14,7 @@ namespace Dawn.Wpf
     /// </summary>
     public sealed class BackupViewModel : ViewModelListBase<ViewModelContainer<string>>
     {
+        private readonly ConfigurationViewModel _configurationViewModel;
         private readonly BackupsViewModel _backupsViewModel;
         private readonly LogViewModel _logViewModel;
         private readonly ILogger _log;
@@ -43,18 +44,19 @@ namespace Dawn.Wpf
 
         public ICommand DeleteCommand { get; }
 
-        public BackupViewModel(in IScarletCommandBuilder commandBuilder, string fullPath, string name, DateTime timeStamp, BackupsViewModel backupsViewModel, LogViewModel logViewModel, ILogger log, Func<bool> onDeleteRequested, Action onDeleting)
+        public BackupViewModel(in IScarletCommandBuilder commandBuilder, BackupModel model, BackupsViewModel backupsViewModel, LogViewModel logViewModel, ILogger log, ConfigurationViewModel configurationViewModel, Func<bool> onDeleteRequested, Action onDeleting)
             : base(commandBuilder)
         {
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _logViewModel = logViewModel;
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _onDeleteRequested = onDeleteRequested ?? throw new ArgumentNullException(nameof(onDeleteRequested));
             _onDeleting = onDeleting ?? throw new ArgumentNullException(nameof(onDeleting));
 
-            FullPath = fullPath ?? throw new ArgumentNullException(nameof(fullPath));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            TimeStamp = timeStamp;
+            FullPath = model.FullPath ?? throw new ArgumentNullException(nameof(BackupModel.FullPath));
+            Name = model.Name ?? throw new ArgumentNullException(nameof(BackupModel.Name));
+            TimeStamp = model.TimeStamp;
 
             DeleteCommand = commandBuilder.Create(Delete, CanDelete)
                 .WithBusyNotification(BusyStack)
@@ -98,7 +100,9 @@ namespace Dawn.Wpf
 
         private bool CanDelete()
         {
-            return _fullPath.Length > 0 && Directory.Exists(_fullPath);
+            return _configurationViewModel.Validation.IsValid
+                && _fullPath.Length > 0
+                && Directory.Exists(_fullPath);
         }
     }
 }
