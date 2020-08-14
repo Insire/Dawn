@@ -1,20 +1,25 @@
-﻿using Serilog;
+﻿using ImTools;
+using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace Dawn.Wpf
 {
     internal sealed class ConfigurationService
     {
+        private const string _SettingsFileName = "Dawn.Wpf.Settings.json";
         private readonly string _settingsFilePath;
         private readonly ConfigurationModel _configuration;
         private readonly ILogger _log;
+        private readonly HttpClient _httpClient;
 
-        public ConfigurationService(ILogger log)
+        public ConfigurationService(ILogger log, HttpClient httpClient)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
             var path = Process.GetCurrentProcess().MainModule.FileName;
             var location = path.Replace(Path.GetFileName(path), "");
@@ -64,16 +69,47 @@ namespace Dawn.Wpf
         {
             try
             {
-                if (File.Exists(_settingsFilePath))
+                var args = Environment.GetCommandLineArgs();
+                var arg = args.FindFirst(p => p.StartsWith("url="));
+                if (arg != null)
                 {
-                    var temp = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath));
+                    var start = arg.IndexOf("'");
+                    var end = arg.LastIndexOf("'");
+                    var length = end - start;
+                    var url = arg.Substring(start + 1, length - 1);
 
-                    _configuration.FirstStart = false;
-                    _configuration.DeploymentFolder = temp.DeploymentFolder;
-                    _configuration.BackupFolder = temp.BackupFolder;
+                    if (Uri.TryCreate(url, UriKind.Absolute, out var baseAddress))
+                    {
+                        _httpClient.BaseAddress = baseAddress;
+                        _httpClient
+                            .GetAsync(_SettingsFileName)
+                            .ContinueWith(async t =>
+                            {
+                                t.Result.EnsureSuccessStatusCode();
+
+                                var content = await t.Result.Content.ReadAsStringAsync();
+                                var temp = JsonSerializer.Deserialize<ConfigurationModel>(content);
+
+                                _configuration.FirstStart = false;
+                                _configuration.DeploymentFolder = temp.DeploymentFolder;
+                                _configuration.BackupFolder = temp.BackupFolder;
+                            })
+                            .Wait();
+                    }
                 }
+                else
+                {
+                    if (File.Exists(_settingsFilePath))
+                    {
+                        var temp = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath));
 
-                Directory.CreateDirectory(_configuration.BackupFolder);
+                        _configuration.FirstStart = false;
+                        _configuration.DeploymentFolder = temp.DeploymentFolder;
+                        _configuration.BackupFolder = temp.BackupFolder;
+                    }
+
+                    Directory.CreateDirectory(_configuration.BackupFolder);
+                }
             }
             catch (Exception ex)
             {

@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
 using System;
+using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 
@@ -33,6 +34,7 @@ namespace Dawn.Wpf
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);
             c.UseInstance(Assembly.GetAssembly(typeof(CompositionRoot)));
+            c.UseInstance(new HttpClient());
 
             c.Register<Shell>(Reuse.Singleton);
             c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
