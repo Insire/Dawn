@@ -338,3 +338,10 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /src/Dawn/Dawn.Wpf/Properties/launchSettings.json
+
+./packages
+/tools/*
+!/tools/packages.config
+/results/*
+binaries
+package
