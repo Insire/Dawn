@@ -10,18 +10,20 @@ namespace Dawn.Wpf
 {
     internal sealed class ConfigurationService
     {
-        private const string _SettingsFileName = "Dawn.Wpf.Settings.json";
+        private const string _settingsFileName = "Dawn.Wpf.Settings.json";
         private readonly string _settingsFilePath;
         private readonly ConfigurationModel _configuration;
         private readonly ILogger _log;
         private readonly HttpClient _httpClient;
+        private readonly Process _currentProcess;
 
-        public ConfigurationService(ILogger log, HttpClient httpClient)
+        public ConfigurationService(ILogger log, HttpClient httpClient, Process currentProcess)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _currentProcess = currentProcess ?? throw new ArgumentNullException(nameof(currentProcess));
 
-            var path = Process.GetCurrentProcess().MainModule.FileName;
+            var path = _currentProcess.MainModule.FileName;
             var location = path.Replace(Path.GetFileName(path), "");
 
             _settingsFilePath = Path.Combine(location, "Dawn.Wpf.Settings.json");
@@ -82,7 +84,7 @@ namespace Dawn.Wpf
                     {
                         _httpClient.BaseAddress = baseAddress;
                         _httpClient
-                            .GetAsync(_SettingsFileName)
+                            .GetAsync(_settingsFileName)
                             .ContinueWith(async t =>
                             {
                                 t.Result.EnsureSuccessStatusCode();

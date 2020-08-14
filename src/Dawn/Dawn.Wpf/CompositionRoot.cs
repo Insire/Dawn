@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
@@ -35,21 +36,20 @@ namespace Dawn.Wpf
             c.UseInstance(logViewModel);
             c.UseInstance(Assembly.GetAssembly(typeof(CompositionRoot)));
             c.UseInstance(new HttpClient());
+            c.UseInstance(Process.GetCurrentProcess());
 
             c.Register<Shell>(Reuse.Singleton);
-            c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
-
             var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
             tracker.Configure<Shell>()
                 .Id(w => $"[Width={SystemParameters.VirtualScreenWidth},Height{SystemParameters.VirtualScreenHeight}]")
                 .Properties(w => new { w.Height, w.Width, w.Left, w.Top, w.WindowState })
                 .PersistOn(nameof(Window.Closing))
                 .StopTrackingOn(nameof(Window.Closing));
+            c.UseInstance(tracker);
 
             c.Register<ConfigurationService>(Reuse.Singleton);
             c.Register(made: Made.Of(r => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
-
-            c.UseInstance(tracker);
+            c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
 
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);

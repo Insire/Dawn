@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
@@ -168,9 +168,9 @@ namespace Dawn.Wpf
                     {
                         _isMassDeleting = true;
 
-                        for (int i = Items.Count - 1; i >= 0; i--)
+                        for (var i = Items.Count - 1; i >= 0; i--)
                         {
-                            BackupViewModel item = Items[i];
+                            var item = Items[i];
                             if (token.IsCancellationRequested)
                             {
                                 return;
