@@ -1,10 +1,12 @@
-﻿using ImTools;
+using ImTools;
 using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
+using System.Text.Unicode;
 
 namespace Dawn.Wpf
 {
@@ -69,56 +71,106 @@ namespace Dawn.Wpf
 
         public ConfigurationModel Get()
         {
-            try
+            var args = Environment.GetCommandLineArgs();
+            foreach (var func in new Func<bool>[] { () => GetFromJson(args), () => GetFromUrl(args), () => GetFromFile() })
             {
-                var args = Environment.GetCommandLineArgs();
-                var arg = args.FindFirst(p => p.StartsWith("url="));
-                if (arg != null)
+                try
                 {
-                    var start = arg.IndexOf("'");
-                    var end = arg.LastIndexOf("'");
-                    var length = end - start;
-                    var url = arg.Substring(start + 1, length - 1);
-
-                    if (Uri.TryCreate(url, UriKind.Absolute, out var baseAddress))
+                    if (func.Invoke())
                     {
-                        _httpClient.BaseAddress = baseAddress;
-                        _httpClient
-                            .GetAsync(_settingsFileName)
-                            .ContinueWith(async t =>
-                            {
-                                t.Result.EnsureSuccessStatusCode();
-
-                                var content = await t.Result.Content.ReadAsStringAsync();
-                                var temp = JsonSerializer.Deserialize<ConfigurationModel>(content);
-
-                                _configuration.FirstStart = false;
-                                _configuration.DeploymentFolder = temp.DeploymentFolder;
-                                _configuration.BackupFolder = temp.BackupFolder;
-                            })
-                            .Wait();
+                        Directory.CreateDirectory(_configuration.BackupFolder);
+                        break;
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (File.Exists(_settingsFilePath))
-                    {
-                        var temp = JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath));
-
-                        _configuration.FirstStart = false;
-                        _configuration.DeploymentFolder = temp.DeploymentFolder;
-                        _configuration.BackupFolder = temp.BackupFolder;
-                    }
-
-                    Directory.CreateDirectory(_configuration.BackupFolder);
+                    _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
                 }
-            }
-            catch (Exception ex)
-            {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
             }
 
             return _configuration;
+        }
+
+        private bool GetFromUrl(string[] args)
+        {
+            var url = args.FindFirst(p => p.StartsWith("url="));
+            if (url != null)
+            {
+                if (Uri.TryCreate(GetArgument(url), UriKind.Absolute, out var baseAddress))
+                {
+                    _httpClient.BaseAddress = baseAddress;
+                    _httpClient
+                        .GetAsync(_settingsFileName)
+                        .ContinueWith(async t =>
+                        {
+                            t.Result.EnsureSuccessStatusCode();
+
+                            var content = await t.Result.Content.ReadAsStringAsync();
+
+                            Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(content));
+
+                            return true;
+                        })
+                        .Wait();
+                }
+            }
+
+            return false;
+        }
+
+        private bool GetFromJson(string[] args)
+        {
+            var json = args.FindFirst(p => p.StartsWith("json="));
+            if (json != null)
+            {
+                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool GetFromFile()
+        {
+            if (File.Exists(_settingsFilePath))
+            {
+                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath)));
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// argument needs to be base64 encoded and the source of that needs to be utf8 encoded
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        private static string GetArgument(string argument)
+        {
+            var start = argument.IndexOf("'");
+            var end = argument.LastIndexOf("'");
+            var length = end - start;
+
+            var result = argument.Substring(start + 1, length - 1);
+            var bytes = Convert.FromBase64String(result);
+            result = Encoding.UTF8.GetString(bytes);
+
+            return result;
+        }
+
+        private static void Update(ConfigurationModel target, ConfigurationModel update)
+        {
+            target.FirstStart = false;
+
+            if (update.DeploymentFolder != null && update.DeploymentFolder.Length > 0)
+                target.DeploymentFolder = update.DeploymentFolder;
+
+            if (update.BackupFolder != null && update.BackupFolder.Length > 0)
+                target.BackupFolder = update.BackupFolder;
+
+            if (update.BackupFileTypes != null && update.BackupFileTypes.Count > 0)
+                target.BackupFileTypes = update.BackupFileTypes;
         }
     }
 }
