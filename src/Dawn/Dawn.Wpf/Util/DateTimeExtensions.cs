@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Dawn.Wpf
 {
@@ -6,7 +6,7 @@ namespace Dawn.Wpf
     {
         public static string FormatAsBackup(this DateTime dateTime)
         {
-            return $"{dateTime:ddMMyyyyhhmmss}";
+            return $"{dateTime:ddMMyyyyHHmmss}";
         }
     }
 }

@@ -105,7 +105,7 @@ namespace Dawn.Wpf
                             date = date.AddMinutes(minutes);
                             date = date.AddSeconds(seconds);
 
-                            key = date.ToString("yyyy.MM.dd hh:mm:ss");
+                            key = date.ToString("yyyy.MM.dd HH:mm:ss");
                             if (!lookup.ContainsKey(key))
                             {
                                 var group = _viewModelFactory.Get(new BackupModel()

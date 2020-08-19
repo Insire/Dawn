@@ -1,4 +1,4 @@
-﻿<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
+<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
@@ -37,7 +37,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <TextBlock>
-                        <Run Text="{Binding Value.Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy hh:mm:ss.fff}'}" />
+                        <Run Text="{Binding Value.Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
                         <Run Text="{Binding Value.Level, Mode=OneWay}">
                             <Run.Style>
                                 <Style TargetType="{x:Type Run}">
