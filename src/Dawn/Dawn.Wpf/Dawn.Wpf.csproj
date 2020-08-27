@@ -23,8 +23,8 @@
     <ItemGroup>
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-        <PackageReference Include="DryIoc.dll" Version="4.3.1" />
-        <PackageReference Include="FluentValidation" Version="9.1.2" />
+        <PackageReference Include="DryIoc.dll" Version="4.3.3" />
+        <PackageReference Include="FluentValidation" Version="9.2.0" />
         <PackageReference Include="Jot" Version="2.1.7" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.4.0" />
         <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.56-gf4de9b24e9" />
@@ -36,7 +36,7 @@
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
 
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.1.91">
+        <PackageReference Include="Nerdbank.GitVersioning" Version="3.2.31">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

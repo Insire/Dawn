@@ -1,7 +1,7 @@
-#tool nuget:?package=GitVersion.CommandLine&version=5.2.4
+#tool nuget:?package=GitVersion.CommandLine&version=5.3.7
 
 #addin nuget:?package=Cake.Incubator&version=5.1.0
-#addin nuget:?package=Cake.GitVersioning&version=3.1.91
+#addin nuget:?package=Cake.GitVersioning&version=3.2.31
 #addin "nuget:?package=SharpZipLib&version=1.2.0"
 #addin "nuget:?package=Cake.Compression&version=0.2.4"
 
