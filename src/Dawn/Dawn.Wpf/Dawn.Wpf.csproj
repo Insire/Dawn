@@ -15,38 +15,24 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Resource Include="..\..\..\ookii-dialogs-wpf\LICENSE" Link="Resources\Ookii.Dialogs.Wpf.NETCore\LICENSE">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </Resource>
-    </ItemGroup>
-
-    <ItemGroup>
+        <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.0.0" />
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-        <PackageReference Include="DryIoc.dll" Version="4.3.3" />
-        <PackageReference Include="FluentValidation" Version="9.2.0" />
+        <PackageReference Include="DryIoc.dll" Version="4.5.1" />
+        <PackageReference Include="FluentValidation" Version="9.3.0" />
         <PackageReference Include="Jot" Version="2.1.7" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.4.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.56-gf4de9b24e9" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.70" />
 
         <PackageReference Include="AdonisUI" Version="1.16.0" />
         <PackageReference Include="AdonisUI.ClassicTheme" Version="1.16.0" />
 
-        <PackageReference Include="Serilog" Version="2.9.0" />
+        <PackageReference Include="Serilog" Version="2.10.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
-        <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
 
         <PackageReference Include="Nerdbank.GitVersioning" Version="3.2.31">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\ookii-dialogs-wpf\src\Ookii.Dialogs.Wpf.NETCore\Ookii.Dialogs.Wpf.NETCore.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Resources\" />
     </ItemGroup>
 </Project>

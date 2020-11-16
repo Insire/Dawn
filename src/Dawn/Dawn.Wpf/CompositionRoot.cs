@@ -1,4 +1,4 @@
-﻿using DryIoc;
+using DryIoc;
 using FluentValidation;
 using Jot;
 using Jot.Storage;
@@ -30,7 +30,7 @@ namespace Dawn.Wpf
                     || Matching.FromSource<BackupsViewModel>().Invoke(o)
                     || Matching.FromSource<BackupViewModel>().Invoke(o))
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                .WriteTo.RollingFile("./logs/log-{Date}.txt", buffered: false);
+                .WriteTo.File("./logs/log-{Date}.txt", buffered: false);
 
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);
