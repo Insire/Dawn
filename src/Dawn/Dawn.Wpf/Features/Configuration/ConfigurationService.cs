@@ -43,6 +43,7 @@ namespace Dawn.Wpf
                     new BackupFileTypeModel( ".xml","XML",false),
                     new BackupFileTypeModel( ".config","CONFIG",true),
                     new BackupFileTypeModel( ".pdb","PDB",false),
+                    new BackupFileTypeModel( ".zip","ZIP",true),
                 }
             };
 

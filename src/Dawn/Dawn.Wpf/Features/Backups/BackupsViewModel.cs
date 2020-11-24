@@ -220,12 +220,18 @@ namespace Dawn.Wpf
                 {
                     foreach (var file in backupViewModel.Items.ToArray())
                     {
-                        var fileName = Path.GetFileName(file.Value);
-                        var restoreFileName = Path.Combine(deploymentFolder, fileName);
+                        var extension = Path.GetExtension(file.Value).ToLower();
+                        if (extension == ".zip")
+                        {
+                            RestoreArchive(file.Value, deploymentFolder, now);
+                        }
+                        else
+                        {
+                            var fileName = Path.GetFileName(file.Value);
+                            var restoreFileName = Path.Combine(deploymentFolder, fileName);
 
-                        Restore(file.Value, restoreFileName);
-
-                        File.SetLastWriteTime(restoreFileName, now);
+                            RestoreFile(file.Value, restoreFileName, now);
+                        }
                     }
                 });
 
@@ -237,9 +243,17 @@ namespace Dawn.Wpf
             }
         }
 
-        private void Restore(string from, string to)
+        private void RestoreFile(string from, string to, DateTime timeStamp)
         {
-            if (Copy(from, to))
+            if (FileUtils.CopyFor<BackupsViewModel>(from, to, _log, timeStamp, true))
+            {
+                _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
+            }
+        }
+
+        private void RestoreArchive(string from, string to, DateTime timeStamp)
+        {
+            if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, true))
             {
                 _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }
@@ -250,11 +264,6 @@ namespace Dawn.Wpf
             return !IsBusy
                 && backupViewModel != null
                 && _configurationViewModel.Validation.IsValid;
-        }
-
-        private bool Copy(string from, string to)
-        {
-            return FileUtils.CopyFor<BackupsViewModel>(from, to, _log, true);
         }
     }
 }

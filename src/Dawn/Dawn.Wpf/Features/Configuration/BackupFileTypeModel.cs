@@ -1,5 +1,8 @@
-﻿namespace Dawn.Wpf
+using System.Diagnostics;
+
+namespace Dawn.Wpf
 {
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public sealed class BackupFileTypeModel
     {
         public bool IsEnabled { get; set; }
@@ -15,6 +18,11 @@
             Extension = extension;
             Name = name;
             IsEnabled = isEnabled;
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return $"{Name} - {Extension}";
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<controls:AdonisWindow x:Class="Dawn.Wpf.Shell"
+<controls:AdonisWindow x:Class="Dawn.Wpf.Shell"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
@@ -185,11 +185,11 @@
                                                 <icons:PackIconFontAwesome Kind="PlaySolid" />
                                             </Button>
 
-                                            <Button DockPanel.Dock="Right" ToolTip="Open details">
+                                            <!--<Button DockPanel.Dock="Right" ToolTip="Open details">
                                                 <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
-                                            </Button>
+                                            </Button>-->
 
-                                            <Button Margin="8,0"
+                                            <Button Margin="0"
                                                     Command="{Binding DeleteCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Delete backup">
@@ -242,9 +242,9 @@
                                                                            DockPanel.Dock="Left"
                                                                            Kind="FolderSolid" />
 
-                                                <Button DockPanel.Dock="Right" ToolTip="Open details">
+                                                <!--<Button DockPanel.Dock="Right" ToolTip="Open details">
                                                     <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
-                                                </Button>
+                                                </Button>-->
 
                                                 <Button Margin="8,0"
                                                         Command="{Binding DeleteCommand}"

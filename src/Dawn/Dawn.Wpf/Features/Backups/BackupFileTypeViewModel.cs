@@ -1,8 +1,10 @@
-﻿using MvvmScarletToolkit.Observables;
+using MvvmScarletToolkit.Observables;
 using System;
+using System.Diagnostics;
 
 namespace Dawn.Wpf
 {
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public sealed class BackupFileTypeViewModel : ObservableObject
     {
         private string _name;
@@ -36,6 +38,11 @@ namespace Dawn.Wpf
             Name = type ?? throw new ArgumentNullException(nameof(type));
             Extension = extension ?? throw new ArgumentNullException(nameof(extension));
             IsEnabled = isEnabled;
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return $"{Name} - {Extension}";
         }
     }
 }
