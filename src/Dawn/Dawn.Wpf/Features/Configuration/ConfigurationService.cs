@@ -82,6 +82,10 @@ namespace Dawn.Wpf
                         break;
                     }
                 }
+                catch (FormatException)
+                {
+                    // when there is no base64 encoded argument
+                }
                 catch (Exception ex)
                 {
                     _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());

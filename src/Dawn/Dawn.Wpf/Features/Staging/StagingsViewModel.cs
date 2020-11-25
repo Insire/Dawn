@@ -1,4 +1,4 @@
-﻿using ImTools;
+using ImTools;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
@@ -97,7 +97,7 @@ namespace Dawn.Wpf
 
                             if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                             {
-                                Backup(newfile.Path, backupFileName, reuseLastBackup);
+                                BackupFile(newfile.Path, backupFileName, reuseLastBackup);
                             }
 
                             Update(newfile.Path, deploymentFileName);
@@ -142,17 +142,33 @@ namespace Dawn.Wpf
 
         private void Update(string from, string to)
         {
-            if (Copy(from, to, true))
+            var extension = Path.GetExtension(from).ToLower();
+            if (extension == ".zip")
             {
-                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
+                CopyArchive(from, Path.GetDirectoryName(to), true);
+            }
+            else
+            {
+                if (Copy(from, to, true))
+                {
+                    _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
+                }
             }
         }
 
-        private void Backup(string from, string to, bool overwrite)
+        private void BackupFile(string from, string to, bool overwrite)
         {
             if (Copy(from, to, overwrite))
             {
                 _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
+            }
+        }
+
+        private void CopyArchive(string from, string to, bool overwrite)
+        {
+            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, overwrite))
+            {
+                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
             }
         }
 
