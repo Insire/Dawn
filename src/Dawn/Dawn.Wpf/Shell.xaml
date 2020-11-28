@@ -10,6 +10,7 @@
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
+                       Name="root"
                        Title="{Binding Title}"
                        Width="900"
                        Height="450"
@@ -49,11 +50,6 @@
                 </Button.Style>
                 <icons:PackIconFontAwesome Kind="CogSolid" />
             </Button>
-
-            <ToggleButton x:Name="ExpanderToggle"
-                          DockPanel.Dock="Right"
-                          IsChecked="True"
-                          Visibility="Collapsed" />
 
             <ToggleButton x:Name="ViewToggle"
                           DockPanel.Dock="Right"
@@ -102,7 +98,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="3*" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="8" />
         </Grid.RowDefinitions>
 
@@ -281,10 +277,21 @@
             </ItemsControl>
         </ScrollViewer>
 
+        <!--  Staging details  -->
+
         <DockPanel Grid.Row="1"
-                   Grid.RowSpan="2"
-                   Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
-                   Visibility="{Binding IsChecked, ElementName=ExpanderToggle, Converter={mvvm:InvertBooleanToVisibilityConverter}}">
+                   Grid.RowSpan="1"
+                   Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}">
+            <DockPanel.Style>
+                <Style TargetType="{x:Type DockPanel}">
+                    <Setter Property="Visibility" Value="{Binding StagingVisibility, ElementName=root, Mode=TwoWay}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Stagings.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DockPanel.Style>
 
             <ListBox Margin="0,8,0,0"
                      ItemsSource="{Binding Stagings.Items}"
@@ -298,7 +305,9 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:StagingViewModel}">
                         <DockPanel HorizontalAlignment="Stretch">
-                            <icons:PackIconFontAwesome DockPanel.Dock="Left" Kind="FileSolid" />
+                            <icons:PackIconFontAwesome VerticalAlignment="Center"
+                                                       DockPanel.Dock="Left"
+                                                       Kind="FileSolid" />
                             <Button Command="{Binding Data.RemoveCommand, Source={StaticResource StagingsProxy}}"
                                     DockPanel.Dock="Right"
                                     ToolTip="Unstage this">
@@ -310,6 +319,8 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </DockPanel>
+
+        <!--  Staging bar  -->
 
         <DockPanel Grid.Row="2"
                    Grid.RowSpan="2"
@@ -329,7 +340,7 @@
                        DockPanel.Dock="Bottom"
                        LastChildFill="False">
 
-                <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding IsChecked, ElementName=ExpanderToggle}">
+                <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding StagingChecked, ElementName=root}">
                     <ToggleButton.Style>
                         <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
                             <Setter Property="Content">
@@ -374,6 +385,8 @@
                 <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Count, StringFormat='{} Staging Area ({0} Files)'}" />
             </DockPanel>
         </DockPanel>
+
+        <!--  Busy overlay  -->
 
         <Border Grid.RowSpan="4"
                 Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"

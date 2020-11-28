@@ -1,4 +1,4 @@
-﻿using AdonisUI.Controls;
+using AdonisUI.Controls;
 using Jot;
 using System;
 using System.Windows;
@@ -7,6 +7,74 @@ namespace Dawn.Wpf
 {
     public partial class Shell
     {
+        public Visibility StagingVisibility
+        {
+            get { return (Visibility)GetValue(StagingVisibilityProperty); }
+            set { SetValue(StagingVisibilityProperty, value); }
+        }
+
+        public static readonly DependencyProperty StagingVisibilityProperty = DependencyProperty.Register(
+            nameof(StagingVisibility),
+            typeof(Visibility),
+            typeof(Shell),
+            new PropertyMetadata(Visibility.Collapsed, OnStagingVisibilityChanged));
+
+        private static void OnStagingVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is Shell shell)
+            {
+                if (e.NewValue is Visibility visibility)
+                {
+                    switch (visibility)
+                    {
+                        case Visibility.Visible:
+                            shell.SetCurrentValue(StagingCheckedProperty, true);
+                            break;
+
+                        case Visibility.Collapsed:
+                            shell.SetCurrentValue(StagingCheckedProperty, false);
+                            break;
+
+                        case Visibility.Hidden:
+                            shell.SetCurrentValue(StagingCheckedProperty, false);
+                            break;
+                    }
+                }
+            }
+        }
+
+        public bool StagingChecked
+        {
+            get { return (bool)GetValue(StagingCheckedProperty); }
+            set { SetValue(StagingCheckedProperty, value); }
+        }
+
+        public static readonly DependencyProperty StagingCheckedProperty = DependencyProperty.Register(
+            nameof(StagingChecked),
+            typeof(bool),
+            typeof(Shell),
+            new PropertyMetadata(false, StagingCheckedChanged));
+
+        private static void StagingCheckedChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is Shell shell)
+            {
+                if (e.NewValue is bool flag)
+                {
+                    switch (flag)
+                    {
+                        case true:
+                            shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Visible);
+                            break;
+
+                        case false:
+                            shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Collapsed);
+                            break;
+                    }
+                }
+            }
+        }
+
         private readonly ShellViewModel _shellViewModel;
         private readonly LogViewModel _logViewModel;
 
