@@ -14,6 +14,8 @@
                        Title="{Binding Title}"
                        Width="900"
                        Height="450"
+                       d:DataContext="{d:DesignInstance Type=local:ShellViewModel,
+                                                        IsDesignTimeCreatable=False}"
                        AllowDrop="True"
                        Drop="OnDrop"
                        IconVisibility="Collapsed"
@@ -75,11 +77,35 @@
                 </ToggleButton.Style>
             </ToggleButton>
 
-            <!--<Button DockPanel.Dock="Right"
-                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
-                    ToolTip="Update available">
-                <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" Kind="BirthdayCakeSolid" />
-            </Button>-->
+            <Button DockPanel.Dock="Right" ToolTipService.ShowOnDisabled="True">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
+                        <Setter Property="Command" Value="{Binding CheckForApplicationUpdateCommand}" />
+                        <Setter Property="ToolTip" Value="Check for updates from github" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsApplicationUpdateAvailable}" Value="True">
+                                <Setter Property="ToolTip" Value="Updates are available! Update?" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+
+                <icons:PackIconFontAwesome>
+                    <icons:PackIconFontAwesome.Style>
+                        <Style TargetType="{x:Type icons:PackIconFontAwesome}">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
+
+                            <Setter Property="Kind" Value="GithubBrands" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsApplicationUpdateAvailable}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    <Setter Property="Kind" Value="DownloadSolid" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </icons:PackIconFontAwesome.Style>
+                </icons:PackIconFontAwesome>
+            </Button>
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 

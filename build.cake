@@ -16,6 +16,8 @@ const string BinPath = "./binaries/";
 
 var target = Argument("target", "Default");
 var Configuration = Argument("configuration", "Release");
+var semver = "";
+var gitVersion = default(GitVersion);
 
 private void Build(string path)
 {
@@ -49,6 +51,9 @@ Setup(ctx =>
     {
         Debug(entry.Key + " " + entry.Value);
     }
+
+    gitVersion = GitVersion();
+    semver = GitVersioningGetVersion().SemVer2;
 });
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,8 +94,6 @@ Task("CleanSolution")
 Task("UpdateAssemblyInfo")
     .Does(() =>
     {
-        var gitVersion = GitVersion();
-        var semver = GitVersioningGetVersion().SemVer2;
         var assemblyInfoParseResult = ParseAssemblyInfo(AssemblyInfoPath);
 
         var settings = new AssemblyInfoSettings()
@@ -142,7 +145,7 @@ Task("BuildAndPack")
 
         var bin = new DirectoryPath(BinPath);
 
-        ZipCompress(bin, bin.CombineWithFilePath(new FilePath(".\\Dawn.zip")), new FilePath[]
+        ZipCompress(bin, bin.CombineWithFilePath(new FilePath($".\\Dawn_{semver}.zip")), new FilePath[]
         {
             bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.exe")),
             bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.pdb"))
