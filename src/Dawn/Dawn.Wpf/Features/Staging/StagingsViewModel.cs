@@ -47,18 +47,28 @@ namespace Dawn.Wpf
                 .Build();
         }
 
-        public async Task Add(string[] files)
+        public async Task Add(string[] fileSystemInfos)
         {
-            foreach (var file in files)
+            foreach (var fileSystemInfo in fileSystemInfos)
             {
-                if (!File.Exists(file))
+                if (File.Exists(fileSystemInfo))
                 {
-                    continue;
+                    var viewModel = new StagingViewModel(fileSystemInfo);
+
+                    await Add(viewModel);
                 }
 
-                var viewModel = new StagingViewModel(file);
+                if (Directory.Exists(fileSystemInfo))
+                {
+                    var files = await Task.Run(() => Directory.GetFiles(fileSystemInfo, "*", SearchOption.AllDirectories));
 
-                await Add(viewModel);
+                    foreach (var file in files)
+                    {
+                        var viewModel = new StagingViewModel(file);
+
+                        await Add(viewModel);
+                    }
+                }
             }
         }
 
