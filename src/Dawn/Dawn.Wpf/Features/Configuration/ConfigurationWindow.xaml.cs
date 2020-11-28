@@ -1,7 +1,9 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Commands;
+using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
@@ -12,14 +14,25 @@ namespace Dawn.Wpf
         private readonly ConfigurationViewModel _configurationViewModel;
 
         public ICommand CloseCommand { get; }
+        public ICommand CopyToClipboardCommand { get; }
 
         public ConfigurationWindow(ConfigurationViewModel configurationViewModel)
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
 
             CloseCommand = new RelayCommand(ScarletCommandBuilder.Default, CloseInternal, CanClose);
+            CopyToClipboardCommand = new RelayCommand(ScarletCommandBuilder.Default, CopyToClipboard);
 
             InitializeComponent();
+        }
+
+        private void CopyToClipboard()
+        {
+            var json = JsonConvert.SerializeObject(_configurationViewModel.Model, Formatting.None);
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var base64 = Convert.ToBase64String(bytes);
+
+            Clipboard.SetText($"json='{base64}'", TextDataFormat.Text);
         }
 
         private void CloseInternal()
