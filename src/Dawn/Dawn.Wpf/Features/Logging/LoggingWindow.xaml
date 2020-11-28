@@ -13,6 +13,8 @@
                        Title="Log"
                        Width="700"
                        Height="350"
+                       d:DataContext="{d:DesignInstance Type=local:LogViewModel,
+                                                        IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        WindowStartupLocation="CenterOwner"
                        WindowStyle="ToolWindow"

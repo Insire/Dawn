@@ -29,6 +29,11 @@ namespace Dawn.Wpf
 
         public ConfigurationModel Model => _model;
 
+        /// <summary>
+        /// configuration was loaded from a local file
+        /// </summary>
+        public bool IsLocalConfig { get; }
+
         public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, ConfigurationModel model, IValidator<ConfigurationViewModel> validator)
             : base(commandBuilder)
         {
@@ -36,6 +41,8 @@ namespace Dawn.Wpf
 
             _deploymentFolder = _model.DeploymentFolder;
             _backupFolder = _model.BackupFolder;
+
+            IsLocalConfig = _model.IsLocalConfig;
 
             BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
 

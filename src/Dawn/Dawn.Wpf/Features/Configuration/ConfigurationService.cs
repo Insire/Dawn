@@ -55,6 +55,11 @@ namespace Dawn.Wpf
         {
             try
             {
+                if (!_configuration.IsLocalConfig)
+                {
+                    return;
+                }
+
                 var jsonString = JsonSerializer.Serialize(_configuration, new JsonSerializerOptions()
                 {
                     IgnoreNullValues = true,
@@ -112,6 +117,7 @@ namespace Dawn.Wpf
                             var content = await t.Result.Content.ReadAsStringAsync();
 
                             Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(content));
+                            _configuration.IsLocalConfig = false;
 
                             return true;
                         })
@@ -128,6 +134,8 @@ namespace Dawn.Wpf
             if (json != null)
             {
                 Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));
+                _configuration.IsLocalConfig = false;
+
                 return true;
             }
 
@@ -139,6 +147,8 @@ namespace Dawn.Wpf
             if (File.Exists(_settingsFilePath))
             {
                 Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath)));
+                _configuration.IsLocalConfig = true;
+
                 return true;
             }
 
