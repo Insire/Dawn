@@ -72,7 +72,7 @@ namespace Dawn.Wpf
             }
         }
 
-        public async Task Apply(CancellationToken token)
+        private async Task Apply(CancellationToken token)
         {
             try
             {
