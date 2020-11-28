@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
@@ -49,7 +49,7 @@ namespace Dawn.Wpf
         {
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _logViewModel = logViewModel;
-            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _log = log?.ForContext<BackupViewModel>() ?? throw new ArgumentNullException(nameof(log));
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _onDeleteRequested = onDeleteRequested ?? throw new ArgumentNullException(nameof(onDeleteRequested));
             _onDeleting = onDeleting ?? throw new ArgumentNullException(nameof(onDeleting));
@@ -81,13 +81,15 @@ namespace Dawn.Wpf
                     await _logViewModel.Clear(CancellationToken.None).ConfigureAwait(false);
                 }
 
-                _log.ForContext<BackupViewModel>().Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
 
                 var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
                 var t2 = Task.Run(async () =>
                 {
                     await Task.Run(() => Directory.Delete(_fullPath, true));
                     await _backupsViewModel.Remove(this);
+
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
                 });
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);

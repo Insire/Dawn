@@ -37,7 +37,7 @@ namespace Dawn.Wpf
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _log = log?.ForContext<StagingsViewModel>() ?? throw new ArgumentNullException(nameof(log));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
 
@@ -112,10 +112,12 @@ namespace Dawn.Wpf
 
                             Update(newfile.Path, deploymentFileName);
                         }
+
+                        _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {directory}", deploymentFolder);
                     }
                     catch (Exception ex)
                     {
-                        _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
+                        _log.Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
                     }
                 }, token);
 
@@ -161,7 +163,7 @@ namespace Dawn.Wpf
             {
                 if (Copy(from, to, true))
                 {
-                    _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
                 }
             }
         }
@@ -170,7 +172,7 @@ namespace Dawn.Wpf
         {
             if (Copy(from, to, overwrite))
             {
-                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
             }
         }
 
@@ -178,7 +180,7 @@ namespace Dawn.Wpf
         {
             if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, overwrite))
             {
-                _log.ForContext<StagingsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
             }
         }
 

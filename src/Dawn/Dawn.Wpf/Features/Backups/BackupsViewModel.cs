@@ -40,7 +40,7 @@ namespace Dawn.Wpf
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _log = log?.ForContext<BackupsViewModel>() ?? throw new ArgumentNullException(nameof(log));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
 
@@ -63,6 +63,7 @@ namespace Dawn.Wpf
             {
                 if (!Directory.Exists(_configurationViewModel.BackupFolder))
                 {
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Backup directory {path} does not exist. Aborting.", _configurationViewModel.BackupFolder);
                     return;
                 }
 
@@ -125,8 +126,9 @@ namespace Dawn.Wpf
                                 await lookup[key].Add(new ViewModelContainer<string>(directory)).ConfigureAwait(false);
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
                         }
                     }
                 }
@@ -158,7 +160,7 @@ namespace Dawn.Wpf
 
                 await _logViewModel.Clear(token).ConfigureAwait(false);
 
-                _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
 
                 var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
 
@@ -188,6 +190,7 @@ namespace Dawn.Wpf
                 });
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {path}", _configurationViewModel.BackupFolder);
             }
             catch (Exception ex)
             {
@@ -212,7 +215,7 @@ namespace Dawn.Wpf
 
                 await _logViewModel.Clear(token).ConfigureAwait(false);
 
-                _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {path}", backupViewModel.Name);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {path}", backupViewModel.Name);
 
                 var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
 
@@ -236,6 +239,8 @@ namespace Dawn.Wpf
                 });
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
+
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {path}", backupViewModel.Name);
             }
             catch (Exception ex)
             {
@@ -247,7 +252,7 @@ namespace Dawn.Wpf
         {
             if (FileUtils.CopyFor<BackupsViewModel>(from, to, _log, timeStamp, true))
             {
-                _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }
         }
 
@@ -255,7 +260,7 @@ namespace Dawn.Wpf
         {
             if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, true))
             {
-                _log.ForContext<BackupsViewModel>().Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }
         }
 

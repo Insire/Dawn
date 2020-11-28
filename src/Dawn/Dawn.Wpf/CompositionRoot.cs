@@ -30,7 +30,7 @@ namespace Dawn.Wpf
                     || Matching.FromSource<BackupsViewModel>().Invoke(o)
                     || Matching.FromSource<BackupViewModel>().Invoke(o))
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                .WriteTo.File("./logs/log-{Date}.txt", buffered: false);
+                .WriteTo.File("./logs/log.txt", buffered: false);
 
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);
