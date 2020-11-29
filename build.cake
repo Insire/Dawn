@@ -89,7 +89,7 @@ Task("CleanSolution")
             EnsureDirectoryExists(folder);
             CleanDirectory(folder,(file) => !file.Path.Segments.Last().Contains(".gitignore"));
         }
-});
+    });
 
 Task("UpdateAssemblyInfo")
     .Does(() =>
@@ -136,7 +136,49 @@ Task("UpdateAssemblyInfo")
         };
 
         CreateAssemblyInfo(new FilePath(AssemblyInfoPath), settings);
-});
+    });
+
+Task("GenerateLicenseFile")
+    .Does(() =>
+    {
+        Install();
+        Run();
+        Uninstall();
+
+        void Install()
+        {
+            var settings = new ProcessSettings()
+                .UseWorkingDirectory(".")
+                .WithArguments(builder => builder
+                    .Append("tool install --global dotnet-project-licenses --version 2.2.6")
+            );
+
+            StartProcess("dotnet", settings);
+        }
+
+        void Uninstall()
+        {
+            var settings = new ProcessSettings()
+                .UseWorkingDirectory(".")
+                .WithArguments(builder => builder
+                    .Append("tool uninstall --global dotnet-project-licenses")
+            );
+
+            StartProcess("dotnet", settings);
+        }
+
+        void Run()
+        {
+            var settings = new ProcessSettings()
+                .UseWorkingDirectory(".")
+                .WithArguments(builder => builder
+                    .AppendSwitchQuoted("-i", @"E:\Code\Dawn\src\Dawn\Dawn.Wpf")
+                    .Append("-j")
+                );
+
+            StartProcess("dotnet-project-licenses", settings);
+        }
+    });
 
 Task("BuildAndPack")
     .Does(() =>
@@ -150,11 +192,15 @@ Task("BuildAndPack")
             bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.exe")),
             bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.pdb"))
         });
+
+        DeleteFile(bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.exe")));
+        DeleteFile(bin.CombineWithFilePath(new FilePath(".\\Dawn.Wpf.pdb")));
     });
 
 Task("Default")
     .IsDependentOn("CleanSolution")
     .IsDependentOn("UpdateAssemblyInfo")
+    .IsDependentOn("GenerateLicenseFile")
     .IsDependentOn("BuildAndPack");
 
 RunTarget(target);

@@ -345,3 +345,4 @@ healthchecksdb
 /results/*
 binaries
 package
+licenses.json
