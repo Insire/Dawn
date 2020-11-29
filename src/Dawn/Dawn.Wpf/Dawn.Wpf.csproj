@@ -8,6 +8,7 @@
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <PublishReadyToRun>true</PublishReadyToRun>
         <PublishSingleFile>true</PublishSingleFile>
+        <ApplicationIcon>dawn.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,7 +1,11 @@
 using AdonisUI.Controls;
 using Jot;
 using System;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Dawn.Wpf
 {
@@ -121,7 +125,8 @@ namespace Dawn.Wpf
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
                 Buttons = MessageBoxButtons.YesNo(),
             }) == AdonisUI.Controls.MessageBoxResult.Yes;
-            ;
+
+            SetImage();
         }
 
         private async void OnDrop(object sender, DragEventArgs e)
@@ -155,6 +160,43 @@ namespace Dawn.Wpf
             };
 
             dlg.ShowDialog();
+        }
+
+        private void SetImage()
+        {
+            var size = new Size(36, 36);
+            var ressource = Application.Current.FindResource("dawnDrawingImage");
+            if (!(ressource is DrawingImage drawingImage))
+            {
+                return;
+            }
+
+            var image = new Image { Source = drawingImage };
+            image.Measure(size);
+            image.Arrange(new Rect(size));
+
+            var rtb = new RenderTargetBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(image);
+
+            var png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(rtb));
+
+            using (var memory = new MemoryStream())
+            {
+                png.Save(memory);
+                memory.Position = 0;
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = memory;
+                bitmapImage.UriSource = null;
+                bitmapImage.EndInit();
+
+                bitmapImage.Freeze();
+
+                SetCurrentValue(IconProperty, bitmapImage);
+            }
         }
     }
 }
