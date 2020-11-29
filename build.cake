@@ -172,7 +172,7 @@ Task("GenerateLicenseFile")
             var settings = new ProcessSettings()
                 .UseWorkingDirectory(".")
                 .WithArguments(builder => builder
-                    .AppendSwitchQuoted("-i", @"E:\Code\Dawn\src\Dawn\Dawn.Wpf")
+                    .AppendSwitchQuoted("-i", @".\src\Dawn\Dawn.Wpf")
                     .Append("-j")
                 );
 
