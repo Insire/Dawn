@@ -47,7 +47,7 @@
             </TabItem>
 
             <TabItem Header="Credits">
-                <DockPanel Margin="0,16">
+                <StackPanel Margin="0,16">
                     <TextBlock HorizontalAlignment="Center"
                                DockPanel.Dock="Top"
                                FontSize="24"
@@ -55,7 +55,7 @@
                                Text="Credits"
                                TextAlignment="Center" />
 
-                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition Width="8" />
@@ -86,11 +86,11 @@
                             </Hyperlink>
                         </TextBlock>
                     </Grid>
-                </DockPanel>
+                </StackPanel>
             </TabItem>
 
             <TabItem Header="Dependencies">
-                <DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Items}" />
+                <DataGrid ItemsSource="{Binding Items}" />
             </TabItem>
         </TabControl>
     </DockPanel>
