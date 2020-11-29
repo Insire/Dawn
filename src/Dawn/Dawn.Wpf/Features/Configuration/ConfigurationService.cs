@@ -47,7 +47,6 @@ namespace Dawn.Wpf
                 }
             };
 
-            Directory.CreateDirectory(_configuration.BackupFolder);
             Directory.CreateDirectory(Path.Combine(location, "logs"));
         }
 

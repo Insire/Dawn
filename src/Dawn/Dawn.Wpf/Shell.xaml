@@ -85,7 +85,17 @@
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsApplicationUpdateAvailable}" Value="True">
                                 <Setter Property="ToolTip" Value="Updates are available! Update?" />
+                                <Setter Property="Command" Value="{Binding GetApplicationUpdateCommand}" />
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsApplicationUpdateAvailable}" Value="False" />
+                                    <Condition Binding="{Binding HasCheckedForApplicationUpdate}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="ToolTip" Value="No updates right now" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
@@ -101,6 +111,16 @@
                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
                                     <Setter Property="Kind" Value="DownloadSolid" />
                                 </DataTrigger>
+
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsApplicationUpdateAvailable}" Value="False" />
+                                        <Condition Binding="{Binding HasCheckedForApplicationUpdate}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </icons:PackIconFontAwesome.Style>

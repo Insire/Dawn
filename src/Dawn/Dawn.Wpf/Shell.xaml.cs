@@ -113,6 +113,15 @@ namespace Dawn.Wpf
                 Icon = AdonisUI.Controls.MessageBoxImage.Stop,
                 Buttons = MessageBoxButtons.YesNo(),
             }) == AdonisUI.Controls.MessageBoxResult.Yes;
+
+            _shellViewModel.OnApplicationUpdated = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            {
+                Text = "Your update has been prepared. \r\nDo you want to restart Dawn?",
+                Caption = "Updates have been downloaded successfully.",
+                Icon = AdonisUI.Controls.MessageBoxImage.Information,
+                Buttons = MessageBoxButtons.YesNo(),
+            }) == AdonisUI.Controls.MessageBoxResult.Yes;
+            ;
         }
 
         private async void OnDrop(object sender, DragEventArgs e)

@@ -7,6 +7,36 @@ namespace Dawn.Wpf
 {
     public static class FileUtils
     {
+        public static bool DeleteFor<T>(string file, ILogger log)
+        {
+            try
+            {
+                File.Delete(file);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+            }
+
+            return false;
+        }
+
+        public static bool MoveFor<T>(string from, string to, ILogger log, bool overwrite = false)
+        {
+            try
+            {
+                File.Move(from, to, overwrite);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+            }
+
+            return false;
+        }
+
         public static bool CopyFor<T>(string from, string to, ILogger log, bool overwrite = false)
         {
             try
@@ -44,7 +74,6 @@ namespace Dawn.Wpf
         {
             try
             {
-                //ZipFile.ExtractToDirectory(from, to, overwrite);
                 using (var archive = ZipFile.OpenRead(from))
                 {
                     foreach (var entry in archive.Entries)
@@ -64,6 +93,8 @@ namespace Dawn.Wpf
                             }
                             else // is file
                             {
+                                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+
                                 log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {file}", destinationPath);
                                 entry.ExtractToFile(destinationPath, overwrite);
                             }
@@ -85,7 +116,6 @@ namespace Dawn.Wpf
         {
             try
             {
-                //ZipFile.ExtractToDirectory(from, to, overwrite);
                 using (var archive = ZipFile.OpenRead(from))
                 {
                     foreach (var entry in archive.Entries)
