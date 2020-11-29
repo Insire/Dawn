@@ -32,11 +32,12 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
 
-            <!--<Button DockPanel.Dock="Right"
+            <Button Click="ShowAbout"
+                    DockPanel.Dock="Right"
                     Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
-                    ToolTip="Backups may have been changed">
-                <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Kind="AsteriskSolid" />
-            </Button>-->
+                    ToolTip="About">
+                <icons:PackIconFontAwesome Kind="InfoSolid" />
+            </Button>
 
             <Button Click="OpenConfiguration"
                     DockPanel.Dock="Right"

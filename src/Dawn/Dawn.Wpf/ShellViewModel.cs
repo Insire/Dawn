@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -21,9 +20,9 @@ namespace Dawn.Wpf
         private const string ZipDownloadType = "application/octet-stream";
         private const string GithubRepositoryOwner = "insire";
 
-        private readonly Version _applicationVersion;
         private readonly GitHubClient _client;
         private readonly ILogger _log;
+        private readonly AboutViewModel _aboutViewModel;
 
         private bool _hasUpdatedApplication;
         private ReleaseAsset _asset;
@@ -43,12 +42,6 @@ namespace Dawn.Wpf
             private set { SetValue(ref _isApplicationUpdateAvailable, value); }
         }
 
-        public ICommand CheckForApplicationUpdateCommand { get; }
-
-        public ICommand GetApplicationUpdateCommand { get; }
-
-        public Func<bool> OnApplicationUpdated { get; set; }
-
         private bool _hasCheckedForApplicationUpdate;
         public bool HasCheckedForApplicationUpdate
         {
@@ -56,23 +49,25 @@ namespace Dawn.Wpf
             private set { SetValue(ref _hasCheckedForApplicationUpdate, value); }
         }
 
-        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, ILogger log, Assembly assembly)
+        public Func<bool> OnApplicationUpdated { get; set; }
+
+        public ICommand CheckForApplicationUpdateCommand { get; }
+
+        public ICommand GetApplicationUpdateCommand { get; }
+
+        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, ILogger log, AboutViewModel aboutViewModel)
             : base(ScarletCommandBuilder.Default)
         {
-            if (assembly is null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
-
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Updates = updates ?? throw new ArgumentNullException(nameof(updates));
             Stagings = stagings ?? throw new ArgumentNullException(nameof(stagings));
 
+            _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
             _log = log?.ForContext<ShellViewModel>() ?? throw new ArgumentNullException(nameof(log));
-            _applicationVersion = GetVersion(assembly);
+
             _client = new GitHubClient(new ProductHeaderValue(GithubRepositoryOwner));
 
-            Title = $"Dawn v{_applicationVersion.ToString(3)}";
+            Title = $"{aboutViewModel.Product} v{aboutViewModel.AssemblyVersionString}";
 
             CheckForApplicationUpdateCommand = ScarletCommandBuilder.Default
                 .Create(CheckForApplicationUpdate, CanCheckForApplicationUpdate)
@@ -87,19 +82,6 @@ namespace Dawn.Wpf
                 .WithSingleExecution()
                 .WithCancellation()
                 .Build();
-        }
-
-        private static Version GetVersion(Assembly assembly)
-        {
-            var attributes = assembly.GetCustomAttributes(typeof(AssemblyMetadataAttribute), false);
-            if (attributes.Length == 0)
-            {
-                return assembly.GetName()?.Version ?? new Version(0, 0, 0, 0);
-            }
-
-            var version = attributes.Cast<AssemblyMetadataAttribute>().FirstOrDefault(p => p.Key == "Version");
-
-            return new Version(version.Value);
         }
 
         private async Task CheckForApplicationUpdate(CancellationToken token)
@@ -124,7 +106,7 @@ namespace Dawn.Wpf
 
             if (Version.TryParse(latest.Name, out var version))
             {
-                if (_applicationVersion < version)
+                if (_aboutViewModel.AssemblyVersion < version)
                 {
                     IsApplicationUpdateAvailable = true;
                     HasCheckedForApplicationUpdate = true;

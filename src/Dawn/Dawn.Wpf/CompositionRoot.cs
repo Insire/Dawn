@@ -52,6 +52,7 @@ namespace Dawn.Wpf
             c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
 
             c.Register<ShellViewModel>(Reuse.Singleton);
+            c.Register<AboutViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);
             c.Register<StagingsViewModel>(Reuse.Singleton);
             c.Register<BackupsViewModel>(Reuse.Singleton);

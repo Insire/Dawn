@@ -81,8 +81,9 @@ namespace Dawn.Wpf
 
         private readonly ShellViewModel _shellViewModel;
         private readonly LogViewModel _logViewModel;
+        private readonly AboutViewModel _aboutViewModel;
 
-        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel)
+        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel)
         {
             if (tracker is null)
             {
@@ -90,7 +91,7 @@ namespace Dawn.Wpf
             }
 
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
-
+            _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
@@ -155,6 +156,16 @@ namespace Dawn.Wpf
         private void ShowLog()
         {
             var dlg = new LoggingWindow(_logViewModel)
+            {
+                Owner = this
+            };
+
+            dlg.ShowDialog();
+        }
+
+        private void ShowAbout(object sender, RoutedEventArgs e)
+        {
+            var dlg = new AboutWindow(_aboutViewModel)
             {
                 Owner = this
             };

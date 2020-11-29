@@ -1,0 +1,97 @@
+<controls:AdonisWindow x:Class="Dawn.Wpf.AboutWindow"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       x:Name="rootView"
+                       Title="About"
+                       Width="700"
+                       Height="400"
+                       d:DataContext="{d:DesignInstance Type=local:AboutViewModel,
+                                                        IsDesignTimeCreatable=False}"
+                       IconVisibility="Collapsed"
+                       ResizeMode="NoResize"
+                       WindowStartupLocation="CenterOwner"
+                       WindowStyle="ToolWindow"
+                       mc:Ignorable="d">
+
+    <DockPanel Margin="8">
+        <TabControl>
+            <TabItem Header="About">
+                <DockPanel HorizontalAlignment="Center">
+
+                    <TextBlock Margin="0,0,0,16"
+                               DockPanel.Dock="Bottom"
+                               TextAlignment="Center">
+                        <Run Text="Author: Peter Vietense" />
+                        <LineBreak />
+                        <Run Text="{Binding Copyright, Mode=OneWay}" />
+                        <LineBreak />
+                        <Hyperlink>
+                            <!--  xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"  Command="{mvvm:StartProcess Url='www.github.com/Insire/Dawn'}"  -->
+                            <Run Text="{Binding ProjectUrl, Mode=OneWay}" />
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run FontSize="24"
+                             FontWeight="DemiBold"
+                             Text="{Binding Product, Mode=OneWay}" />
+                        <LineBreak />
+                        <Run FontSize="14" Text="{Binding AssemblyVersionString, StringFormat={}v{0}, Mode=OneWay}" />
+                    </TextBlock>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Credits">
+                <DockPanel Margin="0,16">
+                    <TextBlock HorizontalAlignment="Center"
+                               DockPanel.Dock="Top"
+                               FontSize="24"
+                               FontWeight="DemiBold"
+                               Text="Credits"
+                               TextAlignment="Center" />
+
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Application icon:" />
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Text="Source:" />
+                        <TextBlock Grid.Row="1" Grid.Column="2">
+                            <Hyperlink>
+                                <Run Text="{Binding IconUrl, Mode=OneWay}" />
+                            </Hyperlink>
+                        </TextBlock>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Author:" />
+                        <TextBlock Grid.Row="2" Grid.Column="2">
+                            <Hyperlink>
+                                <Run Text="{Binding IconAuthorUrl, Mode=OneWay}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Dependencies">
+                <DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Items}" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</controls:AdonisWindow>
