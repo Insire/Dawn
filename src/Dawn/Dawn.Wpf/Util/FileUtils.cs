@@ -26,7 +26,11 @@ namespace Dawn.Wpf
         {
             try
             {
-                File.Move(from, to, overwrite);
+                if (from != to)
+                {
+                    File.Move(from, to, overwrite);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -41,7 +45,10 @@ namespace Dawn.Wpf
         {
             try
             {
-                File.Copy(from, to, overwrite);
+                if (from != to)
+                {
+                    File.Copy(from, to, overwrite);
+                }
                 return true;
             }
             catch (Exception ex)
