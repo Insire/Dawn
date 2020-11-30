@@ -228,15 +228,17 @@
                                                 <icons:PackIconFontAwesome Kind="PlaySolid" />
                                             </Button>
 
-                                            <!--<Button DockPanel.Dock="Right" ToolTip="Open details">
-                                                <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
-                                            </Button>-->
-
-                                            <Button Margin="0"
-                                                    Command="{Binding DeleteCommand}"
+                                            <Button Command="{Binding DeleteCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Delete backup">
                                                 <icons:PackIconFontAwesome Kind="TrashSolid" />
+                                            </Button>
+
+                                            <Button Margin="8,0"
+                                                    Command="{Binding OpenExternallyCommand}"
+                                                    DockPanel.Dock="Right"
+                                                    ToolTip="Open in explorer">
+                                                <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
                                             </Button>
 
                                             <TextBlock Text="{Binding Count, StringFormat='{}Files: {0}'}">

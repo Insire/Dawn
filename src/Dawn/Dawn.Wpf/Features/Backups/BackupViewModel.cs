@@ -2,7 +2,9 @@ using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -44,6 +46,8 @@ namespace Dawn.Wpf
 
         public ICommand DeleteCommand { get; }
 
+        public ICommand OpenExternallyCommand { get; }
+
         public BackupViewModel(in IScarletCommandBuilder commandBuilder, BackupModel model, BackupsViewModel backupsViewModel, LogViewModel logViewModel, ILogger log, ConfigurationViewModel configurationViewModel, Func<bool> onDeleteRequested, Action onDeleting)
             : base(commandBuilder)
         {
@@ -62,6 +66,44 @@ namespace Dawn.Wpf
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
+
+            OpenExternallyCommand = commandBuilder.Create(OpenExternally)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
+        }
+
+        public Task OpenExternally()
+        {
+            return Task.Run(() =>
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    using (var process = Process.Start(new ProcessStartInfo("cmd", $"/c start {FullPath}")
+                    {
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    }))
+                    {
+                        process.WaitForExit();
+                    }
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    using (var process = Process.Start("xdg-open", FullPath))
+                    {
+                        process.WaitForExit();
+                    }
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    using (var process = Process.Start("open", FullPath))
+                    {
+                        process.WaitForExit();
+                    }
+                };
+            });
         }
 
         public async Task Delete()
