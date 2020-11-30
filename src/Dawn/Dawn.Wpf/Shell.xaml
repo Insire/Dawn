@@ -287,10 +287,6 @@
                                                                            DockPanel.Dock="Left"
                                                                            Kind="FolderSolid" />
 
-                                                <!--<Button DockPanel.Dock="Right" ToolTip="Open details">
-                                                    <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
-                                                </Button>-->
-
                                                 <Button Margin="8,0"
                                                         Command="{Binding DeleteCommand}"
                                                         DockPanel.Dock="Right"
@@ -440,6 +436,7 @@
         <Border Grid.RowSpan="4"
                 Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
                 Opacity="0.90">
+
             <Border.Style>
                 <Style TargetType="{x:Type Border}">
                     <Setter Property="Visibility" Value="Hidden" />
@@ -456,6 +453,9 @@
             <ContentControl Width="64"
                             Height="64"
                             ContentTemplate="{StaticResource {x:Static adonisUi:Templates.LoadingBars}}" />
+            <Border.InputBindings>
+                <MouseBinding Command="{Binding ShowLogCommand}" Gesture="LeftClick" />
+            </Border.InputBindings>
         </Border>
     </Grid>
 </controls:AdonisWindow>

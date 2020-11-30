@@ -76,6 +76,8 @@ namespace Dawn.Wpf
         {
             try
             {
+                _logViewModel.Progress.Report(0);
+
                 var reuseLastBackup = ReuseLastBackup;
                 var deploymentFolder = _configurationViewModel.DeploymentFolder;
                 var backupFolder = _configurationViewModel.BackupFolder;
@@ -94,8 +96,10 @@ namespace Dawn.Wpf
                 {
                     try
                     {
+                        var count = 0d;
                         foreach (var newfile in Items)
                         {
+                            _logViewModel.Progress.Report(count * 100d / Items.Count - 1);
                             if (token.IsCancellationRequested)
                             {
                                 return;
@@ -110,10 +114,12 @@ namespace Dawn.Wpf
                                 BackupFile(newfile.Path, backupFileName, reuseLastBackup);
                             }
 
-                            Update(newfile.Path, deploymentFileName);
+                            Update(newfile.Path, deploymentFileName, _logViewModel.Progress);
+                            count++;
                         }
 
                         _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {directory}", deploymentFolder);
+                        _logViewModel.Progress.Report(100);
                     }
                     catch (Exception ex)
                     {
@@ -152,12 +158,12 @@ namespace Dawn.Wpf
                 && _configurationViewModel.Validation.IsValid;
         }
 
-        private void Update(string from, string to)
+        private void Update(string from, string to, IProgress<double> progress)
         {
             var extension = Path.GetExtension(from).ToLower();
             if (extension == ".zip")
             {
-                CopyArchive(from, Path.GetDirectoryName(to), true);
+                CopyArchive(from, Path.GetDirectoryName(to), progress, true);
             }
             else
             {
@@ -176,9 +182,9 @@ namespace Dawn.Wpf
             }
         }
 
-        private void CopyArchive(string from, string to, bool overwrite)
+        private void CopyArchive(string from, string to, IProgress<double> progress, bool overwrite)
         {
-            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, overwrite))
+            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, progress, overwrite))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
             }

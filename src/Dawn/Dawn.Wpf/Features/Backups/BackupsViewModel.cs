@@ -160,6 +160,7 @@ namespace Dawn.Wpf
 
                 await _logViewModel.Clear(token).ConfigureAwait(false);
 
+                _logViewModel.Progress.Report(0);
                 _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
 
                 var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
@@ -172,6 +173,7 @@ namespace Dawn.Wpf
 
                         for (var i = Items.Count - 1; i >= 0; i--)
                         {
+                            _logViewModel.Progress.Report(i * 100d / Items.Count - 1);
                             var item = Items[i];
                             if (token.IsCancellationRequested)
                             {
@@ -187,6 +189,7 @@ namespace Dawn.Wpf
                     {
                         _isMassDeleting = false;
                     }
+                    _logViewModel.Progress.Report(100);
                 });
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -209,6 +212,7 @@ namespace Dawn.Wpf
         {
             try
             {
+                _logViewModel.Progress.Report(0);
                 var deploymentFolder = _configurationViewModel.DeploymentFolder;
                 var backupFolder = _configurationViewModel.BackupFolder;
                 var now = DateTime.Now;
@@ -221,12 +225,16 @@ namespace Dawn.Wpf
 
                 var t2 = Task.Run(() =>
                 {
-                    foreach (var file in backupViewModel.Items.ToArray())
+                    var count = 0d;
+                    var array = backupViewModel.Items.ToArray();
+                    foreach (var file in array)
                     {
+                        var percentage = count * 100d / (array.Length - 1);
+                        _logViewModel.Progress.Report(percentage);
                         var extension = Path.GetExtension(file.Value).ToLower();
                         if (extension == ".zip")
                         {
-                            RestoreArchive(file.Value, deploymentFolder, now);
+                            RestoreArchive(file.Value, deploymentFolder, now, _logViewModel.Progress);
                         }
                         else
                         {
@@ -235,7 +243,10 @@ namespace Dawn.Wpf
 
                             RestoreFile(file.Value, restoreFileName, now);
                         }
+
+                        count++;
                     }
+                    _logViewModel.Progress.Report(100);
                 });
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -256,9 +267,9 @@ namespace Dawn.Wpf
             }
         }
 
-        private void RestoreArchive(string from, string to, DateTime timeStamp)
+        private void RestoreArchive(string from, string to, DateTime timeStamp, IProgress<double> progress)
         {
-            if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, true))
+            if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, progress, true))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }

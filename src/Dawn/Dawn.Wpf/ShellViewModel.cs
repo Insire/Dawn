@@ -21,8 +21,9 @@ namespace Dawn.Wpf
         private const string GithubRepositoryOwner = "insire";
 
         private readonly GitHubClient _client;
-        private readonly ILogger _log;
         private readonly AboutViewModel _aboutViewModel;
+        private readonly LogViewModel _logViewModel;
+        private readonly ILogger _log;
 
         private bool _hasUpdatedApplication;
         private ReleaseAsset _asset;
@@ -54,8 +55,11 @@ namespace Dawn.Wpf
         public ICommand CheckForApplicationUpdateCommand { get; }
 
         public ICommand GetApplicationUpdateCommand { get; }
+        public ICommand ShowLogCommand { get; }
 
-        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, ILogger log, AboutViewModel aboutViewModel)
+        public Action ShowLogAction { get; set; }
+
+        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, AboutViewModel aboutViewModel, LogViewModel logViewModel, ILogger log)
             : base(ScarletCommandBuilder.Default)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -63,6 +67,7 @@ namespace Dawn.Wpf
             Stagings = stagings ?? throw new ArgumentNullException(nameof(stagings));
 
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
+            _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _log = log?.ForContext<ShellViewModel>() ?? throw new ArgumentNullException(nameof(log));
 
             _client = new GitHubClient(new ProductHeaderValue(GithubRepositoryOwner));
@@ -82,6 +87,19 @@ namespace Dawn.Wpf
                 .WithSingleExecution()
                 .WithCancellation()
                 .Build();
+
+            ShowLogCommand = ScarletCommandBuilder.Default
+                .Create(ShowLog)
+                .WithSingleExecution()
+                .WithCancellation()
+                .Build();
+        }
+
+        private Task ShowLog()
+        {
+            ShowLogAction?.Invoke();
+
+            return Task.CompletedTask;
         }
 
         private async Task CheckForApplicationUpdate(CancellationToken token)
@@ -133,6 +151,7 @@ namespace Dawn.Wpf
         {
             try
             {
+                _logViewModel.Progress.Report(0);
                 var tempDirectory = Path.GetTempPath();
                 var tempZipFile = Path.Combine(tempDirectory, $"{_asset.Name}");
                 var tempExtractDirectory = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(_asset.Name));
@@ -144,7 +163,7 @@ namespace Dawn.Wpf
                 }
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracting release to {directory}", tempExtractDirectory);
-                if (!FileUtils.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, true))
+                if (!FileUtils.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, _logViewModel.Progress, true))
                 {
                     return;
                 }
@@ -156,6 +175,7 @@ namespace Dawn.Wpf
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Cleaning up temporary files");
                 CleanUpFiles(tempDirectory);
 
+                _logViewModel.Progress.Report(100);
                 _hasUpdatedApplication = true;
                 if (OnApplicationUpdated?.Invoke() == true)
                 {

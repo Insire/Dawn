@@ -92,6 +92,7 @@ namespace Dawn.Wpf
 
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
+
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
@@ -102,6 +103,7 @@ namespace Dawn.Wpf
             _shellViewModel.Updates.OnDeleting += ShowLog;
             _shellViewModel.Updates.OnDeletingAll += ShowLog;
             _shellViewModel.Updates.OnRestoring += ShowLog;
+            _shellViewModel.ShowLogAction += ShowLog;
 
             _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {

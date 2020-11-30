@@ -77,14 +77,16 @@ namespace Dawn.Wpf
             return false;
         }
 
-        public static bool ExtractFor<T>(string from, string to, ILogger log, bool overwrite = false)
+        public static bool ExtractFor<T>(string from, string to, ILogger log, IProgress<double> progress, bool overwrite = false)
         {
             try
             {
                 using (var archive = ZipFile.OpenRead(from))
                 {
+                    var count = 0d;
                     foreach (var entry in archive.Entries)
                     {
+                        progress.Report(count * 100d / archive.Entries.Count - 1);
                         // Gets the full path to ensure that relative segments are removed.
                         var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
 
@@ -106,6 +108,8 @@ namespace Dawn.Wpf
                                 entry.ExtractToFile(destinationPath, overwrite);
                             }
                         }
+
+                        count++;
                     }
                 }
 
@@ -119,14 +123,16 @@ namespace Dawn.Wpf
             return false;
         }
 
-        public static bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, bool overwrite = false)
+        public static bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<double> progress, bool overwrite = false)
         {
             try
             {
                 using (var archive = ZipFile.OpenRead(from))
                 {
+                    var count = 0d;
                     foreach (var entry in archive.Entries)
                     {
+                        progress.Report(count * 100d / archive.Entries.Count - 1);
                         // Gets the full path to ensure that relative segments are removed.
                         var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
 
@@ -149,6 +155,8 @@ namespace Dawn.Wpf
                                 File.SetLastWriteTime(destinationPath, timeStamp);
                             }
                         }
+
+                        count++;
                     }
                 }
 
