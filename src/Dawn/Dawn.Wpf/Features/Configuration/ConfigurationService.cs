@@ -12,11 +12,12 @@ namespace Dawn.Wpf
     internal sealed class ConfigurationService
     {
         private const string _settingsFileName = "Dawn.Wpf.Settings.json";
+
         private readonly string _settingsFilePath;
         private readonly ConfigurationModel _configuration;
-        private readonly ILogger _log;
         private readonly HttpClient _httpClient;
         private readonly Process _currentProcess;
+        private readonly ILogger _log;
 
         public ConfigurationService(ILogger log, HttpClient httpClient, Process currentProcess)
         {
@@ -54,7 +55,7 @@ namespace Dawn.Wpf
         {
             try
             {
-                if (!_configuration.IsLocalConfig)
+                if (!_configuration.FirstStart &&!_configuration.IsLocalConfig)
                 {
                     return;
                 }
