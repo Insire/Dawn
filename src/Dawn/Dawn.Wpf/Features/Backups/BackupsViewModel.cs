@@ -173,7 +173,7 @@ namespace Dawn.Wpf
 
                         for (var i = Items.Count - 1; i >= 0; i--)
                         {
-                            _logViewModel.Progress.Report(i * 100d / Items.Count - 1);
+                            _logViewModel.Progress.Report(i * 100d / (Items.Count - 1));
                             var item = Items[i];
                             if (token.IsCancellationRequested)
                             {

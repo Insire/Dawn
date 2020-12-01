@@ -99,7 +99,7 @@ namespace Dawn.Wpf
                         var count = 0d;
                         foreach (var newfile in Items)
                         {
-                            _logViewModel.Progress.Report(count * 100d / Items.Count - 1);
+                            _logViewModel.Progress.Report(count * 100d / (Items.Count - 1));
                             if (token.IsCancellationRequested)
                             {
                                 return;
