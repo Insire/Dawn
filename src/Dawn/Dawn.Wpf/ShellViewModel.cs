@@ -122,14 +122,14 @@ namespace Dawn.Wpf
                 return;
             }
 
-            if (Version.TryParse(latest.Name, out var version))
+            if (Version.TryParse(latest.TagName, out var version))
             {
                 if (_aboutViewModel.AssemblyVersion < version)
                 {
                     IsApplicationUpdateAvailable = true;
                     HasCheckedForApplicationUpdate = true;
 
-                    _log.Write(Serilog.Events.LogEventLevel.Debug, "An update ({release}) is available", latest.Name);
+                    _log.Write(Serilog.Events.LogEventLevel.Debug, "An update ({release}) is available", latest.TagName);
 
                     _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType);
 
