@@ -134,7 +134,6 @@
                     ToolTip="Open logs">
                 <icons:PackIconFontAwesome Kind="AlignLeftSolid" />
             </Button>
-
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 
@@ -223,10 +222,37 @@
                             <Setter.Value>
                                 <DataTemplate DataType="{x:Type local:BackupViewModel}">
                                     <GroupBox Width="200"
-                                              Height="110"
-                                              Margin="8"
-                                              Header="{Binding Name}"
-                                              HeaderStringFormat="{}Backup: {0}">
+                                              Height="130"
+                                              Margin="8">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Loaded">
+                                                <i:InvokeCommandAction Command="{Binding LoadMetaDataCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+
+                                        <GroupBox.Header>
+                                            <Button HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    Command="{Binding EditMetaDataCommand}">
+                                                <TextBlock>
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Text" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                            <Setter Property="ToolTip" Value="{Binding Comment}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
+                                                                    <Setter Property="Text" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                                    <Setter Property="ToolTip" Value="Rename backup" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Button>
+                                        </GroupBox.Header>
+
                                         <DockPanel>
                                             <Button Margin="0,8,0,0"
                                                     Command="{Binding Data.RestoreCommand, Source={StaticResource UpdatesProxy}}"
@@ -236,13 +262,17 @@
                                                 <icons:PackIconFontAwesome Kind="PlaySolid" />
                                             </Button>
 
-                                            <Button Command="{Binding DeleteCommand}"
+                                            <Button Width="32"
+                                                    Height="32"
+                                                    Command="{Binding DeleteCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Delete backup">
                                                 <icons:PackIconFontAwesome Kind="TrashSolid" />
                                             </Button>
 
-                                            <Button Margin="8,0"
+                                            <Button Width="32"
+                                                    Height="32"
+                                                    Margin="8,0"
                                                     Command="{Binding OpenExternallyCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Open in explorer">

@@ -2,6 +2,7 @@ using AdonisUI.Controls;
 using Jot;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -104,6 +105,7 @@ namespace Dawn.Wpf
             _shellViewModel.Updates.OnDeletingAll += ShowLog;
             _shellViewModel.Updates.OnRestoring += ShowLog;
             _shellViewModel.ShowLogAction += ShowLog;
+            _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
             _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
@@ -176,6 +178,21 @@ namespace Dawn.Wpf
             };
 
             dlg.ShowDialog();
+        }
+
+        private BackupViewModel ShowEditDialog(BackupViewModel backupViewModel)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var dlg = new EditBackupWindow(backupViewModel)
+                {
+                    Owner = this
+                };
+
+                dlg.ShowDialog();
+            });
+
+            return backupViewModel;
         }
 
         private void SetImage()

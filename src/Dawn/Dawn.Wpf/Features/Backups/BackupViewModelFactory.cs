@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using Serilog;
 using System;
 
@@ -19,9 +19,9 @@ namespace Dawn.Wpf
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
         }
 
-        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<bool> onDeleteRequested, Action onDeleting)
+        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<bool> onDeleteRequested, Action onDeleting, Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
         {
-            return new BackupViewModel(_commandBuilder, model, backupsViewModel, _logViewModel, _log, _configurationViewModel, onDeleteRequested, onDeleting);
+            return new BackupViewModel(_commandBuilder, model, backupsViewModel, _logViewModel, _log, _configurationViewModel, onDeleteRequested, onDeleting, onMetaDataEdit);
         }
     }
 }

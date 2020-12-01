@@ -36,6 +36,8 @@ namespace Dawn.Wpf
 
         public Action OnRestoring { get; set; }
 
+        public Func<BackupViewModel, BackupViewModel> OnMetaDataEditing { get; set; }
+
         public BackupsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupViewModelFactory viewModelFactory)
             : base(commandBuilder)
         {
@@ -114,7 +116,7 @@ namespace Dawn.Wpf
                                     FullPath = directory,
                                     Name = key,
                                     TimeStamp = date
-                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); });
+                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); }, (vm) => { return OnMetaDataEditing?.Invoke(vm); });
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
                                 await group.AddRange(files.Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
