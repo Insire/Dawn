@@ -107,6 +107,7 @@ namespace Dawn.Wpf
 
             _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
+                IsSoundEnabled = false,
                 Text = "This will delete all files in this backup folder. \r\nThis can not be undone.",
                 Caption = "Are you sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Warning,
@@ -115,6 +116,7 @@ namespace Dawn.Wpf
 
             _shellViewModel.Updates.OnDeleteAllRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
+                IsSoundEnabled = false,
                 Text = "This will delete every backup. \r\nThis can not be undone.",
                 Caption = "Are you really sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Stop,
@@ -123,6 +125,7 @@ namespace Dawn.Wpf
 
             _shellViewModel.OnApplicationUpdated = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
+                IsSoundEnabled = false,
                 Text = "Your update has been prepared. \r\nDo you want to restart Dawn?",
                 Caption = "Updates have been downloaded successfully.",
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
