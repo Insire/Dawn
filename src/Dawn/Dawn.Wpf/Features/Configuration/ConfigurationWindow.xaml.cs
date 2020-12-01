@@ -32,7 +32,7 @@ namespace Dawn.Wpf
             var bytes = Encoding.UTF8.GetBytes(json);
             var base64 = Convert.ToBase64String(bytes);
 
-            Clipboard.SetText($"json='{base64}'", TextDataFormat.Text);
+            Clipboard.SetDataObject($"json='{base64}'");
         }
 
         private void CloseInternal()

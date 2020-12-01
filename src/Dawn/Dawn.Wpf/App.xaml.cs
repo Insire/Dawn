@@ -1,7 +1,8 @@
-﻿using DryIoc;
+using DryIoc;
 using Jot;
 using Serilog;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Dawn.Wpf
 {
@@ -40,6 +41,14 @@ namespace Dawn.Wpf
             _container.Dispose();
 
             base.OnExit(e);
+        }
+
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            if (e.Exception is System.Runtime.InteropServices.COMException comException && comException.ErrorCode == -2147221040) // copy to clipboard failed
+            {
+                e.Handled = true;
+            }
         }
     }
 }
