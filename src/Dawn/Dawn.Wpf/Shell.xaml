@@ -32,52 +32,6 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
 
-            <Button Click="ShowAbout"
-                    DockPanel.Dock="Right"
-                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
-                    ToolTip="About">
-                <icons:PackIconFontAwesome Kind="InfoSolid" />
-            </Button>
-
-            <Button Click="OpenConfiguration"
-                    DockPanel.Dock="Right"
-                    ToolTip="Open configuration">
-                <Button.Style>
-                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Configuration.Validation.IsValid}" Value="False">
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-                <icons:PackIconFontAwesome Kind="CogSolid" />
-            </Button>
-
-            <ToggleButton x:Name="ViewToggle"
-                          DockPanel.Dock="Right"
-                          IsChecked="False"
-                          ToolTip="Toggle view">
-                <ToggleButton.Style>
-                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowToggleButton}}" TargetType="{x:Type ToggleButton}">
-                        <Setter Property="Content">
-                            <Setter.Value>
-                                <icons:PackIconFontAwesome Kind="ThListSolid" />
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <icons:PackIconFontAwesome Kind="ThSolid" />
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToggleButton.Style>
-            </ToggleButton>
-
             <Button DockPanel.Dock="Right" ToolTipService.ShowOnDisabled="True">
                 <Button.Style>
                     <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
@@ -127,6 +81,60 @@
                     </icons:PackIconFontAwesome.Style>
                 </icons:PackIconFontAwesome>
             </Button>
+
+            <Button Click="ShowAbout"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
+                    ToolTip="About">
+                <icons:PackIconFontAwesome Kind="InfoSolid" />
+            </Button>
+
+            <Button Click="OpenConfiguration"
+                    DockPanel.Dock="Right"
+                    ToolTip="Open configuration">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Configuration.Validation.IsValid}" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <icons:PackIconFontAwesome Kind="CogSolid" />
+            </Button>
+
+            <ToggleButton x:Name="ViewToggle"
+                          DockPanel.Dock="Right"
+                          IsChecked="False"
+                          ToolTip="Toggle view">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowToggleButton}}" TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <icons:PackIconFontAwesome Kind="ThListSolid" />
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <icons:PackIconFontAwesome Kind="ThSolid" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+
+            <Button Command="{Binding ShowLogCommand}"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
+                    ToolTip="Open logs">
+                <icons:PackIconFontAwesome Kind="AlignLeftSolid" />
+            </Button>
+
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 

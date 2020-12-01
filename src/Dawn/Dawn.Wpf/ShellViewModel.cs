@@ -118,7 +118,7 @@ namespace Dawn.Wpf
                 IsApplicationUpdateAvailable = false;
                 HasCheckedForApplicationUpdate = true;
 
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "No releases available");
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "No releases available");
                 return;
             }
 
@@ -129,7 +129,7 @@ namespace Dawn.Wpf
                     IsApplicationUpdateAvailable = true;
                     HasCheckedForApplicationUpdate = true;
 
-                    _log.Write(Serilog.Events.LogEventLevel.Debug, "An update ({release}) is available", latest.TagName);
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
 
                     _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType);
 
@@ -139,7 +139,7 @@ namespace Dawn.Wpf
 
             IsApplicationUpdateAvailable = false;
             HasCheckedForApplicationUpdate = true;
-            _log.Write(Serilog.Events.LogEventLevel.Debug, "No update available");
+            _log.Write(Serilog.Events.LogEventLevel.Warning, "No update available");
         }
 
         private bool CanCheckForApplicationUpdate()
@@ -179,7 +179,7 @@ namespace Dawn.Wpf
                 _hasUpdatedApplication = true;
                 if (OnApplicationUpdated?.Invoke() == true)
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Debug, "Restarting application.");
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restarting application.");
                     Restart(thisProcess);
                 }
             }
@@ -288,7 +288,7 @@ namespace Dawn.Wpf
         {
             if (FileUtils.DeleteFor<ShellViewModel>(from, _log))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Deleting {from}", from);
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting {from}", from);
             }
         }
     }

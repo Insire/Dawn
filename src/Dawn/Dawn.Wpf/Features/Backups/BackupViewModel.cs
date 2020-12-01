@@ -14,6 +14,7 @@ namespace Dawn.Wpf
     /// <summary>
     /// a file that belongs to an update
     /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public sealed class BackupViewModel : ViewModelListBase<ViewModelContainer<string>>
     {
         private readonly ConfigurationViewModel _configurationViewModel;
@@ -147,6 +148,11 @@ namespace Dawn.Wpf
             return _configurationViewModel.Validation.IsValid
                 && _fullPath.Length > 0
                 && Directory.Exists(_fullPath);
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return Name;
         }
     }
 }

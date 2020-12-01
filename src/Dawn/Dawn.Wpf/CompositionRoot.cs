@@ -28,7 +28,8 @@ namespace Dawn.Wpf
                 .WriteTo.Logger(lc =>
                     lc.Filter.ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
                     || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                    || Matching.FromSource<BackupViewModel>().Invoke(o))
+                    || Matching.FromSource<BackupViewModel>().Invoke(o)
+                    || Matching.FromSource<ShellViewModel>().Invoke(o))
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
                 .WriteTo.File("./logs/log.txt", buffered: false);
 
