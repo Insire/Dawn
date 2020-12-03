@@ -10,7 +10,7 @@ A utility to quickly update a directories contents while automatically backing u
 
 ![Default screen](/screenshots/default.png)
 
-### Main screen afer some time
+### Main screen after some time
 
 ![Main screen](/screenshots/main_window.png)
 
