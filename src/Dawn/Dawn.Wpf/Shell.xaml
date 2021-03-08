@@ -19,6 +19,7 @@
                        AllowDrop="True"
                        Drop="OnDrop"
                        IconVisibility="Collapsed"
+                       Topmost="True"
                        mc:Ignorable="d">
 
     <!--  DataContext: ShellViewModel  -->
@@ -156,6 +157,8 @@
             <RowDefinition Height="8" />
         </Grid.RowDefinitions>
 
+        <!--  Empty View  -->
+
         <DockPanel Grid.Row="0"
                    Grid.RowSpan="2"
                    HorizontalAlignment="Center"
@@ -188,7 +191,10 @@
             <icons:PackIconFontAwesome Margin="8"
                                        HorizontalAlignment="Center"
                                        Kind="ChevronDownSolid" />
+
         </DockPanel>
+
+        <!--  Backups  -->
 
         <ScrollViewer Grid.Row="0" Grid.RowSpan="3">
             <ScrollViewer.ContextMenu>
@@ -362,9 +368,7 @@
 
         <!--  Staging details  -->
 
-        <DockPanel Grid.Row="1"
-                   Grid.RowSpan="1"
-                   Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}">
+        <DockPanel Grid.Row="1" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}">
             <DockPanel.Style>
                 <Style TargetType="{x:Type DockPanel}">
                     <Setter Property="Visibility" Value="{Binding StagingVisibility, ElementName=root, Mode=TwoWay}" />
@@ -406,8 +410,7 @@
         <!--  Staging bar  -->
 
         <DockPanel Grid.Row="2"
-                   Grid.RowSpan="2"
-                   VerticalAlignment="Bottom"
+                   Grid.RowSpan="1"
                    Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}">
             <DockPanel.Style>
                 <Style TargetType="{x:Type DockPanel}">
