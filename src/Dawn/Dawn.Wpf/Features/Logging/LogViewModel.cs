@@ -15,7 +15,7 @@ namespace Dawn.Wpf
         public int Percentage
         {
             get { return _precentage; }
-            private set { SetValue(ref _precentage, value); }
+            private set { SetProperty(ref _precentage, value); }
         }
 
         public IProgress<double> Progress => _dispatcherProgress;
@@ -34,6 +34,11 @@ namespace Dawn.Wpf
             }
 
             if (double.IsInfinity(percentage))
+            {
+                return;
+            }
+
+            if (double.IsNaN(percentage))
             {
                 return;
             }
