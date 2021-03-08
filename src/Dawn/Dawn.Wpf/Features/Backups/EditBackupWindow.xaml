@@ -8,6 +8,7 @@
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:scarlet="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
                        Name="rootView"
                        Title="Edit Backup"
                        Width="600"
@@ -41,22 +42,26 @@
 
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
+                   Focusable="False"
                    Text="Name" />
 
         <TextBox Grid.Row="1"
                  Grid.Column="3"
                  adonisExtensions:WatermarkExtension.Watermark="Rename the backup ..."
+                 scarlet:Focus.First="True"
+                 TabIndex="1"
                  Text="{Binding CustomName}"
                  ToolTip="Provide a custom name" />
 
-
         <TextBlock Grid.Row="3"
                    Grid.Column="1"
+                   Focusable="False"
                    Text="Comment" />
 
         <TextBox Grid.Row="3"
                  Grid.Column="3"
                  adonisExtensions:WatermarkExtension.Watermark="Enter a comment ..."
+                 TabIndex="2"
                  Text="{Binding Comment}"
                  ToolTip="Comment" />
 
@@ -70,6 +75,7 @@
                     HorizontalAlignment="Right"
                     Command="{Binding CloseCommand, ElementName=rootView}"
                     Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
+                    TabIndex="3"
                     ToolTip="OK">
                 <icons:FontAwesome Kind="CheckSolid" />
             </Button>
