@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit.Observables;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
 
 namespace Dawn.Wpf
@@ -12,7 +12,7 @@ namespace Dawn.Wpf
         public string Path
         {
             get { return _path; }
-            private set { SetValue(ref _path, value); }
+            private set { SetProperty(ref _path, value); }
         }
 
         public StagingViewModel(string path)

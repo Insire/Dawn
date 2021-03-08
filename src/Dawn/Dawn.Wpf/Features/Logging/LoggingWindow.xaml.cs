@@ -1,5 +1,4 @@
-using MvvmScarletToolkit;
-using MvvmScarletToolkit.Commands;
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Windows.Input;
 
@@ -13,7 +12,7 @@ namespace Dawn.Wpf
         {
             DataContext = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
 
-            CloseCommand = new RelayCommand(ScarletCommandBuilder.Default, CloseInternal);
+            CloseCommand = new RelayCommand(CloseInternal);
 
             InitializeComponent();
         }

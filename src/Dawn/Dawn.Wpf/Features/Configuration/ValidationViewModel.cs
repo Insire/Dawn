@@ -24,14 +24,14 @@ namespace Dawn.Wpf
         public bool HasErrors
         {
             get { return _hasErrors; }
-            private set { SetValue(ref _hasErrors, value); }
+            private set { SetProperty(ref _hasErrors, value); }
         }
 
         private bool _isValid;
         public bool IsValid
         {
             get { return _isValid; }
-            private set { SetValue(ref _isValid, value); }
+            private set { SetProperty(ref _isValid, value); }
         }
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;

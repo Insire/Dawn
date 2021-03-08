@@ -13,14 +13,26 @@ namespace Dawn.Wpf
         public string DeploymentFolder
         {
             get { return _deploymentFolder; }
-            set { SetValue(ref _deploymentFolder, value, onChanged: () => Model.DeploymentFolder = value); }
+            set
+            {
+                if (SetProperty(ref _deploymentFolder, value))
+                {
+                    Model.DeploymentFolder = value;
+                }
+            }
         }
 
         private string _backupFolder;
         public string BackupFolder
         {
             get { return _backupFolder; }
-            set { SetValue(ref _backupFolder, value, onChanged: () => Model.BackupFolder = value); }
+            set
+            {
+                if (SetProperty(ref _backupFolder, value))
+                {
+                    Model.BackupFolder = value;
+                }
+            }
         }
 
         public BackupFileTypesViewModel BackupFileTypes { get; }

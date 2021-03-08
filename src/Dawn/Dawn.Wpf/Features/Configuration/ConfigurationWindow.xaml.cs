@@ -1,5 +1,4 @@
-using MvvmScarletToolkit;
-using MvvmScarletToolkit.Commands;
+using Microsoft.Toolkit.Mvvm.Input;
 using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -20,8 +19,8 @@ namespace Dawn.Wpf
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
 
-            CloseCommand = new RelayCommand(ScarletCommandBuilder.Default, CloseInternal, CanClose);
-            CopyToClipboardCommand = new RelayCommand(ScarletCommandBuilder.Default, CopyToClipboard);
+            CloseCommand = new RelayCommand(CloseInternal, CanClose);
+            CopyToClipboardCommand = new RelayCommand(CopyToClipboard);
 
             InitializeComponent();
         }

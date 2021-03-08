@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit.Observables;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 
 namespace Dawn.Wpf

@@ -1,4 +1,4 @@
-using MvvmScarletToolkit.Observables;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
 using System.Diagnostics;
 
@@ -11,21 +11,21 @@ namespace Dawn.Wpf
         public string Name
         {
             get { return _name; }
-            private set { SetValue(ref _name, value); }
+            private set { SetProperty(ref _name, value); }
         }
 
         private string _extension;
         public string Extension
         {
             get { return _extension; }
-            private set { SetValue(ref _extension, value); }
+            private set { SetProperty(ref _extension, value); }
         }
 
         private bool _isEnabled;
         public bool IsEnabled
         {
             get { return _isEnabled; }
-            set { SetValue(ref _isEnabled, value); }
+            set { SetProperty(ref _isEnabled, value); }
         }
 
         public BackupFileTypeViewModel(BackupFileTypeModel model)

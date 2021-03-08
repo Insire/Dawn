@@ -26,7 +26,7 @@ namespace Dawn.Wpf
         public bool ReuseLastBackup
         {
             get { return _reuseLastBackup; }
-            set { SetValue(ref _reuseLastBackup, value); }
+            set { SetProperty(ref _reuseLastBackup, value); }
         }
 
         public ICommand ApplyCommand { get; }

@@ -40,14 +40,14 @@ namespace Dawn.Wpf
         public bool IsApplicationUpdateAvailable
         {
             get { return _isApplicationUpdateAvailable; }
-            private set { SetValue(ref _isApplicationUpdateAvailable, value); }
+            private set { SetProperty(ref _isApplicationUpdateAvailable, value); }
         }
 
         private bool _hasCheckedForApplicationUpdate;
         public bool HasCheckedForApplicationUpdate
         {
             get { return _hasCheckedForApplicationUpdate; }
-            private set { SetValue(ref _hasCheckedForApplicationUpdate, value); }
+            private set { SetProperty(ref _hasCheckedForApplicationUpdate, value); }
         }
 
         public Func<bool> OnApplicationUpdated { get; set; }

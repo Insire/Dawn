@@ -1,5 +1,4 @@
-using MvvmScarletToolkit;
-using MvvmScarletToolkit.Commands;
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Windows.Input;
 
@@ -15,7 +14,7 @@ namespace Dawn.Wpf
         {
             DataContext = _backupViewModel = backupViewModel ?? throw new ArgumentNullException(nameof(backupViewModel));
 
-            CloseCommand = new RelayCommand(ScarletCommandBuilder.Default, CloseInternal, CanClose);
+            CloseCommand = new RelayCommand(CloseInternal, CanClose);
 
             InitializeComponent();
         }

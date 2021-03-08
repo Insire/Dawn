@@ -2,6 +2,7 @@ using DryIoc;
 using FluentValidation;
 using Jot;
 using Jot.Storage;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
@@ -62,9 +63,8 @@ namespace Dawn.Wpf
 
             c.UseInstance(ScarletCommandBuilder.Default);
             c.UseInstance(ScarletDispatcher.Default);
-            c.UseInstance(ScarletMessenger.Default);
+            c.UseInstance(new StrongReferenceMessenger());
             c.UseInstance(ScarletCommandManager.Default);
-            c.UseInstance(ScarletMessageProxy.Default);
             c.UseInstance(ScarletWeakEventManager.Default);
             c.UseInstance(ScarletExitService.Default);
 

@@ -33,35 +33,35 @@ namespace Dawn.Wpf
         public string FullPath
         {
             get { return _fullPath; }
-            private set { SetValue(ref _fullPath, value); }
+            private set { SetProperty(ref _fullPath, value); }
         }
 
         private string _name;
         public string Name
         {
             get { return _name; }
-            private set { SetValue(ref _name, value); }
+            private set { SetProperty(ref _name, value); }
         }
 
         private string _customName;
         public string CustomName
         {
             get { return _customName; }
-            set { SetValue(ref _customName, value); }
+            set { SetProperty(ref _customName, value); }
         }
 
         private string _comment;
         public string Comment
         {
             get { return _comment; }
-            set { SetValue(ref _comment, value); }
+            set { SetProperty(ref _comment, value); }
         }
 
         private DateTime _timeStamp;
         public DateTime TimeStamp
         {
             get { return _timeStamp; }
-            private set { SetValue(ref _timeStamp, value); }
+            private set { SetProperty(ref _timeStamp, value); }
         }
 
         public ICommand DeleteCommand { get; }
