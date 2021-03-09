@@ -16,7 +16,9 @@ namespace Dawn.Wpf
 {
     public sealed class ShellViewModel : ViewModelBase
     {
-        private const string ZipContentType = "application/x-zip-compressed";
+        private const string ZipCompressedContentType = "application/x-zip-compressed";
+        private const string ZipContentType = "application/zip";
+
         private const string ZipDownloadType = "application/octet-stream";
         private const string GithubRepositoryOwner = "insire";
 
@@ -131,7 +133,7 @@ namespace Dawn.Wpf
 
                     _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
 
-                    _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType);
+                    _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType || p.ContentType == ZipCompressedContentType);
 
                     return;
                 }
@@ -273,7 +275,7 @@ namespace Dawn.Wpf
 
         private bool CanGetApplicationUpdate()
         {
-            return !_hasUpdatedApplication;
+            return !_hasUpdatedApplication && _asset != null;
         }
 
         private void MoveFile(string from, string to)
