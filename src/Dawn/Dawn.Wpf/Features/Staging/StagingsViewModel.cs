@@ -55,18 +55,18 @@ namespace Dawn.Wpf
                 {
                     var viewModel = new StagingViewModel(fileSystemInfo);
 
-                    await Add(viewModel);
+                    await Add(viewModel).ConfigureAwait(false);
                 }
 
                 if (Directory.Exists(fileSystemInfo))
                 {
-                    var files = await Task.Run(() => Directory.GetFiles(fileSystemInfo, "*", SearchOption.AllDirectories));
+                    var files = await Task.Run(() => Directory.GetFiles(fileSystemInfo, "*", SearchOption.AllDirectories)).ConfigureAwait(false);
 
                     foreach (var file in files)
                     {
                         var viewModel = new StagingViewModel(file);
 
-                        await Add(viewModel);
+                        await Add(viewModel).ConfigureAwait(false);
                     }
                 }
             }

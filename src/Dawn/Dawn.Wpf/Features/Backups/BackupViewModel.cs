@@ -69,7 +69,15 @@ namespace Dawn.Wpf
         public ICommand LoadMetaDataCommand { get; }
         public ICommand EditMetaDataCommand { get; }
 
-        public BackupViewModel(in IScarletCommandBuilder commandBuilder, BackupModel model, BackupsViewModel backupsViewModel, LogViewModel logViewModel, ILogger log, ConfigurationViewModel configurationViewModel, Func<bool> onDeleteRequested, Action onDeleting, Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
+        public BackupViewModel(in IScarletCommandBuilder commandBuilder,
+                               BackupModel model,
+                               BackupsViewModel backupsViewModel,
+                               LogViewModel logViewModel,
+                               ILogger log,
+                               ConfigurationViewModel configurationViewModel,
+                               Func<bool> onDeleteRequested,
+                               Action onDeleting,
+                               Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
             : base(commandBuilder)
         {
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
@@ -99,7 +107,7 @@ namespace Dawn.Wpf
                 .WithSingleExecution()
                 .Build();
 
-            EditMetaDataCommand = commandBuilder.Create(EditMetaData)
+            EditMetaDataCommand = commandBuilder.Create(EditMetaData, CanEditMetaData)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
@@ -232,7 +240,7 @@ namespace Dawn.Wpf
                     {
                         process.WaitForExit();
                     }
-                };
+                }
             });
         }
 
@@ -258,8 +266,8 @@ namespace Dawn.Wpf
                 var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
                 var t2 = Task.Run(async () =>
                 {
-                    await Task.Run(() => Directory.Delete(_fullPath, true));
-                    await _backupsViewModel.Remove(this);
+                    await Task.Run(() => Directory.Delete(_fullPath, true)).ConfigureAwait(false);
+                    await _backupsViewModel.Remove(this).ConfigureAwait(false);
 
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
                 });

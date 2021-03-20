@@ -37,9 +37,7 @@ namespace Dawn.Wpf
             {
                 var json = reader.ReadToEnd();
 
-                var dpenedencies = JsonConvert.DeserializeObject<Package[]>(json);
-
-                foreach (var package in dpenedencies)
+                foreach (var package in JsonConvert.DeserializeObject<Package[]>(json))
                 {
                     AddUnchecked(package);
                 }

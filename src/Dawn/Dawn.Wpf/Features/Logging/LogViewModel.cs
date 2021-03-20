@@ -28,7 +28,7 @@ namespace Dawn.Wpf
 
         private void SetPercentage(double percentage)
         {
-            if (percentage == double.NaN)
+            if (double.IsNaN(percentage))
             {
                 return;
             }

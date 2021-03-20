@@ -108,7 +108,7 @@ namespace Dawn.Wpf
         {
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Checking for updates");
 
-            var releases = await _client.Repository.Release.GetAll(GithubRepositoryOwner, "dawn");
+            var releases = await _client.Repository.Release.GetAll(GithubRepositoryOwner, "dawn").ConfigureAwait(false);
             var publicReleases = releases
                 .Where(p => !p.Draft && !p.Prerelease)
                 .OrderByDescending(p => p.PublishedAt)
@@ -159,7 +159,7 @@ namespace Dawn.Wpf
                 var tempExtractDirectory = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(_asset.Name));
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Downloading release from {url}", _asset.Url);
-                if (!await DownloadRelease(tempZipFile, token))
+                if (!await DownloadRelease(tempZipFile, token).ConfigureAwait(false))
                 {
                     return;
                 }
@@ -258,7 +258,7 @@ namespace Dawn.Wpf
 
         private async Task<bool> DownloadRelease(string to, CancellationToken token)
         {
-            var response = await _client.Connection.Get<object>(new Uri(_asset.Url), new Dictionary<string, string>(), ZipDownloadType, token);
+            var response = await _client.Connection.Get<object>(new Uri(_asset.Url), new Dictionary<string, string>(), ZipDownloadType, token).ConfigureAwait(false);
 
             if (response?.HttpResponse?.StatusCode != HttpStatusCode.OK)
             {
