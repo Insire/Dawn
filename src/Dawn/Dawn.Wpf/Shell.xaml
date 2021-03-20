@@ -25,7 +25,7 @@
     <!--  DataContext: ShellViewModel  -->
 
     <controls:AdonisWindow.TitleBarContent>
-        <DockPanel IsEnabled="{Binding Updates.IsBusy, Converter={mvvm:InvertBooleanConverter}}" LastChildFill="False">
+        <DockPanel IsEnabled="{Binding Updates.IsBusy, Converter={mvvm:IsNot}}" LastChildFill="False">
 
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
@@ -241,22 +241,37 @@
                                                     Background="Transparent"
                                                     BorderBrush="Transparent"
                                                     Command="{Binding EditMetaDataCommand}">
-
                                                 <Button.Style>
-                                                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.AccentButton}}" TargetType="{x:Type Button}">
-                                                        <Setter Property="Content" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                        <Setter Property="ToolTip" Value="{Binding Comment}" />
+                                                    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
+                                                        <Setter Property="ToolTip" Value="Rename backup" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
-                                                                <Setter Property="Content" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                            </DataTrigger>
 
-                                                            <DataTrigger Binding="{Binding Comment}" Value="{x:Null}">
-                                                                <Setter Property="ToolTip" Value="Rename backup" />
+                                                            <DataTrigger Binding="{Binding Comment, Converter={mvvm:IsNullOrWhiteSpace}}" Value="False">
+                                                                <Setter Property="ToolTip" Value="{Binding Comment, Mode=OneWay, StringFormat={}Backup: {0}}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
+
+                                                <TextBlock TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Text" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding CustomName, Converter={mvvm:IsNullOrEmpty}}" Value="False">
+                                                                    <Setter Property="Text">
+                                                                        <Setter.Value>
+                                                                            <MultiBinding StringFormat="{}{0} - {1}">
+                                                                                <Binding Mode="OneWay" Path="CustomName" />
+                                                                                <Binding Mode="OneWay" Path="Name" />
+                                                                            </MultiBinding>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Button>
                                         </GroupBox.Header>
 
@@ -326,6 +341,22 @@
                                         <DataTemplate DataType="{x:Type local:BackupViewModel}">
 
                                             <DockPanel Margin="8,0,0,0">
+                                                <DockPanel.ToolTip>
+                                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Items}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <VirtualizingStackPanel IsItemsHost="True" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Value}" />
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </ToolTip>
+                                                </DockPanel.ToolTip>
 
                                                 <icons:PackIconFontAwesome Margin="8,0"
                                                                            VerticalAlignment="Center"
@@ -364,21 +395,42 @@
                                                            DockPanel.Dock="Right"
                                                            Text="{Binding Count, StringFormat='{}Files: {0}', Mode=OneWay}" />
 
-                                                <TextBlock Margin="8,0"
-                                                           VerticalAlignment="Center"
-                                                           DockPanel.Dock="Right"
-                                                           Text="{Binding Name, Mode=OneWay}" />
-
-                                                <TextBlock VerticalAlignment="Center">
+                                                <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
                                                     <TextBlock.Style>
                                                         <Style TargetType="{x:Type TextBlock}">
-                                                            <Setter Property="Text" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                            <Setter Property="ToolTip" Value="{Binding Comment}" />
+                                                            <Setter Property="Text" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
-                                                                    <Setter Property="ToolTip" Value="Rename backup" />
-                                                                    <Setter Property="Text" Value="{Binding Name, StringFormat='{}Backup: {0},', Mode=OneWay}" />
-                                                                </DataTrigger>
+
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding CustomName, Converter={mvvm:IsNullOrEmpty}}" Value="False" />
+                                                                        <Condition Binding="{Binding Comment, Converter={mvvm:IsNullOrEmpty}}" Value="True" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Text">
+                                                                        <Setter.Value>
+                                                                            <MultiBinding StringFormat="{}Backup: {0} - {1} {2}">
+                                                                                <Binding Mode="OneWay" Path="CustomName" />
+                                                                                <Binding Mode="OneWay" Path="Name" />
+                                                                            </MultiBinding>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </MultiDataTrigger>
+
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding CustomName, Converter={mvvm:IsNullOrEmpty}}" Value="False" />
+                                                                        <Condition Binding="{Binding Comment, Converter={mvvm:IsNullOrEmpty}}" Value="False" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Text">
+                                                                        <Setter.Value>
+                                                                            <MultiBinding StringFormat="{}Backup: {0} - {1} | {2}">
+                                                                                <Binding Mode="OneWay" Path="CustomName" />
+                                                                                <Binding Mode="OneWay" Path="Name" />
+                                                                                <Binding Mode="OneWay" Path="Comment" />
+                                                                            </MultiBinding>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>
