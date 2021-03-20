@@ -32,7 +32,7 @@
         <PackageReference Include="DryIoc.dll" Version="4.7.4" />
         <PackageReference Include="Jot" Version="2.1.8" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.8.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.123" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.146" />
         <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.0" />
 
         <PackageReference Include="Serilog" Version="2.10.0" />
