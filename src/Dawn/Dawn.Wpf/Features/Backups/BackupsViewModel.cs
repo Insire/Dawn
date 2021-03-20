@@ -119,7 +119,7 @@ namespace Dawn.Wpf
                                 }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); }, (vm) => OnMetaDataEditing?.Invoke(vm));
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
-                                await group.AddRange(files.Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
+                                await group.AddRange(files.Where(p => !p.EndsWith("backup.json", StringComparison.InvariantCultureIgnoreCase)).Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
 
                                 lookup.Add(key, group);
                             }
