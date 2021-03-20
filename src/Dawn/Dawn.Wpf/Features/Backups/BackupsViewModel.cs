@@ -116,7 +116,7 @@ namespace Dawn.Wpf
                                     FullPath = directory,
                                     Name = key,
                                     TimeStamp = date
-                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); }, (vm) => { return OnMetaDataEditing?.Invoke(vm); });
+                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); }, (vm) => OnMetaDataEditing?.Invoke(vm));
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
                                 await group.AddRange(files.Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
@@ -145,7 +145,7 @@ namespace Dawn.Wpf
 
         public override bool CanRefresh()
         {
-            return _configurationViewModel.Validation.IsValid
+            return !_configurationViewModel.HasErrors
                 && base.CanRefresh();
         }
 
@@ -182,10 +182,10 @@ namespace Dawn.Wpf
                                 return;
                             }
 
-                            await item.Delete();
+                            await item.Delete().ConfigureAwait(false);
                         }
 
-                        await Refresh(token);
+                        await Refresh(token).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -206,7 +206,7 @@ namespace Dawn.Wpf
         private bool CanDeleteAll()
         {
             return !IsBusy
-                && _configurationViewModel.Validation.IsValid
+                && !_configurationViewModel.HasErrors
                 && Items.Count > 0;
         }
 
@@ -281,7 +281,7 @@ namespace Dawn.Wpf
         {
             return !IsBusy
                 && backupViewModel != null
-                && _configurationViewModel.Validation.IsValid;
+                && !_configurationViewModel.HasErrors;
         }
     }
 }

@@ -29,7 +29,7 @@
 
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
-                    <i:InvokeCommandAction Command="{Binding Configuration.Validation.ValidateCommand}" />
+                    <i:InvokeCommandAction Command="{Binding Configuration.ValidateCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
 
@@ -96,7 +96,7 @@
                 <Button.Style>
                     <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowButton}}" TargetType="{x:Type Button}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Configuration.Validation.IsValid}" Value="False">
+                            <DataTrigger Binding="{Binding Configuration.HasErrors}" Value="True">
                                 <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -191,7 +191,6 @@
             <icons:PackIconFontAwesome Margin="8"
                                        HorizontalAlignment="Center"
                                        Kind="ChevronDownSolid" />
-
         </DockPanel>
 
         <!--  Backups  -->
@@ -242,20 +241,22 @@
                                                     Background="Transparent"
                                                     BorderBrush="Transparent"
                                                     Command="{Binding EditMetaDataCommand}">
-                                                <TextBlock>
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="{x:Type TextBlock}">
-                                                            <Setter Property="Text" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                            <Setter Property="ToolTip" Value="{Binding Comment}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
-                                                                    <Setter Property="Text" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                                    <Setter Property="ToolTip" Value="Rename backup" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+
+                                                <Button.Style>
+                                                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.AccentButton}}" TargetType="{x:Type Button}">
+                                                        <Setter Property="Content" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                        <Setter Property="ToolTip" Value="{Binding Comment}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
+                                                                <Setter Property="Content" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                            </DataTrigger>
+
+                                                            <DataTrigger Binding="{Binding Comment}" Value="{x:Null}">
+                                                                <Setter Property="ToolTip" Value="Rename backup" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
                                             </Button>
                                         </GroupBox.Header>
 
@@ -345,9 +346,42 @@
                                                     <icons:PackIconFontAwesome Kind="PlaySolid" />
                                                 </Button>
 
-                                                <TextBlock>
-                                                    <Run Text="{Binding Name, StringFormat='{}Backup: {0},', Mode=OneWay}" />
-                                                    <Run Text="{Binding Count, StringFormat='{}Files: {0}', Mode=OneWay}" />
+                                                <Button Margin="8,0"
+                                                        Command="{Binding EditMetaDataCommand}"
+                                                        DockPanel.Dock="Right"
+                                                        ToolTip="Rename backup">
+                                                    <icons:PackIconFontAwesome Kind="EditSolid" />
+                                                </Button>
+
+                                                <Button Command="{Binding OpenExternallyCommand}"
+                                                        DockPanel.Dock="Right"
+                                                        ToolTip="Open in explorer">
+                                                    <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
+                                                </Button>
+
+                                                <TextBlock Margin="8,0"
+                                                           VerticalAlignment="Center"
+                                                           DockPanel.Dock="Right"
+                                                           Text="{Binding Count, StringFormat='{}Files: {0}', Mode=OneWay}" />
+
+                                                <TextBlock Margin="8,0"
+                                                           VerticalAlignment="Center"
+                                                           DockPanel.Dock="Right"
+                                                           Text="{Binding Name, Mode=OneWay}" />
+
+                                                <TextBlock VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Text" Value="{Binding CustomName, Mode=OneWay, StringFormat={}Backup: {0}}" />
+                                                            <Setter Property="ToolTip" Value="{Binding Comment}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding CustomName}" Value="{x:Null}">
+                                                                    <Setter Property="ToolTip" Value="Rename backup" />
+                                                                    <Setter Property="Text" Value="{Binding Name, StringFormat='{}Backup: {0},', Mode=OneWay}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
                                                 </TextBlock>
                                             </DockPanel>
                                         </DataTemplate>

@@ -56,7 +56,7 @@
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True"
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True"
                  adonisExtensions:WatermarkExtension.Watermark="Select the folder to update ..."
-                 Text="{Binding Validation.DeploymentFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding DeploymentFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Select the folder to apply updates to" />
         <Button Grid.Row="1"
                 Grid.Column="5"
@@ -75,7 +75,7 @@
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnFocus="True"
                  adonisExtensions:ValidationExtension.IsErrorMessageVisibleOnMouseOver="True"
                  adonisExtensions:WatermarkExtension.Watermark="Select a backup folder ..."
-                 Text="{Binding Validation.BackupFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding BackupFolder, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
                  ToolTip="Select the folder to store you backups in" />
         <Button Grid.Row="3"
                 Grid.Column="5"

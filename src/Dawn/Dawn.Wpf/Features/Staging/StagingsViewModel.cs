@@ -155,7 +155,7 @@ namespace Dawn.Wpf
         private bool CanApply()
         {
             return !IsBusy
-                && _configurationViewModel.Validation.IsValid;
+                && !_configurationViewModel.HasErrors;
         }
 
         private void Update(string from, string to, IProgress<double> progress)

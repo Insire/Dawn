@@ -36,12 +36,18 @@ namespace Dawn.Wpf
 
         private void CloseInternal()
         {
+            _configurationViewModel.Validate();
+            if (_configurationViewModel.HasErrors)
+            {
+                return;
+            }
+
             DialogResult = true;
         }
 
         private bool CanClose()
         {
-            return _configurationViewModel.Validation.IsValid && !_configurationViewModel.IsBusy;
+            return !_configurationViewModel.HasErrors;
         }
 
         public bool TrySelectFolder(out string folder)

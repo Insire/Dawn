@@ -1,21 +1,24 @@
-using FluentValidation;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using MvvmScarletToolkit;
-using MvvmScarletToolkit.Observables;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Dawn.Wpf
 {
-    public sealed class ConfigurationViewModel : ViewModelBase
+    public sealed class ConfigurationViewModel : ObservableValidator
     {
-        private readonly ConfigurationModel _model;
-
         private string _deploymentFolder;
+        [Display(Name = "Deployment Folder", Description = "The folder where files will get deployed to")]
+        [Required]
+        [MinLength(2)]
         public string DeploymentFolder
         {
             get { return _deploymentFolder; }
             set
             {
-                if (SetProperty(ref _deploymentFolder, value))
+                if (SetProperty(ref _deploymentFolder, value, true))
                 {
                     Model.DeploymentFolder = value;
                 }
@@ -23,42 +26,55 @@ namespace Dawn.Wpf
         }
 
         private string _backupFolder;
+        [Display(Name = "Backup Folder", Description = "The folder where Dawn will store backups of the files that are going to be deployed")]
+        [Required]
+        [MinLength(2)]
         public string BackupFolder
         {
             get { return _backupFolder; }
             set
             {
-                if (SetProperty(ref _backupFolder, value))
+                if (SetProperty(ref _backupFolder, value, true))
                 {
                     Model.BackupFolder = value;
                 }
             }
         }
 
+        public ICommand ValidateCommand { get; }
+
         public BackupFileTypesViewModel BackupFileTypes { get; }
 
-        public ValidationConfigurationViewModel Validation { get; }
-
-        public ConfigurationModel Model => _model;
+        public ConfigurationModel Model { get; }
 
         /// <summary>
         /// configuration was loaded from a local file
         /// </summary>
         public bool IsLocalConfig { get; }
 
-        public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, ConfigurationModel model, IValidator<ConfigurationViewModel> validator)
-            : base(commandBuilder)
+        public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, ConfigurationModel model)
         {
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            Model = model ?? throw new ArgumentNullException(nameof(model));
 
-            _deploymentFolder = _model.DeploymentFolder;
-            _backupFolder = _model.BackupFolder;
+            _deploymentFolder = Model.DeploymentFolder;
+            _backupFolder = Model.BackupFolder;
 
-            IsLocalConfig = _model.IsLocalConfig;
+            IsLocalConfig = Model.IsLocalConfig;
 
             BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
 
-            Validation = new ValidationConfigurationViewModel(commandBuilder, validator, this);
+            ValidateCommand = commandBuilder
+                      .Create(Validate)
+                      .WithAsyncCancellation()
+                      .WithSingleExecution()
+                      .Build();
+        }
+
+        public Task Validate()
+        {
+            ValidateAllProperties();
+
+            return Task.CompletedTask;
         }
     }
 }

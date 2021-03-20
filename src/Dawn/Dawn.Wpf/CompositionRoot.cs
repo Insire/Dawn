@@ -1,5 +1,4 @@
 using DryIoc;
-using FluentValidation;
 using Jot;
 using Jot.Storage;
 using Microsoft.Toolkit.Mvvm.Messaging;
@@ -50,8 +49,7 @@ namespace Dawn.Wpf
             c.UseInstance(tracker);
 
             c.Register<ConfigurationService>(Reuse.Singleton);
-            c.Register(made: Made.Of(r => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
-            c.Register<IValidator<ConfigurationViewModel>, ConfigurationViewModelValidator>(Reuse.Singleton);
+            c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);

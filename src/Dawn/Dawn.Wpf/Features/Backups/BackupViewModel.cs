@@ -282,8 +282,7 @@ namespace Dawn.Wpf
 
         private bool CanDelete()
         {
-            return _configurationViewModel != null
-                && _configurationViewModel.Validation.IsValid
+            return _configurationViewModel?.HasErrors == false
                 && _onDeleteRequested != null
                 && _onDeleting != null
                 && _log != null
