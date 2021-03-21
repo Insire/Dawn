@@ -106,32 +106,32 @@ namespace Dawn.Wpf
             _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
-            _shellViewModel.Updates.OnDeleteRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete all files in this backup folder. \r\nThis can not be undone.",
                 Caption = "Are you sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Warning,
                 Buttons = MessageBoxButtons.YesNo(),
-            }) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
-            _shellViewModel.Updates.OnDeleteAllRequested = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteAllRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete every backup. \r\nThis can not be undone.",
                 Caption = "Are you really sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Stop,
                 Buttons = MessageBoxButtons.YesNo(),
-            }) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
-            _shellViewModel.OnApplicationUpdated = () => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.OnApplicationUpdated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "Your update has been prepared. \r\nDo you want to restart Dawn?",
                 Caption = "Updates have been downloaded successfully.",
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
                 Buttons = MessageBoxButtons.YesNo(),
-            }) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
             SetImage();
         }
@@ -151,32 +151,41 @@ namespace Dawn.Wpf
 
         private void OpenConfiguration(object sender, RoutedEventArgs e)
         {
-            var dlg = new ConfigurationWindow(_shellViewModel.Configuration)
+            Dispatcher.Invoke(() =>
             {
-                Owner = this
-            };
+                var dlg = new ConfigurationWindow(_shellViewModel.Configuration)
+                {
+                    Owner = this
+                };
 
-            dlg.ShowDialog();
+                dlg.ShowDialog();
+            });
         }
 
         private void ShowLog()
         {
-            var dlg = new LoggingWindow(_logViewModel)
+            Dispatcher.Invoke(() =>
             {
-                Owner = this
-            };
+                var dlg = new LoggingWindow(_logViewModel)
+                {
+                    Owner = this
+                };
 
-            dlg.ShowDialog();
+                dlg.ShowDialog();
+            });
         }
 
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
-            var dlg = new AboutWindow(_aboutViewModel)
+            Dispatcher.Invoke(() =>
             {
-                Owner = this
-            };
+                var dlg = new AboutWindow(_aboutViewModel)
+                {
+                    Owner = this
+                };
 
-            dlg.ShowDialog();
+                dlg.ShowDialog();
+            });
         }
 
         private BackupViewModel ShowEditDialog(BackupViewModel backupViewModel)
