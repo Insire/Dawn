@@ -1,3 +1,4 @@
+using AdonisUI;
 using DryIoc;
 using Jot;
 using Serilog;
@@ -6,9 +7,6 @@ using System.Windows.Threading;
 
 namespace Dawn.Wpf
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private readonly IContainer _container;
@@ -26,6 +24,10 @@ namespace Dawn.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            var model = _configurationService.Get();
+
+            ResourceLocator.SetColorScheme(Current.Resources, model.IsLightTheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 
             var shell = _container.Resolve<Shell>();
             shell.Show();

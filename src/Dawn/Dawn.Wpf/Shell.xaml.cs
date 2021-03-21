@@ -1,3 +1,4 @@
+using AdonisUI;
 using AdonisUI.Controls;
 using Jot;
 using System;
@@ -36,9 +37,6 @@ namespace Dawn.Wpf
                             break;
 
                         case Visibility.Collapsed:
-                            shell.SetCurrentValue(StagingCheckedProperty, false);
-                            break;
-
                         case Visibility.Hidden:
                             shell.SetCurrentValue(StagingCheckedProperty, false);
                             break;
@@ -82,8 +80,9 @@ namespace Dawn.Wpf
         private readonly ShellViewModel _shellViewModel;
         private readonly LogViewModel _logViewModel;
         private readonly AboutViewModel _aboutViewModel;
+        private readonly ConfigurationService _configurationService;
 
-        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel)
+        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel, ConfigurationService configurationService)
         {
             if (tracker is null)
             {
@@ -92,6 +91,7 @@ namespace Dawn.Wpf
 
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
+            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
 
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
@@ -229,6 +229,18 @@ namespace Dawn.Wpf
 
                 SetCurrentValue(IconProperty, bitmapImage);
             }
+        }
+
+        private void OnToggleTheme(object sender, RoutedEventArgs e)
+        {
+            var model = _configurationService.Get();
+            model.IsLightTheme = !model.IsLightTheme;
+
+            ResourceLocator.SetColorScheme(Application.Current.Resources, model.IsLightTheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+
+            _configurationService.Save();
+
+            SetImage();
         }
     }
 }

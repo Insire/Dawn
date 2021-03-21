@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace Dawn.Wpf
 {
-    internal sealed class ConfigurationService
+    public sealed class ConfigurationService
     {
         private const string _settingsFileName = "Dawn.Wpf.Settings.json";
 
@@ -55,7 +55,7 @@ namespace Dawn.Wpf
         {
             try
             {
-                if (!_configuration.FirstStart &&!_configuration.IsLocalConfig)
+                if (!_configuration.FirstStart && !_configuration.IsLocalConfig)
                 {
                     return;
                 }
@@ -103,27 +103,31 @@ namespace Dawn.Wpf
         private bool GetFromUrl(string[] args)
         {
             var url = args.FindFirst(p => p.StartsWith("url="));
-            if (url != null)
+            if (url == null)
             {
-                if (Uri.TryCreate(GetArgument(url), UriKind.Absolute, out var baseAddress))
-                {
-                    _httpClient.BaseAddress = baseAddress;
-                    _httpClient
-                        .GetAsync(_settingsFileName)
-                        .ContinueWith(async t =>
-                        {
-                            t.Result.EnsureSuccessStatusCode();
-
-                            var content = await t.Result.Content.ReadAsStringAsync();
-
-                            Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(content));
-                            _configuration.IsLocalConfig = false;
-
-                            return true;
-                        })
-                        .Wait();
-                }
+                return false;
             }
+
+            if (!Uri.TryCreate(GetArgument(url), UriKind.Absolute, out var baseAddress))
+            {
+                return false;
+            }
+
+            _httpClient.BaseAddress = baseAddress;
+            _httpClient
+                .GetAsync(_settingsFileName)
+                .ContinueWith(async t =>
+                {
+                    t.Result.EnsureSuccessStatusCode();
+
+                    var content = await t.Result.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(content));
+                    _configuration.IsLocalConfig = false;
+
+                    return true;
+                })
+                .Wait();
 
             return false;
         }
@@ -158,8 +162,6 @@ namespace Dawn.Wpf
         /// <summary>
         /// argument needs to be base64 encoded and the source of that needs to be utf8 encoded
         /// </summary>
-        /// <param name="argument"></param>
-        /// <returns></returns>
         private static string GetArgument(string argument)
         {
             var start = argument.IndexOf("'");
@@ -168,23 +170,24 @@ namespace Dawn.Wpf
 
             var result = argument.Substring(start + 1, length - 1);
             var bytes = Convert.FromBase64String(result);
-            result = Encoding.UTF8.GetString(bytes);
 
-            return result;
+            return Encoding.UTF8.GetString(bytes);
         }
 
         private static void Update(ConfigurationModel target, ConfigurationModel update)
         {
             target.FirstStart = false;
 
-            if (update.DeploymentFolder != null && update.DeploymentFolder.Length > 0)
+            if (update.DeploymentFolder?.Length > 0)
                 target.DeploymentFolder = update.DeploymentFolder;
 
-            if (update.BackupFolder != null && update.BackupFolder.Length > 0)
+            if (update.BackupFolder?.Length > 0)
                 target.BackupFolder = update.BackupFolder;
 
-            if (update.BackupFileTypes != null && update.BackupFileTypes.Count > 0)
+            if (update.BackupFileTypes?.Count > 0)
                 target.BackupFileTypes = update.BackupFileTypes;
+
+            target.IsLightTheme = update.IsLightTheme;
         }
     }
 }

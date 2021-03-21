@@ -13,6 +13,8 @@ namespace Dawn.Wpf
         [JsonIgnore]
         public bool IsLocalConfig { get; set; }
 
+        public bool IsLightTheme { get; set; }
+
         public List<BackupFileTypeModel> BackupFileTypes { get; set; }
     }
 }

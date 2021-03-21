@@ -90,6 +90,13 @@
                 <icons:PackIconFontAwesome Kind="InfoSolid" />
             </Button>
 
+            <Button Click="OnToggleTheme"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource {x:Static adonisUi:Styles.WindowButton}}"
+                    ToolTip="Toggle Theme">
+                <icons:PackIconFontAwesome Kind="PaintBrushSolid" />
+            </Button>
+
             <Button Click="OpenConfiguration"
                     DockPanel.Dock="Right"
                     ToolTip="Open configuration">
