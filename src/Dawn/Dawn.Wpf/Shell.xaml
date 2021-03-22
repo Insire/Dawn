@@ -399,8 +399,18 @@
 
                                                 <TextBlock Margin="8,0"
                                                            VerticalAlignment="Center"
-                                                           DockPanel.Dock="Right"
-                                                           Text="{Binding Count, StringFormat='{}Files: {0}', Mode=OneWay}" />
+                                                           DockPanel.Dock="Right">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Text" Value="{Binding Count, StringFormat='{}{0} Files', Mode=OneWay}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Count}" Value="1">
+                                                                    <Setter Property="Text" Value="{Binding Count, StringFormat='{}{0} File', Mode=OneWay}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
 
                                                 <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
                                                     <TextBlock.Style>
