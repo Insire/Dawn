@@ -12,6 +12,18 @@ namespace Dawn.Wpf
 {
     public partial class Shell
     {
+        public bool IsLightTheme
+        {
+            get { return (bool)GetValue(IsLightThemeProperty); }
+            set { SetValue(IsLightThemeProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsLightThemeProperty = DependencyProperty.Register(
+            nameof(IsLightTheme),
+            typeof(bool),
+            typeof(Shell),
+            new PropertyMetadata(false));
+
         public Visibility StagingVisibility
         {
             get { return (Visibility)GetValue(StagingVisibilityProperty); }
@@ -243,9 +255,13 @@ namespace Dawn.Wpf
         private void OnToggleTheme(object sender, RoutedEventArgs e)
         {
             var model = _configurationService.Get();
-            model.IsLightTheme = !model.IsLightTheme;
 
-            ResourceLocator.SetColorScheme(Application.Current.Resources, model.IsLightTheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+            var isLightTheme = !IsLightTheme;
+
+            SetValue(IsLightThemeProperty, isLightTheme);
+            model.IsLightTheme = isLightTheme;
+
+            ResourceLocator.SetColorScheme(Application.Current.Resources, isLightTheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 
             _configurationService.Save();
 
