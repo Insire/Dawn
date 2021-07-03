@@ -3,6 +3,7 @@ using AdonisUI.Controls;
 using Jot;
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,6 +11,7 @@ using System.Windows.Media.Imaging;
 
 namespace Dawn.Wpf
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class Shell
     {
         public bool IsLightTheme
@@ -219,7 +221,7 @@ namespace Dawn.Wpf
         {
             var size = new Size(36, 36);
             var ressource = Application.Current.FindResource("dawnDrawingImage");
-            if (!(ressource is DrawingImage drawingImage))
+            if (ressource is not DrawingImage drawingImage)
             {
                 return;
             }
