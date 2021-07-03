@@ -3,8 +3,10 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
                        x:Name="rootView"
                        Title="About"
                        Width="700"
@@ -29,8 +31,10 @@
                         <LineBreak />
                         <Run Text="{Binding Copyright, Mode=OneWay}" />
                         <LineBreak />
-                        <Hyperlink>
-                            <!--  xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"  Command="{mvvm:StartProcess Url='www.github.com/Insire/Dawn'}"  -->
+                        <Hyperlink NavigateUri="{Binding ProjectUrl, Mode=OneWay}">
+                            <i:Interaction.Behaviors>
+                                <mvvm:LaunchNavigateUriAsNewProcessBehavior />
+                            </i:Interaction.Behaviors>
                             <Run Text="{Binding ProjectUrl, Mode=OneWay}" />
                         </Hyperlink>
                     </TextBlock>
