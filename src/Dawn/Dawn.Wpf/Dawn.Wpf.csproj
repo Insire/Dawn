@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Roslynator.Analyzers" Version="3.1.0">
+        <PackageReference Include="Roslynator.Analyzers" Version="3.2.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -29,16 +29,16 @@
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-        <PackageReference Include="DryIoc.dll" Version="4.7.4" />
+        <PackageReference Include="DryIoc.dll" Version="4.8.0" />
         <PackageReference Include="Jot" Version="2.1.8" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.8.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.1.146" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.45" />
         <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.0" />
 
         <PackageReference Include="Serilog" Version="2.10.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37">
+        <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.220">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
