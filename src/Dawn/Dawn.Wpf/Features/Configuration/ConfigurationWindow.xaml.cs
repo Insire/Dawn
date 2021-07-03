@@ -2,12 +2,14 @@ using Microsoft.Toolkit.Mvvm.Input;
 using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
 namespace Dawn.Wpf
 {
+    [SupportedOSPlatform("windows7.0")]
     public sealed partial class ConfigurationWindow
     {
         private readonly ConfigurationViewModel _configurationViewModel;
@@ -50,7 +52,7 @@ namespace Dawn.Wpf
             return !_configurationViewModel.HasErrors;
         }
 
-        public bool TrySelectFolder(out string folder)
+        private static bool TrySelectFolder(out string folder)
         {
             var dlg = new VistaFolderBrowserDialog
             {

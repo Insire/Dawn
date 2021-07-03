@@ -3,6 +3,7 @@ using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -125,7 +126,7 @@ namespace Dawn.Wpf
                                 .AddMinutes(minutes)
                                 .AddSeconds(seconds);
 
-                            key = date.ToString("yyyy.MM.dd HH:mm:ss");
+                            key = date.ToString("yyyy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture);
                             if (!lookup.ContainsKey(key))
                             {
                                 var group = _viewModelFactory.Get(new BackupModel()
@@ -136,13 +137,13 @@ namespace Dawn.Wpf
                                 }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) { OnDeleting?.Invoke(); } }, (vm) => OnMetaDataEditing?.Invoke(vm));
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
-                                await group.AddRange(files.Where(p => !p.EndsWith("backup.json", StringComparison.InvariantCultureIgnoreCase)).Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);
+                                await group.AddRange(files.Where(p => !p.EndsWith("backup.json", StringComparison.InvariantCultureIgnoreCase)).Select(p => new ViewModelContainer<string>(p)), token).ConfigureAwait(false);
 
                                 lookup.Add(key, group);
                             }
                             else
                             {
-                                await lookup[key].Add(new ViewModelContainer<string>(directory)).ConfigureAwait(false);
+                                await lookup[key].Add(new ViewModelContainer<string>(directory), token).ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)
@@ -152,7 +153,7 @@ namespace Dawn.Wpf
                     }
                 }
 
-                await AddRange(lookup.Values).ConfigureAwait(false);
+                await AddRange(lookup.Values, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -209,7 +210,7 @@ namespace Dawn.Wpf
                         _isMassDeleting = false;
                     }
                     _logViewModel.Progress.Report(100);
-                });
+                }, token);
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
                 _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {path}", _configurationViewModel.BackupFolder);
@@ -250,7 +251,7 @@ namespace Dawn.Wpf
                     {
                         var percentage = count * 100d / (array.Length - 1);
                         _logViewModel.Progress.Report(percentage);
-                        var extension = Path.GetExtension(file.Value).ToLower();
+                        var extension = Path.GetExtension(file.Value).ToLowerInvariant();
                         if (extension == ".zip")
                         {
                             RestoreArchive(file.Value, deploymentFolder, now, _logViewModel.Progress);
@@ -266,7 +267,7 @@ namespace Dawn.Wpf
                         count++;
                     }
                     _logViewModel.Progress.Report(100);
-                });
+                }, token);
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
 

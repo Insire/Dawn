@@ -139,7 +139,7 @@ namespace Dawn.Wpf
             }
         }
 
-        private string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)
+        private static string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)
         {
             if (reuseLastBackup)
             {
