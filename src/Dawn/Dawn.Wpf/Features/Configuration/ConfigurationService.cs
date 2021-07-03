@@ -160,8 +160,9 @@ namespace Dawn.Wpf
         }
 
         /// <summary>
-        /// argument needs to be base64 encoded and the source of that needs to be utf8 encoded
+        /// converts cli argument into clear text value
         /// </summary>
+        /// <param name="argument">needs to be base64 encoded and the source of that needs to be utf8 encoded</param>
         private static string GetArgument(string argument)
         {
             var start = argument.IndexOf("'");
@@ -179,13 +180,19 @@ namespace Dawn.Wpf
             target.FirstStart = false;
 
             if (update.DeploymentFolder?.Length > 0)
+            {
                 target.DeploymentFolder = update.DeploymentFolder;
+            }
 
             if (update.BackupFolder?.Length > 0)
+            {
                 target.BackupFolder = update.BackupFolder;
+            }
 
             if (update.BackupFileTypes?.Count > 0)
+            {
                 target.BackupFileTypes = update.BackupFileTypes;
+            }
 
             target.IsLightTheme = update.IsLightTheme;
         }

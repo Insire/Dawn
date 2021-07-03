@@ -48,9 +48,9 @@ namespace Dawn.Wpf
             Dispatcher.Invoke(() => Percentage = newValue);
         }
 
-        public void Emit(LogEvent logEvent)
+        public async void Emit(LogEvent logEvent)
         {
-            Add(new ViewModelContainer<LogEvent>(logEvent));
+            await Add(new ViewModelContainer<LogEvent>(logEvent)).ConfigureAwait(false);
         }
     }
 }

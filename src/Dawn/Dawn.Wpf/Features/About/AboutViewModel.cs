@@ -47,8 +47,8 @@ namespace Dawn.Wpf
         private static T GetAttribute<T>(Assembly assembly)
             where T : Attribute
         {
-            var attributes = assembly.GetCustomAttributes(typeof(T), false);
-            return attributes.Cast<T>().First();
+            var attributes = assembly.GetCustomAttributes<T>();
+            return attributes.First();
         }
 
         private static Version GetVersion(Assembly assembly)

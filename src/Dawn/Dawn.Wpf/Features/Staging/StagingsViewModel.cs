@@ -146,10 +146,8 @@ namespace Dawn.Wpf
                 var reuseBackup = backups.OrderByDescending(p => p.TimeStamp).First();
                 return Path.Combine(rootFolder, reuseBackup.TimeStamp.FormatAsBackup());
             }
-            else
-            {
-                return Path.Combine(rootFolder, DateTime.Now.FormatAsBackup());
-            }
+
+            return Path.Combine(rootFolder, DateTime.Now.FormatAsBackup());
         }
 
         private bool CanApply()
@@ -165,12 +163,9 @@ namespace Dawn.Wpf
             {
                 CopyArchive(from, Path.GetDirectoryName(to), progress, true);
             }
-            else
+            else if (Copy(from, to, true))
             {
-                if (Copy(from, to, true))
-                {
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
-                }
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
             }
         }
 

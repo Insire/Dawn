@@ -80,33 +80,50 @@ namespace Dawn.Wpf
                         try
                         {
                             if (!int.TryParse(key.Substring(0, 2), out var days))
+                            {
                                 days = 1;
+                            }
+
                             if (!int.TryParse(key.Substring(2, 2), out var months))
+                            {
                                 months = 1;
+                            }
+
                             if (!int.TryParse(key.Substring(4, 4), out var years))
+                            {
                                 years = 2001;
+                            }
 
                             var hours = 0;
                             var minutes = 0;
                             var seconds = 0;
 
                             if (key.Length >= 10)
+                            {
                                 int.TryParse(key.Substring(8, 2), out hours);
+                            }
+
                             if (key.Length >= 12)
+                            {
                                 int.TryParse(key.Substring(10, 2), out minutes);
+                            }
+
                             if (key.Length >= 14)
+                            {
                                 int.TryParse(key.Substring(12, 2), out seconds);
+                            }
 
                             days--;
                             months--;
                             years--;
 
-                            var date = DateTime.MinValue.AddDays(days);
-                            date = date.AddMonths(months);
-                            date = date.AddYears(years);
-                            date = date.AddHours(hours);
-                            date = date.AddMinutes(minutes);
-                            date = date.AddSeconds(seconds);
+                            var date = DateTime.MinValue
+                                .AddDays(days)
+                                .AddMonths(months)
+                                .AddYears(years)
+                                .AddHours(hours)
+                                .AddMinutes(minutes)
+                                .AddSeconds(seconds);
 
                             key = date.ToString("yyyy.MM.dd HH:mm:ss");
                             if (!lookup.ContainsKey(key))
@@ -116,7 +133,7 @@ namespace Dawn.Wpf
                                     FullPath = directory,
                                     Name = key,
                                     TimeStamp = date
-                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) OnDeleting?.Invoke(); }, (vm) => OnMetaDataEditing?.Invoke(vm));
+                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) { OnDeleting?.Invoke(); } }, (vm) => OnMetaDataEditing?.Invoke(vm));
                                 var files = await Task.Run(() => Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
                                 await group.AddRange(files.Where(p => !p.EndsWith("backup.json", StringComparison.InvariantCultureIgnoreCase)).Select(p => new ViewModelContainer<string>(p))).ConfigureAwait(false);

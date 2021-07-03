@@ -86,7 +86,7 @@ namespace Dawn.Wpf
                     var count = 0d;
                     foreach (var entry in archive.Entries)
                     {
-                        progress.Report(count * 100d / archive.Entries.Count - 1);
+                        progress.Report(count * 100d / (archive.Entries.Count - 1));
                         // Gets the full path to ensure that relative segments are removed.
                         var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
 
@@ -132,7 +132,7 @@ namespace Dawn.Wpf
                     var count = 0d;
                     foreach (var entry in archive.Entries)
                     {
-                        progress.Report(count * 100d / archive.Entries.Count - 1);
+                        progress.Report(count * 100d / (archive.Entries.Count - 1));
                         // Gets the full path to ensure that relative segments are removed.
                         var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
 

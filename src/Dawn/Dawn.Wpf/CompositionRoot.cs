@@ -61,7 +61,7 @@ namespace Dawn.Wpf
 
             c.UseInstance(ScarletCommandBuilder.Default);
             c.UseInstance(ScarletDispatcher.Default);
-            c.UseInstance(new StrongReferenceMessenger());
+            c.UseInstance(StrongReferenceMessenger.Default);
             c.UseInstance(ScarletCommandManager.Default);
             c.UseInstance(ScarletWeakEventManager.Default);
             c.UseInstance(ScarletExitService.Default);
