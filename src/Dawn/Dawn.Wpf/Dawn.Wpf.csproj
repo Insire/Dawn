@@ -3,11 +3,14 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net5.0-windows7.0</TargetFramework>
         <UseWPF>true</UseWPF>
-        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <PublishSingleFile>true</PublishSingleFile>
         <ApplicationIcon>dawn.ico</ApplicationIcon>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>
