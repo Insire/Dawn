@@ -55,7 +55,7 @@ namespace Dawn.Wpf
         {
             try
             {
-                if (!_configuration.FirstStart && !_configuration.IsLocalConfig)
+                if (!_configuration.FirstStart && _configuration.IsLocalConfig != true)
                 {
                     return;
                 }
@@ -97,12 +97,22 @@ namespace Dawn.Wpf
                 }
             }
 
+            if (_configuration.UpdateTimeStampOnApply is null)
+            {
+                _configuration.UpdateTimeStampOnApply = false;
+            }
+
+            if (_configuration.UpdateTimeStampOnRestore is null)
+            {
+                _configuration.UpdateTimeStampOnRestore = true;
+            }
+
             return _configuration;
         }
 
         private bool GetFromUrl(string[] args)
         {
-            var url = args.FindFirst(p => p.StartsWith("url="));
+            var url = args.FindFirst(p => p.StartsWith("url=", StringComparison.InvariantCultureIgnoreCase));
             if (url == null)
             {
                 return false;
@@ -134,7 +144,7 @@ namespace Dawn.Wpf
 
         private bool GetFromJson(string[] args)
         {
-            var json = args.FindFirst(p => p.StartsWith("json="));
+            var json = args.FindFirst(p => p.StartsWith("json=", StringComparison.InvariantCultureIgnoreCase));
             if (json != null)
             {
                 Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));
@@ -165,8 +175,8 @@ namespace Dawn.Wpf
         /// <param name="argument">needs to be base64 encoded and the source of that needs to be utf8 encoded</param>
         private static string GetArgument(string argument)
         {
-            var start = argument.IndexOf("'");
-            var end = argument.LastIndexOf("'");
+            var start = argument.IndexOf("'", StringComparison.InvariantCultureIgnoreCase);
+            var end = argument.LastIndexOf("'", StringComparison.InvariantCultureIgnoreCase);
             var length = end - start;
 
             var result = argument.Substring(start + 1, length - 1);
@@ -194,6 +204,8 @@ namespace Dawn.Wpf
                 target.BackupFileTypes = update.BackupFileTypes;
             }
 
+            target.UpdateTimeStampOnApply = update.UpdateTimeStampOnApply;
+            target.UpdateTimeStampOnRestore = update.UpdateTimeStampOnRestore;
             target.IsLightTheme = update.IsLightTheme;
         }
     }

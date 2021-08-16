@@ -35,9 +35,9 @@ namespace Dawn.Wpf
 
         public BackupFileTypeViewModel(string type, string extension, bool isEnabled)
         {
-            Name = type ?? throw new ArgumentNullException(nameof(type));
-            Extension = extension ?? throw new ArgumentNullException(nameof(extension));
-            IsEnabled = isEnabled;
+            _name = type ?? throw new ArgumentNullException(nameof(type));
+            _extension = extension ?? throw new ArgumentNullException(nameof(extension));
+            _isEnabled = isEnabled;
         }
 
         private string GetDebuggerDisplay()

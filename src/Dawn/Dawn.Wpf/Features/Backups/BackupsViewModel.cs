@@ -281,7 +281,7 @@ namespace Dawn.Wpf
 
         private void RestoreFile(string from, string to, DateTime timeStamp)
         {
-            if (FileUtils.CopyFor<BackupsViewModel>(from, to, _log, timeStamp, true))
+            if (FileUtils.CopyFor<BackupsViewModel>(from, to, _log, timeStamp, true, _configurationViewModel.UpdateTimeStampOnRestore))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }
@@ -289,7 +289,7 @@ namespace Dawn.Wpf
 
         private void RestoreArchive(string from, string to, DateTime timeStamp, IProgress<double> progress)
         {
-            if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, progress, true))
+            if (FileUtils.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, progress, true, _configurationViewModel.UpdateTimeStampOnRestore))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
             }

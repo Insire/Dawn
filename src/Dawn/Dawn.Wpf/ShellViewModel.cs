@@ -124,19 +124,16 @@ namespace Dawn.Wpf
                 return;
             }
 
-            if (Version.TryParse(latest.TagName, out var version))
+            if (Version.TryParse(latest.TagName, out var version) && _aboutViewModel.AssemblyVersion < version)
             {
-                if (_aboutViewModel.AssemblyVersion < version)
-                {
-                    IsApplicationUpdateAvailable = true;
-                    HasCheckedForApplicationUpdate = true;
+                IsApplicationUpdateAvailable = true;
+                HasCheckedForApplicationUpdate = true;
 
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
 
-                    _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType || p.ContentType == ZipCompressedContentType);
+                _asset = latest.Assets.FirstOrDefault(p => p.ContentType is ZipContentType or ZipCompressedContentType);
 
-                    return;
-                }
+                return;
             }
 
             IsApplicationUpdateAvailable = false;
@@ -165,7 +162,7 @@ namespace Dawn.Wpf
                 }
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracting release to {directory}", tempExtractDirectory);
-                if (!FileUtils.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, _logViewModel.Progress, true))
+                if (!FileUtils.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, DateTime.MinValue, _logViewModel.Progress, true, false))
                 {
                     return;
                 }
@@ -223,10 +220,9 @@ namespace Dawn.Wpf
             File.Copy(bak, me);
 
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Updating application files");
-            var files = Directory.GetFiles(from, "*.*", SearchOption.AllDirectories);
-            foreach (var file in files)
+            foreach (var file in (string[])Directory.GetFiles(from, "*.*", SearchOption.AllDirectories))
             {
-                if (file.EndsWith(".pdb") && Debugger.IsAttached)
+                if (file.EndsWith(".pdb", StringComparison.InvariantCultureIgnoreCase) && Debugger.IsAttached)
                 {
                     continue; // the debugger holds a filelock on pdb files
                 }

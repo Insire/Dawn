@@ -41,10 +41,17 @@
             <RowDefinition Height="8" />
             <RowDefinition Height="32" />
             <RowDefinition Height="8" />
+            <RowDefinition Height="64" />
             <RowDefinition Height="8" />
             <RowDefinition Height="32" />
             <RowDefinition Height="8" />
         </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="8"
+                   Grid.RowSpan="3"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="7"
+                   Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" />
 
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
@@ -61,8 +68,9 @@
         <Button Grid.Row="1"
                 Grid.Column="5"
                 Padding="8"
-                Click="SelectTargetFolder">
-            <icons:FontAwesome Kind="SearchSolid" />
+                Click="SelectTargetFolder"
+                ToolTip="Select a folder">
+            <icons:PackIconFontAwesome Kind="SearchSolid" />
         </Button>
 
         <TextBlock Grid.Row="3"
@@ -80,8 +88,9 @@
         <Button Grid.Row="3"
                 Grid.Column="5"
                 Padding="8"
-                Click="SelectBackupFolder">
-            <icons:FontAwesome Kind="SearchSolid" />
+                Click="SelectBackupFolder"
+                ToolTip="Select a folder">
+            <icons:PackIconFontAwesome Kind="SearchSolid" />
         </Button>
 
         <ItemsControl Grid.Row="5"
@@ -96,7 +105,8 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:BackupFileTypeViewModel}">
-                    <StackPanel Margin="0,0,8,0" Orientation="Horizontal">
+                    <StackPanel Margin="0,0,8,0"
+                                Orientation="Horizontal">
                         <CheckBox IsChecked="{Binding IsEnabled}" />
                         <TextBlock Text="{Binding Name}" />
                     </StackPanel>
@@ -104,30 +114,27 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <DockPanel Grid.Row="7"
-                   Grid.RowSpan="3"
-                   Grid.Column="0"
-                   Grid.ColumnSpan="7"
-                   Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}">
-            <Button Margin="8"
-                    Padding="8"
-                    HorizontalAlignment="Right"
-                    Command="{Binding CloseCommand, ElementName=rootView}"
-                    Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
-                    ToolTip="OK">
-                <icons:FontAwesome Kind="CheckSolid" />
-            </Button>
-        </DockPanel>
+        <UniformGrid Grid.Row="6"
+                     Grid.RowSpan="2"
+                     Grid.Column="3"
+                     Columns="1"
+                     Rows="2">
+            <CheckBox Content="Set last write time when applying update"
+                      IsChecked="{Binding UpdateTimeStampOnApply}" />
+            <CheckBox Content="Set last write time when restoring backup"
+                      IsChecked="{Binding UpdateTimeStampOnRestore}" />
+        </UniformGrid>
 
-        <TextBlock Grid.Row="8"
+        <TextBlock Grid.Row="9"
                    Grid.Column="1"
-                   Grid.ColumnSpan="5"
+                   Grid.ColumnSpan="3"
                    VerticalAlignment="Center"
                    Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}">
             <TextBlock.Style>
                 <Style TargetType="{x:Type TextBlock}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsLocalConfig}" Value="False">
+                        <DataTrigger Binding="{Binding IsLocalConfig}"
+                                     Value="False">
                             <Setter Property="Text" Value="The configuration was provided via an external source and will not be stored locally" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -135,25 +142,21 @@
             </TextBlock.Style>
         </TextBlock>
 
-        <Button Grid.Row="8"
+        <Button Grid.Row="9"
+                Grid.Column="5"
+                Command="{Binding CloseCommand, ElementName=rootView}"
+                ToolTip="OK">
+            <icons:PackIconFontAwesome Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
+                                       Kind="CheckSolid" />
+        </Button>
+
+        <Button Grid.Row="9"
                 Grid.Column="1"
                 Grid.ColumnSpan="3"
-                Padding="8"
                 HorizontalAlignment="Right"
                 Command="{Binding CopyToClipboardCommand, ElementName=rootView}"
                 ToolTip="Copy current settings to clipboard">
-            <icons:FontAwesome Kind="ClipboardSolid" />
-        </Button>
-
-        <Button Grid.Row="8"
-                Grid.Column="3"
-                Grid.ColumnSpan="3"
-                Padding="8"
-                HorizontalAlignment="Right"
-                Command="{Binding CloseCommand, ElementName=rootView}"
-                Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}"
-                ToolTip="OK">
-            <icons:FontAwesome Kind="CheckSolid" />
+            <icons:PackIconFontAwesome Kind="ClipboardSolid" />
         </Button>
     </Grid>
 </controls:AdonisWindow>

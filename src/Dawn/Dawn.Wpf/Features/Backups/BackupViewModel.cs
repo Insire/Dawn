@@ -88,9 +88,9 @@ namespace Dawn.Wpf
             _onDeleting = onDeleting ?? throw new ArgumentNullException(nameof(onDeleting));
             _onMetaDataEdit = onMetaDataEdit ?? throw new ArgumentNullException(nameof(onMetaDataEdit));
 
-            FullPath = model.FullPath ?? throw new ArgumentNullException(nameof(BackupModel.FullPath));
-            Name = model.Name ?? throw new ArgumentNullException(nameof(BackupModel.Name));
-            TimeStamp = model.TimeStamp;
+            _fullPath = model.FullPath ?? throw new ArgumentNullException(nameof(BackupModel.FullPath));
+            _name = model.Name ?? throw new ArgumentNullException(nameof(BackupModel.Name));
+            _timeStamp = model.TimeStamp;
 
             DeleteCommand = commandBuilder.Create(Delete, CanDelete)
                 .WithBusyNotification(BusyStack)

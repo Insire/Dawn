@@ -83,6 +83,7 @@ namespace Dawn.Wpf
                 var backupFolder = _configurationViewModel.BackupFolder;
                 var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
                 var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
+                var now = DateTime.Now;
 
                 Directory.CreateDirectory(deploymentFolder);
                 Directory.CreateDirectory(backupFolder);
@@ -111,10 +112,10 @@ namespace Dawn.Wpf
 
                             if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                             {
-                                BackupFile(newfile.Path, backupFileName, reuseLastBackup);
+                                BackupFile(newfile.Path, backupFileName, now, reuseLastBackup);
                             }
 
-                            Update(newfile.Path, deploymentFileName, _logViewModel.Progress);
+                            Update(newfile.Path, deploymentFileName, now, _logViewModel.Progress);
                             count++;
                         }
 
@@ -156,38 +157,38 @@ namespace Dawn.Wpf
                 && !_configurationViewModel.HasErrors;
         }
 
-        private void Update(string from, string to, IProgress<double> progress)
+        private void Update(string from, string to, DateTime timeStamp, IProgress<double> progress)
         {
-            var extension = Path.GetExtension(from).ToLower();
+            var extension = Path.GetExtension(from).ToLowerInvariant();
             if (extension == ".zip")
             {
-                CopyArchive(from, Path.GetDirectoryName(to), progress, true);
+                CopyArchive(from, Path.GetDirectoryName(to), timeStamp, progress, true);
             }
-            else if (Copy(from, to, true))
+            else if (Copy(from, to, timeStamp, true, _configurationViewModel.UpdateTimeStampOnApply))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
             }
         }
 
-        private void BackupFile(string from, string to, bool overwrite)
+        private void BackupFile(string from, string to, DateTime timeStamp, bool overwrite)
         {
-            if (Copy(from, to, overwrite))
+            if (Copy(from, to, timeStamp, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
             }
         }
 
-        private void CopyArchive(string from, string to, IProgress<double> progress, bool overwrite)
+        private void CopyArchive(string from, string to, DateTime timeStamp, IProgress<double> progress, bool overwrite)
         {
-            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, progress, overwrite))
+            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, timeStamp, progress, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
             }
         }
 
-        private bool Copy(string from, string to, bool overwrite = false)
+        private bool Copy(string from, string to, DateTime timeStamp, bool overwrite, bool setLastWriteTime)
         {
-            return FileUtils.CopyFor<StagingsViewModel>(from, to, _log, overwrite);
+            return FileUtils.CopyFor<StagingsViewModel>(from, to, _log, timeStamp, overwrite, setLastWriteTime);
         }
     }
 }
