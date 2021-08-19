@@ -35,6 +35,7 @@ namespace Dawn.Wpf
                 DeploymentFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "TestDeployment"),
                 BackupFolder = Path.Combine(location, "backups"),
                 FirstStart = true,
+                IsKeepinForeground = true,
                 BackupFileTypes = new System.Collections.Generic.List<BackupFileTypeModel>()
                 {
                     new BackupFileTypeModel( ".dll","DLL",true),

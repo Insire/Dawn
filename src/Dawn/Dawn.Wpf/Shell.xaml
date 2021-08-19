@@ -19,7 +19,7 @@
                        AllowDrop="True"
                        Drop="OnDrop"
                        IconVisibility="Collapsed"
-                       Topmost="True"
+                       Topmost="{Binding Configuration.IsKeepinForeground}"
                        mc:Ignorable="d">
 
     <!--  DataContext: ShellViewModel  -->

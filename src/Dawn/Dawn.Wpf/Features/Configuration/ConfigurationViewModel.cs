@@ -41,6 +41,21 @@ namespace Dawn.Wpf
             }
         }
 
+        private bool _isKeepinForeground;
+        [Display(Name = "Keep in foreground", Description = "Keeps the window in the foreground by setting Topmost")]
+        [Required]
+        public bool IsKeepinForeground
+        {
+            get { return _isKeepinForeground; }
+            set
+            {
+                if (SetProperty(ref _isKeepinForeground, value, true))
+                {
+                    Model.IsKeepinForeground = value;
+                }
+            }
+        }
+
         public ICommand ValidateCommand { get; }
 
         public BackupFileTypesViewModel BackupFileTypes { get; }
@@ -58,6 +73,7 @@ namespace Dawn.Wpf
 
             _deploymentFolder = Model.DeploymentFolder;
             _backupFolder = Model.BackupFolder;
+            _isKeepinForeground = Model.IsKeepinForeground;
 
             IsLocalConfig = Model.IsLocalConfig;
 

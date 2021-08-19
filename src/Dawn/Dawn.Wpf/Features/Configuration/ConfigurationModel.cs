@@ -15,6 +15,8 @@ namespace Dawn.Wpf
 
         public bool IsLightTheme { get; set; }
 
+        public bool IsKeepinForeground { get; set; }
+
         public List<BackupFileTypeModel> BackupFileTypes { get; set; }
     }
 }

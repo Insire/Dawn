@@ -22,6 +22,9 @@
 
     <!--  DataContext: ConfigurationViewModel  -->
 
+    <TabControl>
+
+        <TabItem Header="Backup">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8" />
@@ -156,4 +159,22 @@
             <icons:FontAwesome Kind="CheckSolid" />
         </Button>
     </Grid>
+        </TabItem>
+        <TabItem Header="General">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="8"/>
+                </Grid.RowDefinitions>
+
+                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding IsKeepinForeground}" Content="Keep in foreground" ToolTip="Keeps the window in the foreground by setting Topmost"/>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </controls:AdonisWindow>
