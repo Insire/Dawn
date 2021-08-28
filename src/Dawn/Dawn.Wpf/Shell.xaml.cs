@@ -1,6 +1,7 @@
 using AdonisUI;
 using AdonisUI.Controls;
 using Jot;
+using Serilog;
 using System;
 using System.IO;
 using System.Runtime.Versioning;
@@ -89,8 +90,9 @@ namespace Dawn.Wpf
         private readonly LogViewModel _logViewModel;
         private readonly AboutViewModel _aboutViewModel;
         private readonly ConfigurationService _configurationService;
+        private readonly ILogger _log;
 
-        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel, ConfigurationService configurationService)
+        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel, ConfigurationService configurationService, ILogger log)
         {
             if (tracker is null)
             {
@@ -100,6 +102,7 @@ namespace Dawn.Wpf
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
 
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
@@ -162,6 +165,19 @@ namespace Dawn.Wpf
                 if (data is string[] fileArray)
                 {
                     await _shellViewModel.Stagings.Add(fileArray).ConfigureAwait(false);
+                }
+                else
+                {
+                    _log.Warning("Drop data type is unexpected");
+                    _log.Warning("Drop data type found: {Format}", data.GetType().FullName);
+                }
+            }
+            else
+            {
+                _log.Warning("Drop data format is unsupported or not convertible");
+                foreach (var format in e.Data.GetFormats())
+                {
+                    _log.Warning("Drop data format found: {Format}", format);
                 }
             }
         }
