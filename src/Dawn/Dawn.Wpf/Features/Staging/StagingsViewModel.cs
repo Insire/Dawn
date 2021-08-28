@@ -21,6 +21,7 @@ namespace Dawn.Wpf
         private readonly ILogger _log;
         private readonly LogViewModel _logViewModel;
         private readonly BackupsViewModel _backupsViewModel;
+        private readonly IFileSystem _fileSystem;
 
         private bool _reuseLastBackup;
         public bool ReuseLastBackup
@@ -33,13 +34,14 @@ namespace Dawn.Wpf
 
         public Action OnApplyingStagings { get; set; }
 
-        public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupsViewModel backupsViewModel)
+        public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupsViewModel backupsViewModel, IFileSystem fileSystem)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _log = log?.ForContext<StagingsViewModel>() ?? throw new ArgumentNullException(nameof(log));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             ApplyCommand = commandBuilder.Create(Apply, CanApply)
                 .WithBusyNotification(BusyStack)
@@ -51,16 +53,16 @@ namespace Dawn.Wpf
         {
             foreach (var fileSystemInfo in fileSystemInfos)
             {
-                if (File.Exists(fileSystemInfo))
+                if (_fileSystem.FileExists(fileSystemInfo))
                 {
                     var viewModel = new StagingViewModel(fileSystemInfo);
 
                     await Add(viewModel).ConfigureAwait(false);
                 }
 
-                if (Directory.Exists(fileSystemInfo))
+                if (_fileSystem.DirectoryExists(fileSystemInfo))
                 {
-                    var files = await Task.Run(() => Directory.GetFiles(fileSystemInfo, "*", SearchOption.AllDirectories)).ConfigureAwait(false);
+                    var files = await Task.Run(() => _fileSystem.GetFiles(fileSystemInfo, "*", SearchOption.AllDirectories)).ConfigureAwait(false);
 
                     foreach (var file in files)
                     {
@@ -76,8 +78,6 @@ namespace Dawn.Wpf
         {
             try
             {
-                _logViewModel.Progress.Report(0);
-
                 var reuseLastBackup = ReuseLastBackup;
                 var deploymentFolder = _configurationViewModel.DeploymentFolder;
                 var backupFolder = _configurationViewModel.BackupFolder;
@@ -85,11 +85,11 @@ namespace Dawn.Wpf
                 var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
                 var now = DateTime.Now;
 
-                Directory.CreateDirectory(deploymentFolder);
-                Directory.CreateDirectory(backupFolder);
-                Directory.CreateDirectory(backupFileFolder);
+                _fileSystem.CreateDirectory(deploymentFolder);
+                _fileSystem.CreateDirectory(backupFolder);
+                _fileSystem.CreateDirectory(backupFileFolder);
 
-                await _logViewModel.Clear(token).ConfigureAwait(false);
+                _logViewModel.Clear();
 
                 var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
 
@@ -97,10 +97,10 @@ namespace Dawn.Wpf
                 {
                     try
                     {
-                        var count = 0d;
+                        var count = 0m;
                         foreach (var newfile in Items)
                         {
-                            _logViewModel.Progress.Report(count * 100d / (Items.Count - 1));
+                            _logViewModel.Progress.Report(count * 100m / (Items.Count - 1));
                             if (token.IsCancellationRequested)
                             {
                                 return;
@@ -157,7 +157,7 @@ namespace Dawn.Wpf
                 && !_configurationViewModel.HasErrors;
         }
 
-        private void Update(string from, string to, DateTime timeStamp, IProgress<double> progress)
+        private void Update(string from, string to, DateTime timeStamp, IProgress<decimal> progress)
         {
             var extension = Path.GetExtension(from).ToLowerInvariant();
             if (extension == ".zip")
@@ -178,9 +178,9 @@ namespace Dawn.Wpf
             }
         }
 
-        private void CopyArchive(string from, string to, DateTime timeStamp, IProgress<double> progress, bool overwrite)
+        private void CopyArchive(string from, string to, DateTime timeStamp, IProgress<decimal> progress, bool overwrite)
         {
-            if (FileUtils.ExtractFor<StagingsViewModel>(from, to, _log, timeStamp, progress, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
+            if (_fileSystem.ExtractFor<StagingsViewModel>(from, to, _log, timeStamp, progress, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
             }
@@ -188,7 +188,7 @@ namespace Dawn.Wpf
 
         private bool Copy(string from, string to, DateTime timeStamp, bool overwrite, bool setLastWriteTime)
         {
-            return FileUtils.CopyFor<StagingsViewModel>(from, to, _log, timeStamp, overwrite, setLastWriteTime);
+            return _fileSystem.CopyFor<StagingsViewModel>(from, to, _log, timeStamp, overwrite, setLastWriteTime);
         }
     }
 }

@@ -3,9 +3,9 @@
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
                        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
-                       xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -23,17 +23,10 @@
 
     <!--  DataContext: LogViewModel  -->
 
-    <controls:AdonisWindow.Resources>
-        <CollectionViewSource x:Key="Logs" Source="{Binding Items}">
-            <CollectionViewSource.SortDescriptions>
-                <componentmodel:SortDescription Direction="Descending" PropertyName="Value.Timestamp" />
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
-    </controls:AdonisWindow.Resources>
-
     <DockPanel>
 
-        <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" DockPanel.Dock="Bottom">
+        <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}"
+                   DockPanel.Dock="Bottom">
             <Button Margin="8"
                     Padding="8"
                     HorizontalAlignment="Right"
@@ -44,21 +37,12 @@
             </Button>
         </DockPanel>
 
-        <ProgressBar DockPanel.Dock="Bottom" Value="{Binding Percentage, Mode=OneWay}">
-            <ProgressBar.Style>
-                <Style BasedOn="{StaticResource {x:Type ProgressBar}}" TargetType="{x:Type ProgressBar}">
-                    <Setter Property="adonisExtensions:ProgressBarExtension.IsProgressAnimationEnabled" Value="False" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Percentage}" Value="0">
-                            <Setter Property="adonisExtensions:ProgressBarExtension.IsProgressAnimationEnabled" Value="True" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ProgressBar.Style>
-        </ProgressBar>
+        <ProgressBar adonisExtensions:ProgressBarExtension.IsProgressAnimationEnabled="False"
+                     local:SmoothProgressBarAnimation.Percentage="{Binding Percentage, Mode=OneWay}"
+                     DockPanel.Dock="Bottom" />
 
         <ScrollViewer Margin="8">
-            <ItemsControl ItemsSource="{Binding Source={StaticResource Logs}}">
+            <ItemsControl ItemsSource="{Binding Items}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel IsItemsHost="True" />
@@ -66,44 +50,92 @@
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock>
-                            <Run Text="{Binding Value.Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
-                            <Run Text="{Binding Value.Level, Mode=OneWay}">
-                                <Run.Style>
-                                    <Style TargetType="{x:Type Run}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Verbose}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
-                                            </DataTrigger>
+                    <DataTemplate DataType="{x:Type local:LogEventViewModel}">
+                        <Border BorderBrush="{x:Null}"
+                                BorderThickness="0">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Command="{Binding CopyCommand}"
+                                              Header="Copy">
+                                        <MenuItem.Icon>
+                                            <icons:PackIconFontAwesome Kind="CopySolid" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Border.ContextMenu>
 
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Debug}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
-                                            </DataTrigger>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{Binding RenderCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
 
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Information}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
-                                            </DataTrigger>
+                            <Border.ToolTip>
+                                <ToolTip>
+                                    <ItemsControl ItemsSource="{Binding Properties}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel IsItemsHost="True" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <Run Text="{Binding Key, Mode=OneWay}" />
+                                                    <Run Text="{Binding Value, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ToolTip>
+                            </Border.ToolTip>
 
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Warning}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" />
-                                            </DataTrigger>
+                            <TextBlock>
+                                <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
+                                <Run Text="{Binding Level, Mode=OneWay}">
+                                    <Run.Style>
+                                        <Style TargetType="{x:Type Run}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Verbose}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
+                                                </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Error}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
-                                            </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Debug}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
+                                                </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding Value.Level}" Value="{x:Static serilog:LogEventLevel.Fatal}">
-                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
-                                                <Setter Property="FontWeight" Value="Bold" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Run.Style>
-                            </Run>
-                            <Run Text="{Binding Value, Mode=OneWay, Converter={local:LogEventRender}}" />
-                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" Text="{Binding Value.Exception, Mode=OneWay}" />
-                        </TextBlock>
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Information}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Warning}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Error}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding Level}"
+                                                             Value="{x:Static serilog:LogEventLevel.Fatal}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Run.Style>
+                                </Run>
+
+                                <Run Text="{Binding Text, Mode=OneWay}" />
+                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}"
+                                     Text="{Binding Exception, Mode=OneWay}" />
+                            </TextBlock>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
