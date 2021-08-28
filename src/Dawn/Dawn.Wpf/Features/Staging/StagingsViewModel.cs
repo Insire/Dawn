@@ -32,6 +32,8 @@ namespace Dawn.Wpf
 
         public ICommand ApplyCommand { get; }
 
+        public Func<bool> OnEmptyDirectoryCreated { get; set; }
+
         public Action OnApplyingStagings { get; set; }
 
         public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupsViewModel backupsViewModel, IFileSystem fileSystem)
@@ -78,62 +80,76 @@ namespace Dawn.Wpf
         {
             try
             {
-                using (_logViewModel.Begin())
-                {
-                    var reuseLastBackup = ReuseLastBackup;
-                    var deploymentFolder = _configurationViewModel.DeploymentFolder;
-                    var backupFolder = _configurationViewModel.BackupFolder;
-                    var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
-                    var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
-                    var now = DateTime.Now;
+                _logViewModel.PrepareBegin();
 
-                    _fileSystem.CreateDirectory(deploymentFolder);
-                    _fileSystem.CreateDirectory(backupFolder);
-                    _fileSystem.CreateDirectory(backupFileFolder);
+                var reuseLastBackup = ReuseLastBackup;
+                var deploymentFolder = _configurationViewModel.DeploymentFolder;
+                var backupFolder = _configurationViewModel.BackupFolder;
+                var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
+                var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
+                var now = DateTime.Now;
 
-                    var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
+                _fileSystem.CreateDirectory(deploymentFolder);
+                _fileSystem.CreateDirectory(backupFolder);
+                _fileSystem.CreateDirectory(backupFileFolder);
 
-                    var t2 = Task.Run(() =>
-                    {
-                        try
-                        {
-                            var count = 0m;
-                            foreach (var newfile in Items)
-                            {
-                                _logViewModel.Progress.Report(count * 100m / (Items.Count - 1));
-                                if (token.IsCancellationRequested)
-                                {
-                                    return;
-                                }
+                var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
 
-                                var fileName = Path.GetFileName(newfile.Path);
-                                var deploymentFileName = Path.Combine(deploymentFolder, fileName);
-                                var backupFileName = Path.Combine(backupFileFolder, fileName);
+                var t2 = Task.Run(() =>
+               {
+                   try
+                   {
+                       using (_logViewModel.Begin())
+                       {
+                           for (var i = 0; i < Items.Count; i++)
+                           {
+                               var newfile = Items[i];
+                               _logViewModel.Progress.Report(i, Items.Count);
 
-                                if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
-                                {
-                                    BackupFile(newfile.Path, backupFileName, now, reuseLastBackup);
-                                }
+                               if (token.IsCancellationRequested)
+                               {
+                                   return;
+                               }
 
-                                Update(newfile.Path, deploymentFileName, now, _logViewModel.Progress);
-                                count++;
-                            }
+                               var fileName = Path.GetFileName(newfile.Path);
+                               var deploymentFileName = Path.Combine(deploymentFolder, fileName);
+                               var backupFileName = Path.Combine(backupFileFolder, fileName);
 
-                            _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {directory}", deploymentFolder);
-                            _logViewModel.Progress.Report(100);
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.LogError(ex);
-                        }
-                    }, token);
+                               if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
+                               {
+                                   BackupFile(newfile.Path, backupFileName, now, reuseLastBackup);
+                               }
 
-                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                               Update(newfile.Path, deploymentFileName, now, _logViewModel.Progress);
+                           }
 
-                    await Clear(token).ConfigureAwait(false);
+                           if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                           {
+                               var delete = OnEmptyDirectoryCreated?.Invoke();
+                               if (delete == true)
+                               {
+                                   _fileSystem.DeleteDirectory(backupFileFolder, true);
+                               }
+                           }
+                           else
+                           {
+                               _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
+                           }
 
-                    await _backupsViewModel.Refresh(token).ConfigureAwait(false);
-                }
+                           _logViewModel.Progress.Report(100);
+                       }
+                   }
+                   catch (Exception ex)
+                   {
+                       _log.LogError(ex);
+                   }
+               }, token);
+
+                await Task.WhenAll(t1, t2).ConfigureAwait(false);
+
+                await Clear(token).ConfigureAwait(false);
+
+                await _backupsViewModel.Refresh(token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -167,7 +183,7 @@ namespace Dawn.Wpf
             }
             else if (Copy(from, to, timeStamp, true, _configurationViewModel.UpdateTimeStampOnApply))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {targetFile}", to);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Updated {File}", to);
             }
         }
 
@@ -175,7 +191,7 @@ namespace Dawn.Wpf
         {
             if (Copy(from, to, timeStamp, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {targetFile} @ {copy}", from, to);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Created backup of {SourceFile} @ {BackupFile}", from, to);
             }
         }
 
@@ -183,7 +199,7 @@ namespace Dawn.Wpf
         {
             if (_fileSystem.ExtractFor<StagingsViewModel>(from, to, _log, timeStamp, progress, overwrite, _configurationViewModel.UpdateTimeStampOnApply))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {backup} to {copy}", from, to);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracted {BackupFile} to {SourceFile}", from, to);
             }
         }
 

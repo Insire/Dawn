@@ -5,6 +5,7 @@ using MvvmScarletToolkit;
 using Serilog.Core;
 using Serilog.Events;
 using System;
+using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
@@ -13,13 +14,15 @@ namespace Dawn.Wpf
 {
     public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
-        private readonly SourceCache<LogEventViewModel, Guid> _sourceCache;
+        private readonly ObservableCollectionExtended<LogEventViewModel> _items;
+        private readonly SourceCache<LogEventViewModel, long> _sourceCache;
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly SynchronizationContext _context;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
 
         private IDisposable _subscription;
         private bool _disposedValue;
+        private long _index;
 
         private int _precentage;
         public int Percentage
@@ -28,7 +31,7 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _precentage, value); }
         }
 
-        public IObservableCollection<LogEventViewModel> Items { get; }
+        public ReadOnlyObservableCollection<LogEventViewModel> Items { get; }
 
         public IProgress<decimal> Progress => _dispatcherProgress;
 
@@ -38,8 +41,9 @@ namespace Dawn.Wpf
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
-            _sourceCache = new SourceCache<LogEventViewModel, Guid>(vm => vm.Key);
-            Items = new ObservableCollectionExtended<LogEventViewModel>();
+            _sourceCache = new SourceCache<LogEventViewModel, long>(vm => vm.Key);
+            _items = new ObservableCollectionExtended<LogEventViewModel>();
+            Items = new ReadOnlyObservableCollection<LogEventViewModel>(_items);
 
             _subscription = CreateSubscription(context);
         }
@@ -62,7 +66,7 @@ namespace Dawn.Wpf
                 .Merge(lessImportantEvents)
                 .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(Items)
+                .Bind(_items)
                 .DisposeMany()
                 .Subscribe();
         }
@@ -81,13 +85,21 @@ namespace Dawn.Wpf
 
         public void Emit(LogEvent logEvent)
         {
-            _sourceCache.AddOrUpdate(new LogEventViewModel(logEvent, this));
+            _sourceCache.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this));
+        }
+
+        /// <summary>
+        ///   we need to clear the bound collection, before the UI is bound to it for performance reasons
+        /// </summary>
+        public void PrepareBegin()
+        {
+            _sourceCache.Clear();
         }
 
         private void Setup()
         {
+            _index = 0;
             Progress.Report(0);
-            _sourceCache.Clear();
 
             _subscription = CreateSubscription(_context);
         }

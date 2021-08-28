@@ -113,7 +113,7 @@ namespace Dawn.Wpf
                 {
                     if (setLastWriteTime)
                     {
-                        log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {file} to {timeStamp}", to, timeStamp);
+                        log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", to, timeStamp);
                         File.SetLastWriteTime(to, timeStamp);
                     }
 
@@ -149,7 +149,7 @@ namespace Dawn.Wpf
                             var fileName = Path.GetFileName(destinationPath);
                             if (fileName.Length == 0)
                             {
-                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Creating destination directory {directory}", destinationPath);
+                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Creating destination directory {FolderPath}", destinationPath);
                                 CreateDirectory(destinationPath);
                             }
                             else // is file
@@ -157,12 +157,12 @@ namespace Dawn.Wpf
                                 var directoryName = destinationPath.Replace(fileName, "");
                                 CreateDirectory(directoryName);
 
-                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {file}", destinationPath);
+                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {File}", destinationPath);
                                 entry.ExtractToFile(destinationPath, overwrite);
 
                                 if (setLastWriteTime)
                                 {
-                                    log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {file} to {timeStamp}", destinationPath, timeStamp);
+                                    log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", destinationPath, timeStamp);
                                     File.SetLastWriteTime(destinationPath, timeStamp);
                                 }
                             }

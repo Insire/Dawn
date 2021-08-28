@@ -258,32 +258,34 @@ namespace Dawn.Wpf
                     return;
                 }
 
-                var subscription = default(IDisposable);
-                try
+                _logViewModel.PrepareBegin();
+
+                var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
+                var t2 = Task.Run(async () =>
                 {
-                    if (!_backupsViewModel.IsBusy)
+                    var subscription = default(IDisposable);
+                    try
                     {
-                        // mass operation in progress
-                        subscription = _logViewModel.Begin();
-                    }
+                        if (!_backupsViewModel.IsBusy)
+                        {
+                            // mass operation in progress
+                            subscription = _logViewModel.Begin();
+                        }
 
-                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
+                        _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
 
-                    var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
-                    var t2 = Task.Run(async () =>
-                    {
                         await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
                         await _backupsViewModel.Remove(this).ConfigureAwait(false);
 
-                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
-                    });
+                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
+                    }
+                    finally
+                    {
+                        subscription?.Dispose();
+                    }
+                });
 
-                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
-                }
-                finally
-                {
-                    subscription?.Dispose();
-                }
+                await Task.WhenAll(t1, t2).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

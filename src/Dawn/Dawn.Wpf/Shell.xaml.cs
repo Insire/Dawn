@@ -141,6 +141,15 @@ namespace Dawn.Wpf
                 Buttons = MessageBoxButtons.YesNo(),
             })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            {
+                IsSoundEnabled = false,
+                Text = "Applying your files didnt result in a new backup. Delete empty backup folder?",
+                Caption = "Delete empty backup folder?.",
+                Icon = AdonisUI.Controls.MessageBoxImage.Information,
+                Buttons = MessageBoxButtons.YesNo(),
+            })) == AdonisUI.Controls.MessageBoxResult.Yes;
+
             SetImage();
         }
 

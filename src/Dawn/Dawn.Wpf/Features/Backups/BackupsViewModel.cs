@@ -73,7 +73,7 @@ namespace Dawn.Wpf
             {
                 if (!_fileSystem.DirectoryExists(_configurationViewModel.BackupFolder))
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Backup directory {path} does not exist. Aborting.", _configurationViewModel.BackupFolder);
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Backup directory {FolderPath} does not exist. Aborting.", _configurationViewModel.BackupFolder);
                     return;
                 }
 
@@ -185,21 +185,23 @@ namespace Dawn.Wpf
                     return;
                 }
 
-                using (_logViewModel.Begin())
+                _logViewModel.PrepareBegin();
+
+                var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
+
+                var t2 = Task.Run(async () =>
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
-
-                    var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
-
-                    var t2 = Task.Run(async () =>
+                    using (_logViewModel.Begin())
                     {
+                        _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+
                         try
                         {
                             _isMassDeleting = true;
 
                             for (var i = 0; i < Items.Count; i++)
                             {
-                                _logViewModel.Progress.Report(i * 100m / (Items.Count - 1));
+                                _logViewModel.Progress.Report(i, Items.Count);
 
                                 if (token.IsCancellationRequested)
                                 {
@@ -216,12 +218,13 @@ namespace Dawn.Wpf
                         {
                             _isMassDeleting = false;
                         }
-                        _logViewModel.Progress.Report(100);
-                    }, token);
 
-                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {path}", _configurationViewModel.BackupFolder);
-                }
+                        _logViewModel.Progress.Report(100);
+                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                    }
+                }, token);
+
+                await Task.WhenAll(t1, t2).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -240,31 +243,33 @@ namespace Dawn.Wpf
         {
             try
             {
-                using (_logViewModel.Begin())
+                _logViewModel.PrepareBegin();
+
+                var deploymentFolder = _configurationViewModel.DeploymentFolder;
+                var backupFolder = _configurationViewModel.BackupFolder;
+                var now = DateTime.Now;
+
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
+
+                var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
+
+                if (!_fileSystem.DirectoryExists(deploymentFolder))
                 {
-                    var deploymentFolder = _configurationViewModel.DeploymentFolder;
-                    var backupFolder = _configurationViewModel.BackupFolder;
-                    var now = DateTime.Now;
+                    _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {FolderPath} does not exist", deploymentFolder);
 
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {path}", backupViewModel.Name);
+                    return;
+                }
 
-                    var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
+                if (!_fileSystem.DirectoryExists(deploymentFolder))
+                {
+                    _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {FolderPath} does not exist", backupFolder);
 
-                    if (!_fileSystem.DirectoryExists(deploymentFolder))
-                    {
-                        _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {path} does not exist", deploymentFolder);
-                        _logViewModel.Progress.Report(100);
-                        return;
-                    }
+                    return;
+                }
 
-                    if (!_fileSystem.DirectoryExists(deploymentFolder))
-                    {
-                        _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {path} does not exist", backupFolder);
-                        _logViewModel.Progress.Report(100);
-                        return;
-                    }
-
-                    var t2 = Task.Run(() =>
+                var t2 = Task.Run(() =>
+                {
+                    using (_logViewModel.Begin())
                     {
                         var array = backupViewModel.Items.ToArray();
                         for (var i = 0; i < array.Length; i++)
@@ -291,13 +296,13 @@ namespace Dawn.Wpf
                                 RestoreFile(file.Value, restoreFileName, now);
                             }
                         }
+
                         _logViewModel.Progress.Report(100);
-                    }, token);
+                        _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
+                    }
+                }, token);
 
-                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
-
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {path}", backupViewModel.Name);
-                }
+                await Task.WhenAll(t1, t2).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -309,7 +314,7 @@ namespace Dawn.Wpf
         {
             if (_fileSystem.CopyFor<BackupsViewModel>(from, to, _log, timeStamp, true, _configurationViewModel.UpdateTimeStampOnRestore))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {SourcePath} from {DestinationPath}", to, from);
             }
         }
 
@@ -317,7 +322,7 @@ namespace Dawn.Wpf
         {
             if (_fileSystem.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, progress, true, _configurationViewModel.UpdateTimeStampOnRestore))
             {
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {backup} from {copy}", to, from);
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Restored backup of {SourcePath} from {DestinationPath}", to, from);
             }
         }
 
