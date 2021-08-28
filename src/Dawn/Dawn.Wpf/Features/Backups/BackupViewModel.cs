@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -28,6 +27,7 @@ namespace Dawn.Wpf
         private readonly Func<bool> _onDeleteRequested;
         private readonly Action _onDeleting;
         private readonly Func<BackupViewModel, BackupViewModel> _onMetaDataEdit;
+        private readonly IFileSystem _fileSystem;
 
         private string _fullPath;
         public string FullPath
@@ -70,6 +70,7 @@ namespace Dawn.Wpf
         public ICommand EditMetaDataCommand { get; }
 
         public BackupViewModel(in IScarletCommandBuilder commandBuilder,
+                               IFileSystem fileSystem,
                                BackupModel model,
                                BackupsViewModel backupsViewModel,
                                LogViewModel logViewModel,
@@ -80,6 +81,7 @@ namespace Dawn.Wpf
                                Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
             : base(commandBuilder)
         {
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _log = log?.ForContext<BackupViewModel>() ?? throw new ArgumentNullException(nameof(log));
@@ -122,6 +124,7 @@ namespace Dawn.Wpf
 
             CustomName = backupViewModel.CustomName;
             Comment = backupViewModel.Comment;
+            _fileSystem = backupViewModel._fileSystem;
         }
 
         private string GetMetaDataFileName()
@@ -134,12 +137,12 @@ namespace Dawn.Wpf
             return Task.Run(() =>
             {
                 var fileName = GetMetaDataFileName();
-                if (!File.Exists(fileName))
+                if (!_fileSystem.FileExists(fileName))
                 {
                     return;
                 }
 
-                var json = File.ReadAllText(fileName, Encoding.UTF8);
+                var json = _fileSystem.ReadAllText(fileName, Encoding.UTF8);
                 var model = JsonConvert.DeserializeObject<BackupMetaDataModel>(json);
 
                 if (model is null)
@@ -161,7 +164,7 @@ namespace Dawn.Wpf
 
         private bool CanLoadMetaData()
         {
-            return File.Exists(GetMetaDataFileName());
+            return _fileSystem.FileExists(GetMetaDataFileName());
         }
 
         private Task EditMetaData()
@@ -190,9 +193,9 @@ namespace Dawn.Wpf
                 }
 
                 var fileName = GetMetaDataFileName();
-                if (CustomName is null && Comment is null && File.Exists(fileName))
+                if (CustomName is null && Comment is null && _fileSystem.FileExists(fileName))
                 {
-                    File.Delete(fileName);
+                    _fileSystem.DeleteFile(fileName);
                     return;
                 }
 
@@ -202,7 +205,7 @@ namespace Dawn.Wpf
                     Comment = Comment
                 });
 
-                File.WriteAllText(fileName, json, Encoding.UTF8);
+                _fileSystem.WriteAllText(fileName, json, Encoding.UTF8);
             });
         }
 
@@ -258,7 +261,7 @@ namespace Dawn.Wpf
                 if (!_backupsViewModel.IsBusy)
                 {
                     // mass operation in progress
-                    await _logViewModel.Clear(CancellationToken.None).ConfigureAwait(false);
+                    _logViewModel.Clear();
                 }
 
                 _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
@@ -266,7 +269,7 @@ namespace Dawn.Wpf
                 var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
                 var t2 = Task.Run(async () =>
                 {
-                    await Task.Run(() => Directory.Delete(_fullPath, true)).ConfigureAwait(false);
+                    await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
                     await _backupsViewModel.Remove(this).ConfigureAwait(false);
 
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
@@ -288,7 +291,7 @@ namespace Dawn.Wpf
                 && _log != null
                 && _logViewModel != null
                 && _fullPath.Length > 0
-                && Directory.Exists(_fullPath);
+                && _fileSystem.DirectoryExists(_fullPath);
         }
 
         private string GetDebuggerDisplay()
