@@ -19,7 +19,7 @@
                        AllowDrop="True"
                        Drop="OnDrop"
                        IconVisibility="Collapsed"
-                       Topmost="True"
+                       Topmost="{Binding IsTopMost, ElementName=root}"
                        mc:Ignorable="d">
 
     <!--  DataContext: ShellViewModel  -->
@@ -142,6 +142,30 @@
                     ToolTip="Open logs">
                 <icons:PackIconFontAwesome Kind="AlignLeftSolid" />
             </Button>
+
+            <ToggleButton DockPanel.Dock="Right"
+                          IsChecked="{Binding IsTopMost, ElementName=root}"
+                          ToolTip="Toggle keep window on top">
+
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowToggleButton}}" TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <icons:PackIconFontAwesome Kind="ToggleOffSolid" />
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <icons:PackIconFontAwesome Kind="ToggleOnSolid" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
         </DockPanel>
     </controls:AdonisWindow.TitleBarContent>
 

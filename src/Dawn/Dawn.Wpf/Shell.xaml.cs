@@ -27,6 +27,18 @@ namespace Dawn.Wpf
             typeof(Shell),
             new PropertyMetadata(false));
 
+        public bool IsTopMost
+        {
+            get { return (bool)GetValue(IsTopMostProperty); }
+            set { SetValue(IsTopMostProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsTopMostProperty = DependencyProperty.Register(
+            nameof(IsTopMost),
+            typeof(bool),
+            typeof(Shell),
+            new PropertyMetadata(true));
+
         public Visibility StagingVisibility
         {
             get { return (Visibility)GetValue(StagingVisibilityProperty); }
