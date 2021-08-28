@@ -185,42 +185,43 @@ namespace Dawn.Wpf
                     return;
                 }
 
-                _logViewModel.Clear();
-
-                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
-
-                var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
-
-                var t2 = Task.Run(async () =>
+                using (_logViewModel.Begin())
                 {
-                    try
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {path}", _configurationViewModel.BackupFolder);
+
+                    var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
+
+                    var t2 = Task.Run(async () =>
                     {
-                        _isMassDeleting = true;
-
-                        for (var i = 0; i < Items.Count; i++)
+                        try
                         {
-                            _logViewModel.Progress.Report(i * 100m / (Items.Count - 1));
+                            _isMassDeleting = true;
 
-                            if (token.IsCancellationRequested)
+                            for (var i = 0; i < Items.Count; i++)
                             {
-                                return;
+                                _logViewModel.Progress.Report(i * 100m / (Items.Count - 1));
+
+                                if (token.IsCancellationRequested)
+                                {
+                                    return;
+                                }
+
+                                var item = Items[i];
+                                await item.Delete().ConfigureAwait(false);
                             }
 
-                            var item = Items[i];
-                            await item.Delete().ConfigureAwait(false);
+                            await Refresh(token).ConfigureAwait(false);
                         }
+                        finally
+                        {
+                            _isMassDeleting = false;
+                        }
+                        _logViewModel.Progress.Report(100);
+                    }, token);
 
-                        await Refresh(token).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        _isMassDeleting = false;
-                    }
-                    _logViewModel.Progress.Report(100);
-                }, token);
-
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {path}", _configurationViewModel.BackupFolder);
+                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {path}", _configurationViewModel.BackupFolder);
+                }
             }
             catch (Exception ex)
             {
@@ -239,63 +240,64 @@ namespace Dawn.Wpf
         {
             try
             {
-                _logViewModel.Clear();
-
-                var deploymentFolder = _configurationViewModel.DeploymentFolder;
-                var backupFolder = _configurationViewModel.BackupFolder;
-                var now = DateTime.Now;
-
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {path}", backupViewModel.Name);
-
-                var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
-
-                if (!_fileSystem.DirectoryExists(deploymentFolder))
+                using (_logViewModel.Begin())
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {path} does not exist", deploymentFolder);
-                    _logViewModel.Progress.Report(100);
-                    return;
-                }
+                    var deploymentFolder = _configurationViewModel.DeploymentFolder;
+                    var backupFolder = _configurationViewModel.BackupFolder;
+                    var now = DateTime.Now;
 
-                if (!_fileSystem.DirectoryExists(deploymentFolder))
-                {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {path} does not exist", backupFolder);
-                    _logViewModel.Progress.Report(100);
-                    return;
-                }
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {path}", backupViewModel.Name);
 
-                var t2 = Task.Run(() =>
-                {
-                    var array = backupViewModel.Items.ToArray();
-                    for (var i = 0; i < array.Length; i++)
+                    var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
+
+                    if (!_fileSystem.DirectoryExists(deploymentFolder))
                     {
-                        if (token.IsCancellationRequested)
-                        {
-                            return;
-                        }
-
-                        var percentage = i * 100m / (array.Length - 1);
-                        _logViewModel.Progress.Report(percentage);
-
-                        var file = array[i];
-                        var extension = Path.GetExtension(file.Value).ToLowerInvariant();
-                        if (extension == ".zip")
-                        {
-                            RestoreArchive(file.Value, deploymentFolder, now, null);
-                        }
-                        else
-                        {
-                            var fileName = Path.GetFileName(file.Value);
-                            var restoreFileName = Path.Combine(deploymentFolder, fileName);
-
-                            RestoreFile(file.Value, restoreFileName, now);
-                        }
+                        _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {path} does not exist", deploymentFolder);
+                        _logViewModel.Progress.Report(100);
+                        return;
                     }
-                    _logViewModel.Progress.Report(100);
-                }, token);
 
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                    if (!_fileSystem.DirectoryExists(deploymentFolder))
+                    {
+                        _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {path} does not exist", backupFolder);
+                        _logViewModel.Progress.Report(100);
+                        return;
+                    }
 
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {path}", backupViewModel.Name);
+                    var t2 = Task.Run(() =>
+                    {
+                        var array = backupViewModel.Items.ToArray();
+                        for (var i = 0; i < array.Length; i++)
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                return;
+                            }
+
+                            var percentage = i * 100m / (array.Length - 1);
+                            _logViewModel.Progress.Report(percentage);
+
+                            var file = array[i];
+                            var extension = Path.GetExtension(file.Value).ToLowerInvariant();
+                            if (extension == ".zip")
+                            {
+                                RestoreArchive(file.Value, deploymentFolder, now, null);
+                            }
+                            else
+                            {
+                                var fileName = Path.GetFileName(file.Value);
+                                var restoreFileName = Path.Combine(deploymentFolder, fileName);
+
+                                RestoreFile(file.Value, restoreFileName, now);
+                            }
+                        }
+                        _logViewModel.Progress.Report(100);
+                    }, token);
+
+                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
+
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {path}", backupViewModel.Name);
+                }
             }
             catch (Exception ex)
             {

@@ -1,6 +1,5 @@
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -34,11 +33,11 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _text, value); }
         }
 
-        public string Key { get; }
+        public Guid Key { get; }
 
         public LogEventViewModel(LogEvent logEvent, ILogEventSink log)
         {
-            Key = Guid.NewGuid().ToString("N");
+            Key = Guid.NewGuid();
             _logEvent = logEvent ?? throw new ArgumentNullException(nameof(logEvent));
             _log = log ?? throw new ArgumentNullException(nameof(log));
 

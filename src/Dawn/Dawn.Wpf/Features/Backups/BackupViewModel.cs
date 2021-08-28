@@ -258,24 +258,32 @@ namespace Dawn.Wpf
                     return;
                 }
 
-                if (!_backupsViewModel.IsBusy)
+                var subscription = default(IDisposable);
+                try
                 {
-                    // mass operation in progress
-                    _logViewModel.Clear();
+                    if (!_backupsViewModel.IsBusy)
+                    {
+                        // mass operation in progress
+                        subscription = _logViewModel.Begin();
+                    }
+
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
+
+                    var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
+                    var t2 = Task.Run(async () =>
+                    {
+                        await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
+                        await _backupsViewModel.Remove(this).ConfigureAwait(false);
+
+                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
+                    });
+
+                    await Task.WhenAll(t1, t2).ConfigureAwait(false);
                 }
-
-                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {name} in {path}", Name, FullPath);
-
-                var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
-                var t2 = Task.Run(async () =>
+                finally
                 {
-                    await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
-                    await _backupsViewModel.Remove(this).ConfigureAwait(false);
-
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {name}", Name);
-                });
-
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                    subscription?.Dispose();
+                }
             }
             catch (Exception ex)
             {

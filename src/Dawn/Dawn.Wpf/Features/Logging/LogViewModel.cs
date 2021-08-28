@@ -13,11 +13,12 @@ namespace Dawn.Wpf
 {
     public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
-        private readonly SourceCache<LogEventViewModel, string> _sourceCache;
+        private readonly SourceCache<LogEventViewModel, Guid> _sourceCache;
         private readonly IScarletCommandBuilder _commandBuilder;
+        private readonly SynchronizationContext _context;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
-        private readonly IDisposable _subscription;
 
+        private IDisposable _subscription;
         private bool _disposedValue;
 
         private int _precentage;
@@ -34,21 +35,41 @@ namespace Dawn.Wpf
         public LogViewModel(in IScarletCommandBuilder commandBuilder, SynchronizationContext context)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
-            _sourceCache = new SourceCache<LogEventViewModel, string>(vm => vm.Key);
+            _sourceCache = new SourceCache<LogEventViewModel, Guid>(vm => vm.Key);
             Items = new ObservableCollectionExtended<LogEventViewModel>();
 
-            _subscription = _sourceCache
+            _subscription = CreateSubscription(context);
+        }
+
+        private IDisposable CreateSubscription(SynchronizationContext context)
+        {
+            var sourceObservable = _sourceCache
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
-                .DistinctUntilChanged()
-                .Sample(TimeSpan.FromMilliseconds(15))
+                .DistinctUntilChanged();
+
+            var importantEvents = sourceObservable
+                .Filter(q => q.Level >= LogEventLevel.Information);
+
+            var lessImportantEvents = sourceObservable
+                .Filter(q => q.Level < LogEventLevel.Information)
+                .Sample(TimeSpan.FromMilliseconds(15));
+
+            return importantEvents
+                .Merge(lessImportantEvents)
                 .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(Items)
                 .DisposeMany()
                 .Subscribe();
+        }
+
+        public IDisposable Begin()
+        {
+            return new Subscription(this);
         }
 
         private void SetPercentage(decimal percentage)
@@ -63,10 +84,17 @@ namespace Dawn.Wpf
             _sourceCache.AddOrUpdate(new LogEventViewModel(logEvent, this));
         }
 
-        public void Clear()
+        private void Setup()
         {
             Progress.Report(0);
             _sourceCache.Clear();
+
+            _subscription = CreateSubscription(_context);
+        }
+
+        private void Clear()
+        {
+            _subscription.Dispose();
         }
 
         private void Dispose(bool disposing)
@@ -87,6 +115,23 @@ namespace Dawn.Wpf
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        private sealed class Subscription : IDisposable
+        {
+            private readonly LogViewModel _viewModel;
+
+            public Subscription(LogViewModel viewModel)
+            {
+                _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+
+                _viewModel.Setup();
+            }
+
+            public void Dispose()
+            {
+                _viewModel.Clear();
+            }
         }
     }
 }
