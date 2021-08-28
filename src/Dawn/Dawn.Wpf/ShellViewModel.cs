@@ -25,6 +25,7 @@ namespace Dawn.Wpf
         private readonly GitHubClient _client;
         private readonly AboutViewModel _aboutViewModel;
         private readonly LogViewModel _logViewModel;
+        private readonly IFileSystem _fileSystem;
         private readonly ILogger _log;
 
         private bool _hasUpdatedApplication;
@@ -61,7 +62,13 @@ namespace Dawn.Wpf
 
         public Action ShowLogAction { get; set; }
 
-        public ShellViewModel(ConfigurationViewModel configuration, BackupsViewModel updates, StagingsViewModel stagings, AboutViewModel aboutViewModel, LogViewModel logViewModel, ILogger log)
+        public ShellViewModel(ConfigurationViewModel configuration,
+                              BackupsViewModel updates,
+                              StagingsViewModel stagings,
+                              AboutViewModel aboutViewModel,
+                              LogViewModel logViewModel,
+                              ILogger log,
+                              IFileSystem fileSystem)
             : base(ScarletCommandBuilder.Default)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -70,6 +77,8 @@ namespace Dawn.Wpf
 
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
             _log = log?.ForContext<ShellViewModel>() ?? throw new ArgumentNullException(nameof(log));
 
             _client = new GitHubClient(new ProductHeaderValue(GithubRepositoryOwner));
@@ -124,19 +133,16 @@ namespace Dawn.Wpf
                 return;
             }
 
-            if (Version.TryParse(latest.TagName, out var version))
+            if (Version.TryParse(latest.TagName, out var version) && _aboutViewModel.AssemblyVersion < version)
             {
-                if (_aboutViewModel.AssemblyVersion < version)
-                {
-                    IsApplicationUpdateAvailable = true;
-                    HasCheckedForApplicationUpdate = true;
+                IsApplicationUpdateAvailable = true;
+                HasCheckedForApplicationUpdate = true;
 
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "An update ({release}) is available", latest.TagName);
 
-                    _asset = latest.Assets.FirstOrDefault(p => p.ContentType == ZipContentType || p.ContentType == ZipCompressedContentType);
+                _asset = latest.Assets.FirstOrDefault(p => p.ContentType is ZipContentType or ZipCompressedContentType);
 
-                    return;
-                }
+                return;
             }
 
             IsApplicationUpdateAvailable = false;
@@ -165,7 +171,7 @@ namespace Dawn.Wpf
                 }
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracting release to {directory}", tempExtractDirectory);
-                if (!FileUtils.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, _logViewModel.Progress, true))
+                if (!_fileSystem.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, DateTime.MinValue, _logViewModel.Progress, true, false))
                 {
                     return;
                 }
@@ -187,7 +193,7 @@ namespace Dawn.Wpf
             }
             catch (Exception ex)
             {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                _log.LogError(ex);
             }
         }
 
@@ -223,10 +229,9 @@ namespace Dawn.Wpf
             File.Copy(bak, me);
 
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Updating application files");
-            var files = Directory.GetFiles(from, "*.*", SearchOption.AllDirectories);
-            foreach (var file in files)
+            foreach (var file in _fileSystem.GetFiles(from, "*.*", SearchOption.AllDirectories))
             {
-                if (file.EndsWith(".pdb") && Debugger.IsAttached)
+                if (file.EndsWith(".pdb", StringComparison.InvariantCultureIgnoreCase) && Debugger.IsAttached)
                 {
                     continue; // the debugger holds a filelock on pdb files
                 }
@@ -240,7 +245,7 @@ namespace Dawn.Wpf
 
         private void CleanUpFiles(string directory)
         {
-            var fileSystemInfos = Directory.GetFiles(directory, "Dawn*.zip", SearchOption.TopDirectoryOnly);
+            var fileSystemInfos = _fileSystem.GetFiles(directory, "Dawn*.zip", SearchOption.TopDirectoryOnly);
             foreach (var file in fileSystemInfos)
             {
                 DeleteFile(file);
@@ -248,7 +253,7 @@ namespace Dawn.Wpf
 
             foreach (var subDirectory in Directory.GetDirectories(directory, "Dawn*", SearchOption.TopDirectoryOnly))
             {
-                fileSystemInfos = Directory.GetFiles(subDirectory, "*", SearchOption.AllDirectories);
+                fileSystemInfos = _fileSystem.GetFiles(subDirectory, "*", SearchOption.AllDirectories);
                 foreach (var file in fileSystemInfos)
                 {
                     DeleteFile(file);
@@ -280,7 +285,7 @@ namespace Dawn.Wpf
 
         private void MoveFile(string from, string to)
         {
-            if (FileUtils.MoveFor<ShellViewModel>(from, to, _log, true))
+            if (_fileSystem.MoveFor<ShellViewModel>(from, to, _log, true))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Moving {from} from {to}", from, to);
             }
@@ -288,7 +293,7 @@ namespace Dawn.Wpf
 
         private void DeleteFile(string from)
         {
-            if (FileUtils.DeleteFor<ShellViewModel>(from, _log))
+            if (_fileSystem.DeleteFor<ShellViewModel>(from, _log))
             {
                 _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting {from}", from);
             }

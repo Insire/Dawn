@@ -26,6 +26,7 @@ namespace Dawn.Wpf
         }
 
         private string _backupFolder;
+
         [Display(Name = "Backup Folder", Description = "The folder where Dawn will store backups of the files that are going to be deployed")]
         [Required]
         [MinLength(2)]
@@ -37,6 +38,35 @@ namespace Dawn.Wpf
                 if (SetProperty(ref _backupFolder, value, true))
                 {
                     Model.BackupFolder = value;
+                }
+            }
+        }
+
+        private bool _updateTimeStampOnRestore;
+
+        [Display(Name = "Update timestamp on restore", Description = "Whether to change the last write time for a file when restoring files")]
+        public bool UpdateTimeStampOnRestore
+        {
+            get { return _updateTimeStampOnRestore; }
+            set
+            {
+                if (SetProperty(ref _updateTimeStampOnRestore, value, true))
+                {
+                    Model.UpdateTimeStampOnRestore = value;
+                }
+            }
+        }
+
+        private bool _updateTimeStampOnApply;
+        [Display(Name = "Update timestamp on applying an update", Description = "Whether to change the last write time for a file when adding files")]
+        public bool UpdateTimeStampOnApply
+        {
+            get { return _updateTimeStampOnApply; }
+            set
+            {
+                if (SetProperty(ref _updateTimeStampOnApply, value, true))
+                {
+                    Model.UpdateTimeStampOnApply = value;
                 }
             }
         }
@@ -58,8 +88,10 @@ namespace Dawn.Wpf
 
             _deploymentFolder = Model.DeploymentFolder;
             _backupFolder = Model.BackupFolder;
+            _updateTimeStampOnApply = Model.UpdateTimeStampOnApply ?? false;
+            _updateTimeStampOnRestore = model.UpdateTimeStampOnRestore ?? false;
 
-            IsLocalConfig = Model.IsLocalConfig;
+            IsLocalConfig = Model.IsLocalConfig ?? true;
 
             BackupFileTypes = new BackupFileTypesViewModel(commandBuilder, model);
 

@@ -1,14 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0-windows7.0</TargetFramework>
         <UseWPF>true</UseWPF>
-        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <PublishSingleFile>true</PublishSingleFile>
         <ApplicationIcon>dawn.ico</ApplicationIcon>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,23 +22,24 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="AdonisUI.ClassicTheme.NET5" Version="1.17.1" />
         <PackageReference Include="Octokit" Version="0.50.0" />
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
+        <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
         <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
         <PackageReference Include="DryIoc.dll" Version="4.8.1" />
         <PackageReference Include="Jot" Version="2.1.8" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.8.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.75" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.78" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.220">
+        <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.231">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         
-        <PackageReference Include="Roslynator.Analyzers" Version="3.2.0">
+        <PackageReference Include="Roslynator.Analyzers" Version="3.2.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

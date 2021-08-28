@@ -1,15 +1,25 @@
+using DynamicData;
+using DynamicData.Binding;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using MvvmScarletToolkit;
-using MvvmScarletToolkit.Observables;
 using Serilog.Core;
 using Serilog.Events;
 using System;
-using System.Diagnostics;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Threading;
 
 namespace Dawn.Wpf
 {
-    public sealed class LogViewModel : ViewModelListBase<ViewModelContainer<LogEvent>>, ILogEventSink
+    public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
-        private readonly DispatcherProgress<double> _dispatcherProgress;
+        private readonly SourceCache<LogEventViewModel, Guid> _sourceCache;
+        private readonly IScarletCommandBuilder _commandBuilder;
+        private readonly SynchronizationContext _context;
+        private readonly DispatcherProgress<decimal> _dispatcherProgress;
+
+        private IDisposable _subscription;
+        private bool _disposedValue;
 
         private int _precentage;
         public int Percentage
@@ -18,39 +28,110 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _precentage, value); }
         }
 
-        public IProgress<double> Progress => _dispatcherProgress;
+        public IObservableCollection<LogEventViewModel> Items { get; }
 
-        public LogViewModel(in IScarletCommandBuilder commandBuilder)
-            : base(commandBuilder)
+        public IProgress<decimal> Progress => _dispatcherProgress;
+
+        public LogViewModel(in IScarletCommandBuilder commandBuilder, SynchronizationContext context)
         {
-            _dispatcherProgress = new DispatcherProgress<double>(Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(50));
+            _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
+
+            _sourceCache = new SourceCache<LogEventViewModel, Guid>(vm => vm.Key);
+            Items = new ObservableCollectionExtended<LogEventViewModel>();
+
+            _subscription = CreateSubscription(context);
         }
 
-        private void SetPercentage(double percentage)
+        private IDisposable CreateSubscription(SynchronizationContext context)
         {
-            if (double.IsNaN(percentage))
-            {
-                return;
-            }
+            var sourceObservable = _sourceCache
+                .Connect()
+                .ObserveOn(TaskPoolScheduler.Default)
+                .DistinctUntilChanged();
 
-            if (double.IsInfinity(percentage))
-            {
-                return;
-            }
+            var importantEvents = sourceObservable
+                .Filter(q => q.Level >= LogEventLevel.Information);
 
-            if (double.IsNaN(percentage))
-            {
-                return;
-            }
+            var lessImportantEvents = sourceObservable
+                .Filter(q => q.Level < LogEventLevel.Information)
+                .Sample(TimeSpan.FromMilliseconds(15));
 
-            var newValue = Convert.ToInt32(Math.Round(percentage, 0));
-            Debug.WriteLine(newValue);
-            Dispatcher.Invoke(() => Percentage = newValue);
+            return importantEvents
+                .Merge(lessImportantEvents)
+                .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
+                .ObserveOn(context)
+                .Bind(Items)
+                .DisposeMany()
+                .Subscribe();
         }
 
-        public async void Emit(LogEvent logEvent)
+        public IDisposable Begin()
         {
-            await Add(new ViewModelContainer<LogEvent>(logEvent)).ConfigureAwait(false);
+            return new Subscription(this);
+        }
+
+        private void SetPercentage(decimal percentage)
+        {
+            var newValue = Convert.ToInt32(Math.Round(percentage, 0, MidpointRounding.AwayFromZero));
+
+            _commandBuilder.Dispatcher.Invoke(() => Percentage = newValue);
+        }
+
+        public void Emit(LogEvent logEvent)
+        {
+            _sourceCache.AddOrUpdate(new LogEventViewModel(logEvent, this));
+        }
+
+        private void Setup()
+        {
+            Progress.Report(0);
+            _sourceCache.Clear();
+
+            _subscription = CreateSubscription(_context);
+        }
+
+        private void Clear()
+        {
+            _subscription.Dispose();
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _subscription.Dispose();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        private sealed class Subscription : IDisposable
+        {
+            private readonly LogViewModel _viewModel;
+
+            public Subscription(LogViewModel viewModel)
+            {
+                _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+
+                _viewModel.Setup();
+            }
+
+            public void Dispose()
+            {
+                _viewModel.Clear();
+            }
         }
     }
 }

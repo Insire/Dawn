@@ -40,21 +40,18 @@ namespace Dawn.Wpf
 
         private static void OnStagingVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is Shell shell)
+            if (sender is Shell shell && e.NewValue is Visibility visibility)
             {
-                if (e.NewValue is Visibility visibility)
+                switch (visibility)
                 {
-                    switch (visibility)
-                    {
-                        case Visibility.Visible:
-                            shell.SetCurrentValue(StagingCheckedProperty, true);
-                            break;
+                    case Visibility.Visible:
+                        shell.SetCurrentValue(StagingCheckedProperty, true);
+                        break;
 
-                        case Visibility.Collapsed:
-                        case Visibility.Hidden:
-                            shell.SetCurrentValue(StagingCheckedProperty, false);
-                            break;
-                    }
+                    case Visibility.Collapsed:
+                    case Visibility.Hidden:
+                        shell.SetCurrentValue(StagingCheckedProperty, false);
+                        break;
                 }
             }
         }
@@ -73,20 +70,17 @@ namespace Dawn.Wpf
 
         private static void StagingCheckedChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is Shell shell)
+            if (sender is Shell shell && e.NewValue is bool flag)
             {
-                if (e.NewValue is bool flag)
+                switch (flag)
                 {
-                    switch (flag)
-                    {
-                        case true:
-                            shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Visible);
-                            break;
+                    case true:
+                        shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Visible);
+                        break;
 
-                        case false:
-                            shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Collapsed);
-                            break;
-                    }
+                    case false:
+                        shell.SetCurrentValue(StagingVisibilityProperty, Visibility.Collapsed);
+                        break;
                 }
             }
         }

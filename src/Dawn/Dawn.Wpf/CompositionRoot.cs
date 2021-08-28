@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 
 namespace Dawn.Wpf
@@ -20,18 +21,18 @@ namespace Dawn.Wpf
         {
             var c = new Container();
 
-            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default);
+            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current);
 
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
-                .WriteTo.Logger(lc =>
-                    lc.Filter.ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
-                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                    || Matching.FromSource<BackupViewModel>().Invoke(o)
-                    || Matching.FromSource<ShellViewModel>().Invoke(o))
-                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                .WriteTo.File("./logs/log.txt", buffered: false);
+                .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
+                    .WriteTo.Logger(lc => lc.Filter
+                                .ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
+                                                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
+                                                    || Matching.FromSource<BackupViewModel>().Invoke(o)
+                                                    || Matching.FromSource<ShellViewModel>().Invoke(o))
+                                .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
 
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);
@@ -51,6 +52,7 @@ namespace Dawn.Wpf
             c.Register<ConfigurationService>(Reuse.Singleton);
             c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
+            c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);

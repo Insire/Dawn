@@ -44,6 +44,17 @@ A utility to quickly update a directories contents while automatically backing u
 - ready for production (i'm using this myself for my day to day work)
 - 3rd party dependencies are attributed in the about section
 
-## Development
+## Build Requirements
 
-You can compile this yourself, by running the ``build.ps1`` file on Windows. You need a recent version of Visual Studio 2019 or newer to be able to do that. You also need internet access and optionally git for cloning the respository.
+This app uses a SDK-style project file, which means you are required to use [Visual Studio 2019](https://visualstudio.microsoft.com/vs/community/) or newer. Visual Studio will prompt you to install any missing components once you open the [sln](./Dawn.sln) file.
+
+For anyone not wishing to install that, they atleast need:
+
+- Windows 10 (older versions work probably too, but the repository is not configured for those)
+- [Net 5.0](https://dotnet.microsoft.com/download/dotnet-core/5.0)
+- [Visual Studio Code](https://code.visualstudio.com/) with the [C# Extension](https://github.com/OmniSharp/omnisharp-vscode) provided by Microsoft
+- [git](https://git-scm.com/)
+
+(This should be everything, but it's possible i missed something. So please tell me if that's the case.)
+
+Once you got the requirements setup, you can compile this yourself, by running the ``build.ps1`` file on Windows.

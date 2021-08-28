@@ -11,10 +11,14 @@ namespace Dawn.Wpf
         public bool FirstStart { get; set; }
 
         [JsonIgnore]
-        public bool IsLocalConfig { get; set; }
+        public bool? IsLocalConfig { get; set; }
 
         public bool IsLightTheme { get; set; }
 
         public List<BackupFileTypeModel> BackupFileTypes { get; set; }
+
+        public bool? UpdateTimeStampOnRestore { get; set; }
+
+        public bool? UpdateTimeStampOnApply { get; set; }
     }
 }

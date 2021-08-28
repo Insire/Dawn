@@ -18,10 +18,12 @@ namespace Dawn.Wpf
         private readonly HttpClient _httpClient;
         private readonly Process _currentProcess;
         private readonly ILogger _log;
+        private readonly IFileSystem _fileSystem;
 
-        public ConfigurationService(ILogger log, HttpClient httpClient, Process currentProcess)
+        public ConfigurationService(ILogger log, IFileSystem fileSystem, HttpClient httpClient, Process currentProcess)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _currentProcess = currentProcess ?? throw new ArgumentNullException(nameof(currentProcess));
 
@@ -48,14 +50,14 @@ namespace Dawn.Wpf
                 }
             };
 
-            Directory.CreateDirectory(Path.Combine(location, "logs"));
+            _fileSystem.CreateDirectory(Path.Combine(location, "logs"));
         }
 
         public void Save()
         {
             try
             {
-                if (!_configuration.FirstStart && !_configuration.IsLocalConfig)
+                if (!_configuration.FirstStart && _configuration.IsLocalConfig != true)
                 {
                     return;
                 }
@@ -66,11 +68,11 @@ namespace Dawn.Wpf
                     WriteIndented = true
                 });
 
-                File.WriteAllText(_settingsFilePath, jsonString);
+                _fileSystem.WriteAllText(_settingsFilePath, jsonString, Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                _log.LogError(ex);
             }
         }
 
@@ -83,7 +85,7 @@ namespace Dawn.Wpf
                 {
                     if (func.Invoke())
                     {
-                        Directory.CreateDirectory(_configuration.BackupFolder);
+                        _fileSystem.CreateDirectory(_configuration.BackupFolder);
                         break;
                     }
                 }
@@ -93,8 +95,18 @@ namespace Dawn.Wpf
                 }
                 catch (Exception ex)
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                    _log.LogError(ex);
                 }
+            }
+
+            if (_configuration.UpdateTimeStampOnApply is null)
+            {
+                _configuration.UpdateTimeStampOnApply = false;
+            }
+
+            if (_configuration.UpdateTimeStampOnRestore is null)
+            {
+                _configuration.UpdateTimeStampOnRestore = true;
             }
 
             return _configuration;
@@ -102,7 +114,7 @@ namespace Dawn.Wpf
 
         private bool GetFromUrl(string[] args)
         {
-            var url = args.FindFirst(p => p.StartsWith("url="));
+            var url = args.FindFirst(p => p.StartsWith("url=", StringComparison.InvariantCultureIgnoreCase));
             if (url == null)
             {
                 return false;
@@ -134,7 +146,7 @@ namespace Dawn.Wpf
 
         private bool GetFromJson(string[] args)
         {
-            var json = args.FindFirst(p => p.StartsWith("json="));
+            var json = args.FindFirst(p => p.StartsWith("json=", StringComparison.InvariantCultureIgnoreCase));
             if (json != null)
             {
                 Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));
@@ -148,9 +160,9 @@ namespace Dawn.Wpf
 
         private bool GetFromFile()
         {
-            if (File.Exists(_settingsFilePath))
+            if (_fileSystem.FileExists(_settingsFilePath))
             {
-                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(File.ReadAllText(_settingsFilePath)));
+                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(_fileSystem.ReadAllText(_settingsFilePath, Encoding.UTF8)));
                 _configuration.IsLocalConfig = true;
 
                 return true;
@@ -165,8 +177,8 @@ namespace Dawn.Wpf
         /// <param name="argument">needs to be base64 encoded and the source of that needs to be utf8 encoded</param>
         private static string GetArgument(string argument)
         {
-            var start = argument.IndexOf("'");
-            var end = argument.LastIndexOf("'");
+            var start = argument.IndexOf("'", StringComparison.InvariantCultureIgnoreCase);
+            var end = argument.LastIndexOf("'", StringComparison.InvariantCultureIgnoreCase);
             var length = end - start;
 
             var result = argument.Substring(start + 1, length - 1);
@@ -194,6 +206,8 @@ namespace Dawn.Wpf
                 target.BackupFileTypes = update.BackupFileTypes;
             }
 
+            target.UpdateTimeStampOnApply = update.UpdateTimeStampOnApply;
+            target.UpdateTimeStampOnRestore = update.UpdateTimeStampOnRestore;
             target.IsLightTheme = update.IsLightTheme;
         }
     }
