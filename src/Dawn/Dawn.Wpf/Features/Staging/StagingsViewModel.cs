@@ -124,7 +124,7 @@ namespace Dawn.Wpf
                     }
                     catch (Exception ex)
                     {
-                        _log.Write(Serilog.Events.LogEventLevel.Fatal, ex.ToString());
+                        _log.LogError(ex);
                     }
                 }, token);
 
@@ -136,7 +136,7 @@ namespace Dawn.Wpf
             }
             catch (Exception ex)
             {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                _log.LogError(ex);
             }
         }
 

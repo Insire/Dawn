@@ -66,11 +66,11 @@ namespace Dawn.Wpf
                     WriteIndented = true
                 });
 
-                File.WriteAllText(_settingsFilePath, jsonString);
+                _fileSystem.WriteAllText(_settingsFilePath, jsonString, Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                _log.LogError(ex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace Dawn.Wpf
                 }
                 catch (Exception ex)
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, ex.ToString());
+                    _log.LogError(ex);
                 }
             }
 
