@@ -32,6 +32,9 @@ namespace Dawn.Wpf
 
         public ICommand ApplyCommand { get; }
 
+        public ICommand AddFilesCommand { get; }
+        public ICommand AddFolderCommand { get; }
+
         public Func<bool> OnEmptyDirectoryCreated { get; set; }
 
         public Action OnApplyingStagings { get; set; }
@@ -49,6 +52,44 @@ namespace Dawn.Wpf
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
+
+            AddFilesCommand = commandBuilder.Create(AddFilesImpl, CanAddFilesImpl)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
+
+            AddFolderCommand = commandBuilder.Create(AddFolderImpl, CanAddFolderImpl)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
+        }
+
+        private async Task AddFilesImpl()
+        {
+            if (_fileSystem.TrySelectFiles(out var files))
+            {
+                await Add(files).ConfigureAwait(false);
+            }
+        }
+
+        private bool CanAddFilesImpl()
+        {
+            return !IsBusy
+                && !_configurationViewModel.HasErrors;
+        }
+
+        private async Task AddFolderImpl()
+        {
+            if (_fileSystem.TrySelectFolder(out var folder))
+            {
+                await Add(new[] { folder }).ConfigureAwait(false);
+            }
+        }
+
+        private bool CanAddFolderImpl()
+        {
+            return !IsBusy
+                && !_configurationViewModel.HasErrors;
         }
 
         public async Task Add(string[] fileSystemInfos)

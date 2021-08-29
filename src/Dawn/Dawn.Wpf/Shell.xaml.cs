@@ -103,8 +103,15 @@ namespace Dawn.Wpf
         private readonly AboutViewModel _aboutViewModel;
         private readonly ConfigurationService _configurationService;
         private readonly ILogger _log;
+        private readonly IFileSystem _fileSystem;
 
-        public Shell(ShellViewModel shellViewModel, Tracker tracker, LogViewModel logViewModel, AboutViewModel aboutViewModel, ConfigurationService configurationService, ILogger log)
+        public Shell(ShellViewModel shellViewModel,
+                     Tracker tracker,
+                     LogViewModel logViewModel,
+                     AboutViewModel aboutViewModel,
+                     ConfigurationService configurationService,
+                     ILogger log,
+                     IFileSystem fileSystem)
         {
             if (tracker is null)
             {
@@ -115,6 +122,7 @@ namespace Dawn.Wpf
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
@@ -198,7 +206,7 @@ namespace Dawn.Wpf
         {
             Dispatcher.Invoke(() =>
             {
-                var dlg = new ConfigurationWindow(_shellViewModel.Configuration)
+                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _log)
                 {
                     Owner = this
                 };

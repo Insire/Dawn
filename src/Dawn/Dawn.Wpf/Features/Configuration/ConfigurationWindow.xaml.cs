@@ -1,6 +1,6 @@
 using Microsoft.Toolkit.Mvvm.Input;
 using Newtonsoft.Json;
-using Ookii.Dialogs.Wpf;
+using Serilog;
 using System;
 using System.Runtime.Versioning;
 using System.Text;
@@ -13,13 +13,17 @@ namespace Dawn.Wpf
     public sealed partial class ConfigurationWindow
     {
         private readonly ConfigurationViewModel _configurationViewModel;
+        private readonly IFileSystem _fileSystem;
+        private readonly ILogger _log;
 
         public ICommand CloseCommand { get; }
         public ICommand CopyToClipboardCommand { get; }
 
-        public ConfigurationWindow(ConfigurationViewModel configurationViewModel)
+        public ConfigurationWindow(ConfigurationViewModel configurationViewModel, IFileSystem fileSystem, ILogger log)
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
 
             CloseCommand = new RelayCommand(CloseInternal, CanClose);
             CopyToClipboardCommand = new RelayCommand(CopyToClipboard);
@@ -33,7 +37,14 @@ namespace Dawn.Wpf
             var bytes = Encoding.UTF8.GetBytes(json);
             var base64 = Convert.ToBase64String(bytes);
 
-            Clipboard.SetDataObject($"json='{base64}'");
+            try
+            {
+                Clipboard.SetDataObject($"json='{base64}'");
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex);
+            }
         }
 
         private void CloseInternal()
@@ -52,32 +63,9 @@ namespace Dawn.Wpf
             return !_configurationViewModel.HasErrors;
         }
 
-        private static bool TrySelectFolder(out string folder)
-        {
-            var dlg = new VistaFolderBrowserDialog
-            {
-                ShowNewFolderButton = true,
-                UseDescriptionForTitle = true,
-                Description = "Select a folder"
-            };
-
-            var result = dlg.ShowDialog();
-
-            if (result == true)
-            {
-                folder = dlg.SelectedPath;
-            }
-            else
-            {
-                folder = null;
-            }
-
-            return result ?? false;
-        }
-
         private void SelectTargetFolder(object sender, RoutedEventArgs e)
         {
-            if (TrySelectFolder(out var folder))
+            if (_fileSystem.TrySelectFolder(out var folder))
             {
                 _configurationViewModel.DeploymentFolder = folder;
             }
@@ -85,7 +73,7 @@ namespace Dawn.Wpf
 
         private void SelectBackupFolder(object sender, RoutedEventArgs e)
         {
-            if (TrySelectFolder(out var folder))
+            if (_fileSystem.TrySelectFolder(out var folder))
             {
                 _configurationViewModel.BackupFolder = folder;
             }

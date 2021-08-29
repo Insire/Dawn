@@ -1,3 +1,4 @@
+using Ookii.Dialogs.Wpf;
 using Serilog;
 using System;
 using System.IO;
@@ -8,6 +9,57 @@ namespace Dawn.Wpf
 {
     public sealed class FileSystem : IFileSystem
     {
+        public bool TrySelectFiles(out string[] files)
+        {
+            var dlg = new VistaOpenFileDialog
+            {
+                CheckFileExists = true,
+                CheckPathExists = true,
+                DereferenceLinks = true,
+                AddExtension = true,
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                Multiselect = true,
+                Title = "Select files",
+                ValidateNames = true,
+            };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                files = dlg.FileNames;
+            }
+            else
+            {
+                files = null;
+            }
+
+            return result ?? false;
+        }
+
+        public bool TrySelectFolder(out string folder)
+        {
+            var dlg = new VistaFolderBrowserDialog
+            {
+                ShowNewFolderButton = true,
+                UseDescriptionForTitle = true,
+                Description = "Select a folder"
+            };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                folder = dlg.SelectedPath;
+            }
+            else
+            {
+                folder = null;
+            }
+
+            return result ?? false;
+        }
+
         public void WriteAllText(string path, string contents, Encoding encoding)
         {
             File.WriteAllText(path, contents, encoding);

@@ -219,9 +219,12 @@
                 <Run Text="Why not drop some files here?" />
             </TextBlock>
 
-            <icons:PackIconFontAwesome Margin="8"
-                                       HorizontalAlignment="Center"
-                                       Kind="ChevronDownSolid" />
+            <Button Margin="4"
+                    HorizontalAlignment="Center"
+                    Command="{Binding Stagings.AddFilesCommand}">
+
+                <icons:PackIconFontAwesome Margin="0,4" Kind="ChevronDownSolid" />
+            </Button>
         </DockPanel>
 
         <!--  Backups  -->
@@ -229,6 +232,18 @@
         <ScrollViewer Grid.Row="0" Grid.RowSpan="3">
             <ScrollViewer.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Command="{Binding Stagings.AddFilesCommand}" Header="Add files">
+                        <MenuItem.Icon>
+                            <icons:PackIconFontAwesome  Kind="PlusSolid" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <MenuItem Command="{Binding Stagings.AddFolderCommand}" Header="Add folder">
+                        <MenuItem.Icon>
+                            <icons:PackIconFontAwesome  Kind="FolderPlusSolid" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    
                     <MenuItem Command="{Binding Updates.RefreshCommand}" Header="Refresh">
                         <MenuItem.Icon>
                             <icons:PackIconFontAwesome Kind="SyncSolid" />

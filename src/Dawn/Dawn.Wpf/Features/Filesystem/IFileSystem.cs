@@ -32,7 +32,8 @@ namespace Dawn.Wpf
         bool MoveFor<T>(string from, string to, ILogger log, bool overwrite = false);
 
         string ReadAllText(string path, Encoding encoding);
-
+        bool TrySelectFiles(out string[] files);
+        bool TrySelectFolder(out string folder);
         void WriteAllText(string path, string contents, Encoding encoding);
     }
 }
