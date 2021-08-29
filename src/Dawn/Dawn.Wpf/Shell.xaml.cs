@@ -137,7 +137,7 @@ namespace Dawn.Wpf
             _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
-            _shellViewModel.Updates.OnDeleteRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete all files in this backup folder. \r\nThis can not be undone.",
@@ -146,7 +146,7 @@ namespace Dawn.Wpf
                 Buttons = MessageBoxButtons.YesNo(),
             })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
-            _shellViewModel.Updates.OnDeleteAllRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteAllRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete every backup. \r\nThis can not be undone.",
@@ -155,7 +155,7 @@ namespace Dawn.Wpf
                 Buttons = MessageBoxButtons.YesNo(),
             })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
-            _shellViewModel.OnApplicationUpdated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.OnApplicationUpdated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "Your update has been prepared. \r\nDo you want to restart Dawn?",
@@ -164,7 +164,7 @@ namespace Dawn.Wpf
                 Buttons = MessageBoxButtons.YesNo(),
             })) == AdonisUI.Controls.MessageBoxResult.Yes;
 
-            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(this, new MessageBoxModel
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "Applying your files didnt result in a new backup. Delete empty backup folder?",
