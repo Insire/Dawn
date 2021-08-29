@@ -9,6 +9,7 @@
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
                        xmlns:serilog="clr-namespace:Serilog.Events;assembly=Serilog"
                        Name="rootView"
                        Title="Log"
@@ -25,8 +26,7 @@
 
     <DockPanel>
 
-        <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}"
-                   DockPanel.Dock="Bottom">
+        <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" DockPanel.Dock="Bottom">
             <Button Margin="8"
                     Padding="8"
                     HorizontalAlignment="Right"
@@ -37,9 +37,11 @@
             </Button>
         </DockPanel>
 
-        <ProgressBar adonisExtensions:ProgressBarExtension.IsProgressAnimationEnabled="False"
-                     local:SmoothProgressBarAnimation.Percentage="{Binding Percentage, Mode=OneWay}"
-                     DockPanel.Dock="Bottom" />
+        <ProgressBar adonisExtensions:ProgressBarExtension.IsProgressAnimationEnabled="False" DockPanel.Dock="Bottom">
+            <i:Interaction.Behaviors>
+                <mvvm:SmoothProgressBehavior Percentage="{Binding Percentage, Mode=OneWay}" />
+            </i:Interaction.Behaviors>
+        </ProgressBar>
 
         <ScrollViewer Margin="8">
             <ItemsControl ItemsSource="{Binding Items}">
@@ -51,12 +53,10 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:LogEventViewModel}">
-                        <Border BorderBrush="{x:Null}"
-                                BorderThickness="0">
+                        <Border BorderBrush="{x:Null}" BorderThickness="0">
                             <Border.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Command="{Binding CopyCommand}"
-                                              Header="Copy">
+                                    <MenuItem Command="{Binding CopyCommand}" Header="Copy">
                                         <MenuItem.Icon>
                                             <icons:PackIconFontAwesome Kind="CopySolid" />
                                         </MenuItem.Icon>
@@ -96,33 +96,27 @@
                                     <Run.Style>
                                         <Style TargetType="{x:Type Run}">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Verbose}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Verbose}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
                                                 </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Debug}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Debug}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
                                                 </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Information}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Information}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
                                                 </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Warning}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Warning}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" />
                                                 </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Error}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Error}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
                                                 </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}"
-                                                             Value="{x:Static serilog:LogEventLevel.Fatal}">
+                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Fatal}">
                                                     <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
                                                     <Setter Property="FontWeight" Value="Bold" />
                                                 </DataTrigger>
@@ -132,8 +126,7 @@
                                 </Run>
 
                                 <Run Text="{Binding Text, Mode=OneWay}" />
-                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}"
-                                     Text="{Binding Exception, Mode=OneWay}" />
+                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" Text="{Binding Exception, Mode=OneWay}" />
                             </TextBlock>
                         </Border>
                     </DataTemplate>

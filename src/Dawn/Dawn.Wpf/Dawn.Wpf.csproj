@@ -32,7 +32,7 @@
         <PackageReference Include="DryIoc.dll" Version="4.8.1" />
         <PackageReference Include="Jot" Version="2.1.8" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.8.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.78" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.85" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
         <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.231">
             <PrivateAssets>all</PrivateAssets>
