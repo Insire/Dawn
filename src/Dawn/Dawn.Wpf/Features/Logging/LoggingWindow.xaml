@@ -29,7 +29,6 @@
     </controls:AdonisWindow.Resources>
 
     <DockPanel>
-
         <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" DockPanel.Dock="Bottom">
 
             <ContentControl Margin="8"
@@ -171,6 +170,7 @@
                                                 <VirtualizingStackPanel IsItemsHost="True" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
+
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <TextBlock>
