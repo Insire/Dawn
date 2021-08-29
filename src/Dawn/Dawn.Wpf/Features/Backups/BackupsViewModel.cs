@@ -199,7 +199,7 @@ namespace Dawn.Wpf
                         {
                             _isMassDeleting = true;
 
-                            for (var i = 0; i < Items.Count; i++)
+                            for (var i = Items.Count - 1; i >= 0; i--)
                             {
                                 _logViewModel.Progress.Report(i, Items.Count);
 
