@@ -1,11 +1,17 @@
+using DynamicData;
+using DynamicData.Binding;
 using ImTools;
+using Microsoft.Toolkit.Mvvm.Input;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -15,13 +21,17 @@ namespace Dawn.Wpf
     /// <summary>
     /// displays files that will be copied to a folder
     /// </summary>
-    public sealed class StagingsViewModel : ViewModelListBase<StagingViewModel>
+    public sealed class StagingsViewModel : ViewModelBase
     {
+        private readonly SourceCache<StagingViewModel, string> _sourceCache;
+        private readonly ObservableCollectionExtended<StagingViewModel> _items;
+
         private readonly ConfigurationViewModel _configurationViewModel;
-        private readonly ILogger _log;
         private readonly LogViewModel _logViewModel;
         private readonly BackupsViewModel _backupsViewModel;
         private readonly IFileSystem _fileSystem;
+        private readonly IDisposable _subscription;
+        private readonly ILogger _log;
 
         private bool _reuseLastBackup;
         public bool ReuseLastBackup
@@ -30,16 +40,30 @@ namespace Dawn.Wpf
             set { SetProperty(ref _reuseLastBackup, value); }
         }
 
-        public ICommand ApplyCommand { get; }
+        private StagingViewModel _selectedItem;
+        public StagingViewModel SelectedItem
+        {
+            get { return _selectedItem; }
+            set { SetProperty(ref _selectedItem, value); }
+        }
 
+        public ReadOnlyObservableCollection<StagingViewModel> Items { get; }
+
+        public ICommand ApplyCommand { get; }
         public ICommand AddFilesCommand { get; }
         public ICommand AddFolderCommand { get; }
 
+        public ICommand ClearCommand { get; }
         public Func<bool> OnEmptyDirectoryCreated { get; set; }
-
         public Action OnApplyingStagings { get; set; }
 
-        public StagingsViewModel(in IScarletCommandBuilder commandBuilder, ConfigurationViewModel configurationViewModel, ILogger log, LogViewModel logViewModel, BackupsViewModel backupsViewModel, IFileSystem fileSystem)
+        public StagingsViewModel(in IScarletCommandBuilder commandBuilder,
+                                 ConfigurationViewModel configurationViewModel,
+                                 ILogger log,
+                                 LogViewModel logViewModel,
+                                 BackupsViewModel backupsViewModel,
+                                 IFileSystem fileSystem,
+                                 SynchronizationContext context)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
@@ -47,6 +71,19 @@ namespace Dawn.Wpf
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
+            _sourceCache = new SourceCache<StagingViewModel, string>(vm => vm.Path);
+            _items = new ObservableCollectionExtended<StagingViewModel>();
+            Items = new ReadOnlyObservableCollection<StagingViewModel>(_items);
+
+            _subscription = _sourceCache
+                .Connect()
+                .ObserveOn(TaskPoolScheduler.Default)
+                .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.Path), SortOptimisations.ComparesImmutableValuesOnly)
+                .ObserveOn(context)
+                .Bind(_items)
+                .DisposeMany()
+                .Subscribe();
 
             ApplyCommand = commandBuilder.Create(Apply, CanApply)
                 .WithBusyNotification(BusyStack)
@@ -62,6 +99,13 @@ namespace Dawn.Wpf
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
+
+            ClearCommand = new RelayCommand(ClearImpl);
+        }
+
+        private void ClearImpl()
+        {
+            _sourceCache.Clear();
         }
 
         private async Task AddFilesImpl()
@@ -94,13 +138,14 @@ namespace Dawn.Wpf
 
         public async Task Add(string[] fileSystemInfos)
         {
+            var viewModels = new List<StagingViewModel>();
             foreach (var fileSystemInfo in fileSystemInfos)
             {
                 if (_fileSystem.FileExists(fileSystemInfo))
                 {
                     var viewModel = new StagingViewModel(fileSystemInfo);
 
-                    await Add(viewModel).ConfigureAwait(false);
+                    viewModels.Add(viewModel);
                 }
 
                 if (_fileSystem.DirectoryExists(fileSystemInfo))
@@ -111,10 +156,12 @@ namespace Dawn.Wpf
                     {
                         var viewModel = new StagingViewModel(file);
 
-                        await Add(viewModel).ConfigureAwait(false);
+                        viewModels.Add(viewModel);
                     }
                 }
             }
+
+            _sourceCache.AddOrUpdate(viewModels);
         }
 
         private async Task Apply(CancellationToken token)
@@ -188,7 +235,7 @@ namespace Dawn.Wpf
 
                 await Task.WhenAll(t1, t2).ConfigureAwait(false);
 
-                await Clear(token).ConfigureAwait(false);
+                _sourceCache.Clear();
 
                 await _backupsViewModel.Refresh(token).ConfigureAwait(false);
             }
@@ -247,6 +294,13 @@ namespace Dawn.Wpf
         private bool Copy(string from, string to, DateTime timeStamp, bool overwrite, bool setLastWriteTime)
         {
             return _fileSystem.CopyFor<StagingsViewModel>(from, to, _log, timeStamp, overwrite, setLastWriteTime);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _subscription?.Dispose();
+
+            base.Dispose(disposing);
         }
     }
 }

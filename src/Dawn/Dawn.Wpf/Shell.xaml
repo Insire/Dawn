@@ -202,7 +202,7 @@
                     <Style.Triggers>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding Stagings.Count}" Value="0" />
+                                <Condition Binding="{Binding Stagings.Items.Count}" Value="0" />
                                 <Condition Binding="{Binding Updates.Count}" Value="0" />
                             </MultiDataTrigger.Conditions>
                             <MultiDataTrigger.Setters>
@@ -224,7 +224,6 @@
             <icons:PackIconFontAwesome Margin="8"
                                        HorizontalAlignment="Center"
                                        Kind="ChevronDownSolid" />
-
         </DockPanel>
 
         <!--  Backups  -->
@@ -345,6 +344,14 @@
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Open in explorer">
                                                 <icons:PackIconFontAwesome Kind="ExternalLinkAltSolid" />
+                                            </Button>
+
+                                            <Button Width="32"
+                                                    Height="32"
+                                                    Command="{Binding OpenExternallyCommand}"
+                                                    DockPanel.Dock="Right"
+                                                    ToolTip="Detect and display changes">
+                                                <icons:PackIconFontAwesome Kind="ExchangeAltSolid" />
                                             </Button>
 
                                             <TextBlock Text="{Binding Count, StringFormat='{}Files: {0}'}">
@@ -515,7 +522,7 @@
                 <Style TargetType="{x:Type DockPanel}">
                     <Setter Property="Visibility" Value="{Binding StagingVisibility, ElementName=root, Mode=TwoWay}" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Stagings.Count}" Value="0">
+                        <DataTrigger Binding="{Binding Stagings.Items.Count}" Value="0">
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -525,6 +532,13 @@
             <ListBox Margin="0,8,0,0"
                      ItemsSource="{Binding Stagings.Items}"
                      SelectedItem="{Binding Stagings.SelectedItem}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel IsItemsHost="True" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
                 <ListBox.ItemContainerStyle>
                     <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.RippleListBoxItem}}" TargetType="{x:Type ListBoxItem}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -557,7 +571,7 @@
             <DockPanel.Style>
                 <Style TargetType="{x:Type DockPanel}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Stagings.Count}" Value="0">
+                        <DataTrigger Binding="{Binding Stagings.Items.Count}" Value="0">
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -610,7 +624,7 @@
                               IsChecked="{Binding Stagings.ReuseLastBackup}"
                               Style="{StaticResource {x:Static adonisUi:Styles.ToggleSwitch}}" />
 
-                <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Count, StringFormat='{} Staging Area ({0} Files)'}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Items.Count, StringFormat='{} Staging Area ({0} Files)'}" />
             </DockPanel>
         </DockPanel>
 

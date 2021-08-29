@@ -17,12 +17,14 @@ namespace Dawn.Wpf
     {
         private readonly ObservableCollectionExtended<LogEventViewModel> _items;
         private readonly ObservableCollectionExtended<LogEventViewModel> _errors;
-        private readonly SourceCache<LogEventViewModel, long> _sourceCache;
+
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly SynchronizationContext _context;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
 
-        private IDisposable _subscription;
+        private readonly SourceCache<LogEventViewModel, long> _sourceCache;
+        private readonly IDisposable _subscription;
+
         private bool _disposedValue;
         private long _index;
 
@@ -37,6 +39,13 @@ namespace Dawn.Wpf
 
         public ReadOnlyObservableCollection<LogEventViewModel> Errors { get; }
 
+        private int _total;
+        public int Total
+        {
+            get { return _total; }
+            private set { SetProperty(ref _total, value); }
+        }
+
         public IProgress<decimal> Progress => _dispatcherProgress;
 
         public LogViewModel(in IScarletCommandBuilder commandBuilder, SynchronizationContext context)
@@ -45,49 +54,45 @@ namespace Dawn.Wpf
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
-            _sourceCache = new SourceCache<LogEventViewModel, long>(vm => vm.Key);
             _items = new ObservableCollectionExtended<LogEventViewModel>();
             Items = new ReadOnlyObservableCollection<LogEventViewModel>(_items);
 
             _errors = new ObservableCollectionExtended<LogEventViewModel>();
             Errors = new ReadOnlyObservableCollection<LogEventViewModel>(_errors);
 
-            _subscription = CreateSubscription(context);
-        }
+            _sourceCache = new SourceCache<LogEventViewModel, long>(vm => vm.Key);
+            var comparer = SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp);
 
-        private IDisposable CreateSubscription(SynchronizationContext context)
-        {
+            var countSubscription = _sourceCache.CountChanged
+                .ObserveOn(TaskPoolScheduler.Default)
+                .Throttle(TimeSpan.FromMilliseconds(250))
+                .ObserveOn(context)
+                .Subscribe(p => Total = p);
+
             var sourceObservable = _sourceCache
                 .Connect()
-                .ObserveOn(TaskPoolScheduler.Default)
-                .DistinctUntilChanged();
+                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
+                .ObserveOn(TaskPoolScheduler.Default);
 
-            var importantEvents = sourceObservable
-                .Filter(q => q.Level >= LogEventLevel.Information);
-
-            var lessImportantEvents = sourceObservable
-                .Filter(q => q.Level < LogEventLevel.Information)
-                .Sample(TimeSpan.FromMilliseconds(15));
-
-            var itemsSubscription = importantEvents
-                .Merge(lessImportantEvents)
-                .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
+            var itemsSubscription = sourceObservable
+                .Filter(q => q.Level >= LogEventLevel.Information)
+                .Merge(sourceObservable
+                        .Filter(q => q.Level < LogEventLevel.Information))
+                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
                 .DisposeMany()
                 .Subscribe();
 
-            var criticalEvents = sourceObservable
-                .Filter(q => q.Level > LogEventLevel.Warning);
-
-            var errorsSubscription = criticalEvents
-                .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
+            var errorsSubscription = sourceObservable
+                .Filter(q => q.Level > LogEventLevel.Warning)
+                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_errors)
                 .DisposeMany()
                 .Subscribe();
 
-            return new CompositeDisposable(itemsSubscription, errorsSubscription);
+            _subscription = new CompositeDisposable(itemsSubscription, errorsSubscription, countSubscription, _sourceCache);
         }
 
         public IDisposable Begin()
@@ -104,11 +109,11 @@ namespace Dawn.Wpf
 
         public void Emit(LogEvent logEvent)
         {
-            _sourceCache.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this));
+            _sourceCache?.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this));
         }
 
         /// <summary>
-        ///   we need to clear the bound collection, before the UI is bound to it for performance reasons
+        /// we need to clear the bound collection, before the UI is bound to it for performance reasons
         /// </summary>
         public void PrepareBegin()
         {
@@ -119,13 +124,6 @@ namespace Dawn.Wpf
         {
             _index = 0;
             Progress.Report(0);
-
-            _subscription = CreateSubscription(_context);
-        }
-
-        private void Clear()
-        {
-            _subscription.Dispose();
         }
 
         private void Dispose(bool disposing)
@@ -134,7 +132,7 @@ namespace Dawn.Wpf
             {
                 if (disposing)
                 {
-                    _subscription.Dispose();
+                    _subscription?.Dispose();
                 }
 
                 _disposedValue = true;
@@ -161,7 +159,6 @@ namespace Dawn.Wpf
 
             public void Dispose()
             {
-                _viewModel.Clear();
             }
         }
     }

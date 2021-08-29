@@ -34,6 +34,7 @@ namespace Dawn.Wpf
                                                     || Matching.FromSource<ShellViewModel>().Invoke(o))
                                 .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
 
+            c.UseInstance(SynchronizationContext.Current);
             c.UseInstance<ILogger>(logConfiguration.CreateLogger());
             c.UseInstance(logViewModel);
             c.UseInstance(Assembly.GetAssembly(typeof(CompositionRoot)));
