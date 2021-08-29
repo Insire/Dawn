@@ -7,6 +7,7 @@ using Serilog.Events;
 using System;
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 
@@ -15,6 +16,7 @@ namespace Dawn.Wpf
     public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
         private readonly ObservableCollectionExtended<LogEventViewModel> _items;
+        private readonly ObservableCollectionExtended<LogEventViewModel> _errors;
         private readonly SourceCache<LogEventViewModel, long> _sourceCache;
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly SynchronizationContext _context;
@@ -33,6 +35,8 @@ namespace Dawn.Wpf
 
         public ReadOnlyObservableCollection<LogEventViewModel> Items { get; }
 
+        public ReadOnlyObservableCollection<LogEventViewModel> Errors { get; }
+
         public IProgress<decimal> Progress => _dispatcherProgress;
 
         public LogViewModel(in IScarletCommandBuilder commandBuilder, SynchronizationContext context)
@@ -44,6 +48,9 @@ namespace Dawn.Wpf
             _sourceCache = new SourceCache<LogEventViewModel, long>(vm => vm.Key);
             _items = new ObservableCollectionExtended<LogEventViewModel>();
             Items = new ReadOnlyObservableCollection<LogEventViewModel>(_items);
+
+            _errors = new ObservableCollectionExtended<LogEventViewModel>();
+            Errors = new ReadOnlyObservableCollection<LogEventViewModel>(_errors);
 
             _subscription = CreateSubscription(context);
         }
@@ -62,13 +69,25 @@ namespace Dawn.Wpf
                 .Filter(q => q.Level < LogEventLevel.Information)
                 .Sample(TimeSpan.FromMilliseconds(15));
 
-            return importantEvents
+            var itemsSubscription = importantEvents
                 .Merge(lessImportantEvents)
                 .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
                 .DisposeMany()
                 .Subscribe();
+
+            var criticalEvents = sourceObservable
+                .Filter(q => q.Level > LogEventLevel.Warning);
+
+            var errorsSubscription = criticalEvents
+                .Sort(SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp), SortOptimisations.ComparesImmutableValuesOnly)
+                .ObserveOn(context)
+                .Bind(_errors)
+                .DisposeMany()
+                .Subscribe();
+
+            return new CompositeDisposable(itemsSubscription, errorsSubscription);
         }
 
         public IDisposable Begin()

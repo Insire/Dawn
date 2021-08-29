@@ -158,7 +158,7 @@ namespace Dawn.Wpf
 
                                if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                                {
-                                   BackupFile(newfile.Path, backupFileName, now, reuseLastBackup);
+                                   BackupFile(newfile.Path, backupFileName, now, true);
                                }
 
                                Update(newfile.Path, deploymentFileName, now, _logViewModel.Progress);

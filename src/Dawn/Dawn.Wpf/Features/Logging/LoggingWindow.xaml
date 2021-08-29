@@ -24,9 +24,102 @@
 
     <!--  DataContext: LogViewModel  -->
 
+    <controls:AdonisWindow.Resources>
+        <mvvm:BindingProxy x:Key="WindowProxy" Data="{Binding ElementName=rootView}" />
+    </controls:AdonisWindow.Resources>
+
     <DockPanel>
 
         <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" DockPanel.Dock="Bottom">
+
+            <ContentControl Margin="8"
+                            Padding="8"
+                            HorizontalAlignment="Left">
+                <ContentControl.Style>
+                    <Style TargetType="{x:Type ContentControl}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <TextBlock>
+                                            <Run Text="There have been" />
+                                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding Errors.Count, Mode=OneWay}" />
+                                            <Run Text="Errors." />
+
+                                            <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Show them?</Hyperlink>
+                                        </TextBlock>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <TextBlock>
+                                            <Run Text="There have been" />
+                                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding Errors.Count, Mode=OneWay}" />
+                                            <Run Text="Errors." />
+
+                                            <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Hide them?</Hyperlink>
+                                        </TextBlock>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Errors.Count}" Value="1" />
+                                    <Condition Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <TextBlock>
+                                                <Run Text="There has been" />
+                                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="1" />
+                                                <Run Text="Error." />
+
+                                                <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Show it?</Hyperlink>
+                                            </TextBlock>
+                                        </Setter.Value>
+                                    </Setter>
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Errors.Count}" Value="1" />
+                                    <Condition Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <TextBlock>
+                                                <Run Text="There has been" />
+                                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="1" />
+                                                <Run Text="Error." />
+
+                                                <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Hide it?</Hyperlink>
+                                            </TextBlock>
+                                        </Setter.Value>
+                                    </Setter>
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+
+                            <DataTrigger Binding="{Binding Errors.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+
             <Button Margin="8"
                     Padding="8"
                     HorizontalAlignment="Right"
@@ -44,7 +137,7 @@
         </ProgressBar>
 
         <ScrollViewer Margin="8">
-            <ItemsControl ItemsSource="{Binding Items}">
+            <ItemsControl>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel IsItemsHost="True" />
@@ -126,11 +219,21 @@
                                 </Run>
 
                                 <Run Text="{Binding Text, Mode=OneWay}" />
-                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" Text="{Binding Exception, Mode=OneWay}" />
                             </TextBlock>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+
+                <ItemsControl.Style>
+                    <Style TargetType="{x:Type ItemsControl}">
+                        <Setter Property="ItemsSource" Value="{Binding Items}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowErrors, ElementName=rootView}" Value="True">
+                                <Setter Property="ItemsSource" Value="{Binding Errors}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
             </ItemsControl>
         </ScrollViewer>
     </DockPanel>
