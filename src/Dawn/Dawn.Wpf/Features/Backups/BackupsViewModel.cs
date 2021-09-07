@@ -33,10 +33,9 @@ namespace Dawn.Wpf
         public Func<bool> OnDeleteRequested { get; set; }
 
         public Action OnDeletingAll { get; set; }
-
         public Action OnDeleting { get; set; }
-
         public Action OnRestoring { get; set; }
+        public Action<BackupViewModel> OnDetectChanges { get; set; }
 
         public Func<BackupViewModel, BackupViewModel> OnMetaDataEditing { get; set; }
 
@@ -55,13 +54,13 @@ namespace Dawn.Wpf
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             RestoreCommand = commandBuilder
-                .Create<BackupViewModel>(Restore, CanRestore)
+                .Create<BackupViewModel>(RestoreImpl, CanRestore)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
             DeleteAllCommand = commandBuilder
-                .Create(DeleteAll, CanDeleteAll)
+                .Create(DeleteAllImpl, CanDeleteAllImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
@@ -136,21 +135,22 @@ namespace Dawn.Wpf
                             key = date.ToString("yyyy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture);
                             if (!lookup.ContainsKey(key))
                             {
-                                var group = _viewModelFactory.Get(new BackupModel()
+                                var model = new BackupModel()
                                 {
                                     FullPath = directory,
                                     Name = key,
                                     TimeStamp = date
-                                }, this, () => _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false), () => { if (!_isMassDeleting) { OnDeleting?.Invoke(); } }, (vm) => OnMetaDataEditing?.Invoke(vm));
+                                };
+                                var group = _viewModelFactory.Get(model, this, OnDeleteRequestedImpl, OnDeletingImpl, OnMetaDataEditImpl, OnDetectChangesImpl);
                                 var files = await Task.Run(() => _fileSystem.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
 
-                                await group.AddRange(files.Where(p => !p.EndsWith("backup.json", StringComparison.InvariantCultureIgnoreCase)).Select(p => new ViewModelContainer<string>(p)), token).ConfigureAwait(false);
+                                await group.AddRange(files.Where(p => !p.EndsWith(IFileSystem.MetaDataFileName, StringComparison.InvariantCultureIgnoreCase)).Select(p => new FileInfoViewModel(p)), token).ConfigureAwait(false);
 
                                 lookup.Add(key, group);
                             }
                             else
                             {
-                                await lookup[key].Add(new ViewModelContainer<string>(directory), token).ConfigureAwait(false);
+                                await lookup[key].Add(new DirectoryViewModel(directory), token).ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)
@@ -168,146 +168,155 @@ namespace Dawn.Wpf
             }
         }
 
+        private bool OnDeleteRequestedImpl()
+        {
+            return _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false);
+        }
+
+        private void OnDeletingImpl()
+        {
+            if (!_isMassDeleting)
+            {
+                OnDeleting?.Invoke();
+            }
+        }
+
+        private BackupViewModel OnMetaDataEditImpl(BackupViewModel backup)
+        {
+            return OnMetaDataEditing?.Invoke(backup);
+        }
+
+        private void OnDetectChangesImpl(BackupViewModel backup)
+        {
+            OnDetectChanges?.Invoke(backup);
+        }
+
         public override bool CanRefresh()
         {
             return !_configurationViewModel.HasErrors
                 && base.CanRefresh();
         }
 
-        private async Task DeleteAll(CancellationToken token)
+        private async Task DeleteAllImpl(CancellationToken token)
         {
-            try
+            var shouldDeleteAll = OnDeleteAllRequested?.Invoke() ?? false;
+
+            if (!shouldDeleteAll)
             {
-                var shouldDeleteAll = OnDeleteAllRequested?.Invoke() ?? false;
+                return;
+            }
 
-                if (!shouldDeleteAll)
+            _logViewModel.PrepareBegin();
+
+            var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
+
+            var t2 = Task.Run(async () =>
+            {
+                using (_logViewModel.Begin())
                 {
-                    return;
-                }
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
 
-                _logViewModel.PrepareBegin();
-
-                var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
-
-                var t2 = Task.Run(async () =>
-                {
-                    using (_logViewModel.Begin())
+                    try
                     {
-                        _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                        _isMassDeleting = true;
 
-                        try
+                        for (var i = Items.Count - 1; i >= 0; i--)
                         {
-                            _isMassDeleting = true;
+                            _logViewModel.Progress.Report(i, Items.Count);
 
-                            for (var i = Items.Count - 1; i >= 0; i--)
+                            if (token.IsCancellationRequested)
                             {
-                                _logViewModel.Progress.Report(i, Items.Count);
-
-                                if (token.IsCancellationRequested)
-                                {
-                                    return;
-                                }
-
-                                var item = Items[i];
-                                await item.Delete().ConfigureAwait(false);
+                                return;
                             }
 
-                            await Refresh(token).ConfigureAwait(false);
-                        }
-                        finally
-                        {
-                            _isMassDeleting = false;
+                            var item = Items[i];
+                            await item.Delete().ConfigureAwait(false);
                         }
 
-                        _logViewModel.Progress.Report(100);
-                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                        await Refresh(token).ConfigureAwait(false);
                     }
-                }, token);
+                    finally
+                    {
+                        _isMassDeleting = false;
+                    }
 
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _log.LogError(ex);
-            }
+                    _logViewModel.Progress.Report(100);
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                }
+            }, token);
+
+            await Task.WhenAll(t1, t2).ConfigureAwait(false);
         }
 
-        private bool CanDeleteAll()
+        private bool CanDeleteAllImpl()
         {
             return !IsBusy
                 && !_configurationViewModel.HasErrors
                 && Items.Count > 0;
         }
 
-        private async Task Restore(BackupViewModel backupViewModel, CancellationToken token)
+        private async Task RestoreImpl(BackupViewModel backupViewModel, CancellationToken token)
         {
-            try
+            _logViewModel.PrepareBegin();
+
+            var deploymentFolder = _configurationViewModel.DeploymentFolder;
+            var backupFolder = _configurationViewModel.BackupFolder;
+            var now = DateTime.Now;
+
+            _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
+
+            var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
+
+            if (!_fileSystem.DirectoryExists(deploymentFolder))
             {
-                _logViewModel.PrepareBegin();
+                _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {FolderPath} does not exist", deploymentFolder);
 
-                var deploymentFolder = _configurationViewModel.DeploymentFolder;
-                var backupFolder = _configurationViewModel.BackupFolder;
-                var now = DateTime.Now;
+                return;
+            }
 
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
+            if (!_fileSystem.DirectoryExists(deploymentFolder))
+            {
+                _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {FolderPath} does not exist", backupFolder);
 
-                var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
+                return;
+            }
 
-                if (!_fileSystem.DirectoryExists(deploymentFolder))
+            var t2 = Task.Run(() =>
+            {
+                using (_logViewModel.Begin())
                 {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, "Deployment folder {FolderPath} does not exist", deploymentFolder);
-
-                    return;
-                }
-
-                if (!_fileSystem.DirectoryExists(deploymentFolder))
-                {
-                    _log.Write(Serilog.Events.LogEventLevel.Error, "Backup folder {FolderPath} does not exist", backupFolder);
-
-                    return;
-                }
-
-                var t2 = Task.Run(() =>
-                {
-                    using (_logViewModel.Begin())
+                    var array = backupViewModel.Items.ToArray();
+                    for (var i = 0; i < array.Length; i++)
                     {
-                        var array = backupViewModel.Items.ToArray();
-                        for (var i = 0; i < array.Length; i++)
+                        if (token.IsCancellationRequested)
                         {
-                            if (token.IsCancellationRequested)
-                            {
-                                return;
-                            }
-
-                            var percentage = i * 100m / (array.Length - 1);
-                            _logViewModel.Progress.Report(percentage);
-
-                            var file = array[i];
-                            var extension = Path.GetExtension(file.Value).ToLowerInvariant();
-                            if (extension == ".zip")
-                            {
-                                RestoreArchive(file.Value, deploymentFolder, now, null);
-                            }
-                            else
-                            {
-                                var fileName = Path.GetFileName(file.Value);
-                                var restoreFileName = Path.Combine(deploymentFolder, fileName);
-
-                                RestoreFile(file.Value, restoreFileName, now);
-                            }
+                            return;
                         }
 
-                        _logViewModel.Progress.Report(100);
-                        _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
-                    }
-                }, token);
+                        var percentage = i * 100m / (array.Length - 1);
+                        _logViewModel.Progress.Report(percentage);
 
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _log.LogError(ex);
-            }
+                        var file = array[i];
+                        var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
+                        if (extension == ".zip")
+                        {
+                            RestoreArchive(file.FullPath, deploymentFolder, now, null);
+                        }
+                        else
+                        {
+                            var fileName = Path.GetFileName(file.FullPath);
+                            var restoreFileName = Path.Combine(deploymentFolder, fileName);
+
+                            RestoreFile(file.FullPath, restoreFileName, now);
+                        }
+                    }
+
+                    _logViewModel.Progress.Report(100);
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
+                }
+            }, token);
+
+            await Task.WhenAll(t1, t2).ConfigureAwait(false);
         }
 
         private void RestoreFile(string from, string to, DateTime timeStamp)

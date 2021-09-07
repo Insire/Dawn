@@ -52,6 +52,7 @@ namespace Dawn.Wpf
         public ICommand ApplyCommand { get; }
         public ICommand AddFilesCommand { get; }
         public ICommand AddFolderCommand { get; }
+        public ICommand RemoveCommand { get; }
 
         public ICommand ClearCommand { get; }
         public Func<bool> OnEmptyDirectoryCreated { get; set; }
@@ -72,35 +73,52 @@ namespace Dawn.Wpf
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
-            _sourceCache = new SourceCache<StagingViewModel, string>(vm => vm.Path);
+            _sourceCache = new SourceCache<StagingViewModel, string>(vm => vm.FullPath);
             _items = new ObservableCollectionExtended<StagingViewModel>();
             Items = new ReadOnlyObservableCollection<StagingViewModel>(_items);
 
             _subscription = _sourceCache
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
-                .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.Path), SortOptimisations.ComparesImmutableValuesOnly)
+                .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.FullPath), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
                 .DisposeMany()
                 .Subscribe();
 
-            ApplyCommand = commandBuilder.Create(Apply, CanApply)
+            ApplyCommand = commandBuilder
+                .Create(ApplyImpl, CanApply)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
-            AddFilesCommand = commandBuilder.Create(AddFilesImpl, CanAddFilesImpl)
+            AddFilesCommand = commandBuilder
+                .Create(AddFilesImpl, CanAddFilesImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
-            AddFolderCommand = commandBuilder.Create(AddFolderImpl, CanAddFolderImpl)
+            AddFolderCommand = commandBuilder
+                .Create(AddFolderImpl, CanAddFolderImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
+            RemoveCommand = new RelayCommand<object>(RemoveImpl, CanRemoveImpl);
             ClearCommand = new RelayCommand(ClearImpl);
+        }
+
+        private void RemoveImpl(object args)
+        {
+            if (args is StagingViewModel staging)
+            {
+                _sourceCache.Remove(staging);
+            }
+        }
+
+        private bool CanRemoveImpl(object args)
+        {
+            return args is StagingViewModel;
         }
 
         private void ClearImpl()
@@ -164,85 +182,78 @@ namespace Dawn.Wpf
             _sourceCache.AddOrUpdate(viewModels);
         }
 
-        private async Task Apply(CancellationToken token)
+        private async Task ApplyImpl(CancellationToken token)
         {
-            try
-            {
-                _logViewModel.PrepareBegin();
+            _logViewModel.PrepareBegin();
 
-                var reuseLastBackup = ReuseLastBackup;
-                var deploymentFolder = _configurationViewModel.DeploymentFolder;
-                var backupFolder = _configurationViewModel.BackupFolder;
-                var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
-                var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
-                var now = DateTime.Now;
+            var reuseLastBackup = ReuseLastBackup;
+            var deploymentFolder = _configurationViewModel.DeploymentFolder;
+            var backupFolder = _configurationViewModel.BackupFolder;
+            var backupTypes = _configurationViewModel.BackupFileTypes.Items.Select(p => p.Extension).ToArray();
+            var backupFileFolder = GetFolderName(_backupsViewModel.Items, backupFolder, reuseLastBackup);
+            var now = DateTime.Now;
 
-                _fileSystem.CreateDirectory(deploymentFolder);
-                _fileSystem.CreateDirectory(backupFolder);
-                _fileSystem.CreateDirectory(backupFileFolder);
+            _fileSystem.CreateDirectory(deploymentFolder);
+            _fileSystem.CreateDirectory(backupFolder);
+            _fileSystem.CreateDirectory(backupFileFolder);
 
-                var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
+            var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
 
-                var t2 = Task.Run(() =>
+            var t2 = Task.Run(() =>
+           {
+               try
                {
-                   try
+                   using (_logViewModel.Begin())
                    {
-                       using (_logViewModel.Begin())
+                       for (var i = 0; i < Items.Count; i++)
                        {
-                           for (var i = 0; i < Items.Count; i++)
+                           var newfile = Items[i];
+                           _logViewModel.Progress.Report(i, Items.Count);
+
+                           if (token.IsCancellationRequested)
                            {
-                               var newfile = Items[i];
-                               _logViewModel.Progress.Report(i, Items.Count);
-
-                               if (token.IsCancellationRequested)
-                               {
-                                   return;
-                               }
-
-                               var fileName = Path.GetFileName(newfile.Path);
-                               var deploymentFileName = Path.Combine(deploymentFolder, fileName);
-                               var backupFileName = Path.Combine(backupFileFolder, fileName);
-
-                               if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
-                               {
-                                   BackupFile(newfile.Path, backupFileName, now, true);
-                               }
-
-                               Update(newfile.Path, deploymentFileName, now, _logViewModel.Progress);
+                               return;
                            }
 
-                           if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                           var fileName = Path.GetFileName(newfile.FullPath);
+                           var deploymentFileName = Path.Combine(deploymentFolder, fileName);
+                           var backupFileName = Path.Combine(backupFileFolder, fileName);
+
+                           if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                            {
-                               var delete = OnEmptyDirectoryCreated?.Invoke();
-                               if (delete == true)
-                               {
-                                   _fileSystem.DeleteDirectory(backupFileFolder, true);
-                               }
-                           }
-                           else
-                           {
-                               _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
+                               BackupFile(newfile.FullPath, backupFileName, now, true);
                            }
 
-                           _logViewModel.Progress.Report(100);
+                           Update(newfile.FullPath, deploymentFileName, now, _logViewModel.Progress);
                        }
+
+                       if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                       {
+                           var delete = OnEmptyDirectoryCreated?.Invoke();
+                           if (delete == true)
+                           {
+                               _fileSystem.DeleteDirectory(backupFileFolder, true);
+                           }
+                       }
+                       else
+                       {
+                           _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
+                       }
+
+                       _logViewModel.Progress.Report(100);
                    }
-                   catch (Exception ex)
-                   {
-                       _log.LogError(ex);
-                   }
-               }, token);
+               }
+               catch (Exception ex)
+               {
+                   _log.LogError(ex);
+               }
+           }, token);
 
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
+            await Task.WhenAll(t1, t2).ConfigureAwait(false);
 
-                _sourceCache.Clear();
+            _sourceCache.Clear();
 
-                await _backupsViewModel.Refresh(token).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _log.LogError(ex);
-            }
+            await _backupsViewModel.Refresh(token).ConfigureAwait(false);
         }
 
         private static string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)

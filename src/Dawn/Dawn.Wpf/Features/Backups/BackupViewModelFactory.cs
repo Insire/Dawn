@@ -21,9 +21,9 @@ namespace Dawn.Wpf
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
-        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<bool> onDeleteRequested, Action onDeleting, Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
+        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<bool> onDeleteRequested, Action onDeleting, Func<BackupViewModel, BackupViewModel> onMetaDataEdit, Action<BackupViewModel> onDetectChanges)
         {
-            return new BackupViewModel(_commandBuilder, _fileSystem, model, backupsViewModel, _logViewModel, _log, _configurationViewModel, onDeleteRequested, onDeleting, onMetaDataEdit);
+            return new BackupViewModel(_commandBuilder, _fileSystem, model, backupsViewModel, _logViewModel, _log, _configurationViewModel, onDeleteRequested, onDeleting, onMetaDataEdit, onDetectChanges);
         }
     }
 }

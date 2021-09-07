@@ -16,18 +16,18 @@ namespace Dawn.Wpf
     /// a file that belongs to an update
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public sealed class BackupViewModel : ViewModelListBase<ViewModelContainer<string>>
+    public sealed class BackupViewModel : ViewModelListBase<FileSystemViewModel>
     {
-        private const string MetaDataFileName = "backup.json";
-
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly BackupsViewModel _backupsViewModel;
         private readonly LogViewModel _logViewModel;
         private readonly ILogger _log;
+        private readonly IFileSystem _fileSystem;
+
         private readonly Func<bool> _onDeleteRequested;
         private readonly Action _onDeleting;
         private readonly Func<BackupViewModel, BackupViewModel> _onMetaDataEdit;
-        private readonly IFileSystem _fileSystem;
+        private readonly Action<BackupViewModel> _onDetectChanges;
 
         private string _fullPath;
         public string FullPath
@@ -68,6 +68,7 @@ namespace Dawn.Wpf
         public ICommand OpenExternallyCommand { get; }
         public ICommand LoadMetaDataCommand { get; }
         public ICommand EditMetaDataCommand { get; }
+        public ICommand DetectChangesCommand { get; }
 
         public BackupViewModel(in IScarletCommandBuilder commandBuilder,
                                IFileSystem fileSystem,
@@ -78,7 +79,8 @@ namespace Dawn.Wpf
                                ConfigurationViewModel configurationViewModel,
                                Func<bool> onDeleteRequested,
                                Action onDeleting,
-                               Func<BackupViewModel, BackupViewModel> onMetaDataEdit)
+                               Func<BackupViewModel, BackupViewModel> onMetaDataEdit,
+                               Action<BackupViewModel> onDetectChanges)
             : base(commandBuilder)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -89,27 +91,38 @@ namespace Dawn.Wpf
             _onDeleteRequested = onDeleteRequested ?? throw new ArgumentNullException(nameof(onDeleteRequested));
             _onDeleting = onDeleting ?? throw new ArgumentNullException(nameof(onDeleting));
             _onMetaDataEdit = onMetaDataEdit ?? throw new ArgumentNullException(nameof(onMetaDataEdit));
+            _onDetectChanges = onDetectChanges ?? throw new ArgumentNullException(nameof(onDetectChanges));
 
             _fullPath = model.FullPath ?? throw new ArgumentNullException(nameof(BackupModel.FullPath));
             _name = model.Name ?? throw new ArgumentNullException(nameof(BackupModel.Name));
             _timeStamp = model.TimeStamp;
 
-            DeleteCommand = commandBuilder.Create(Delete, CanDelete)
+            DeleteCommand = commandBuilder
+                .Create(DeleteImpl, CanDeleteImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
-            OpenExternallyCommand = commandBuilder.Create(OpenExternally)
+            OpenExternallyCommand = commandBuilder
+                .Create(OpenExternallyImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
-            LoadMetaDataCommand = commandBuilder.Create(LoadMetaData, CanLoadMetaData)
+            LoadMetaDataCommand = commandBuilder
+                .Create(LoadMetaDataImpl, CanLoadMetaDataImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
 
-            EditMetaDataCommand = commandBuilder.Create(EditMetaData, CanEditMetaData)
+            EditMetaDataCommand = commandBuilder
+                .Create(EditMetaDataImpl, CanEditMetaDataImpl)
+                .WithBusyNotification(BusyStack)
+                .WithSingleExecution()
+                .Build();
+
+            DetectChangesCommand = commandBuilder
+                .Create(DetectChangesImpl, CanDetectChangesImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
@@ -129,10 +142,22 @@ namespace Dawn.Wpf
 
         private string GetMetaDataFileName()
         {
-            return Path.Combine(FullPath, MetaDataFileName);
+            return Path.Combine(FullPath, IFileSystem.MetaDataFileName);
         }
 
-        private Task LoadMetaData()
+        private Task DetectChangesImpl()
+        {
+            _onDetectChanges.Invoke(this);
+
+            return Task.CompletedTask;
+        }
+
+        private bool CanDetectChangesImpl()
+        {
+            return !IsBusy;
+        }
+
+        private Task LoadMetaDataImpl()
         {
             return Task.Run(() =>
             {
@@ -162,12 +187,12 @@ namespace Dawn.Wpf
             });
         }
 
-        private bool CanLoadMetaData()
+        private bool CanLoadMetaDataImpl()
         {
             return _fileSystem.FileExists(GetMetaDataFileName());
         }
 
-        private Task EditMetaData()
+        private Task EditMetaDataImpl()
         {
             return Task.Run(() =>
             {
@@ -209,12 +234,12 @@ namespace Dawn.Wpf
             });
         }
 
-        private bool CanEditMetaData()
+        private bool CanEditMetaDataImpl()
         {
             return _onMetaDataEdit != null;
         }
 
-        private Task OpenExternally()
+        private Task OpenExternallyImpl()
         {
             return Task.Run(() =>
             {
@@ -247,45 +272,50 @@ namespace Dawn.Wpf
             });
         }
 
+        private async Task DeleteImpl()
+        {
+            var shouldDelete = _onDeleteRequested?.Invoke() ?? false;
+
+            if (!shouldDelete)
+            {
+                return;
+            }
+
+            _logViewModel.PrepareBegin();
+
+            var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
+            var t2 = Task.Run(async () =>
+            {
+                var subscription = default(IDisposable);
+                try
+                {
+                    if (!_backupsViewModel.IsBusy)
+                    {
+                        // mass operation in progress
+                        subscription = _logViewModel.Begin();
+                    }
+
+                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
+
+                    await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
+                    await _backupsViewModel.Remove(this).ConfigureAwait(false);
+
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
+                }
+                finally
+                {
+                    subscription?.Dispose();
+                }
+            });
+
+            await Task.WhenAll(t1, t2).ConfigureAwait(false);
+        }
+
         public async Task Delete()
         {
             try
             {
-                var shouldDelete = _onDeleteRequested?.Invoke() ?? false;
-
-                if (!shouldDelete)
-                {
-                    return;
-                }
-
-                _logViewModel.PrepareBegin();
-
-                var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
-                var t2 = Task.Run(async () =>
-                {
-                    var subscription = default(IDisposable);
-                    try
-                    {
-                        if (!_backupsViewModel.IsBusy)
-                        {
-                            // mass operation in progress
-                            subscription = _logViewModel.Begin();
-                        }
-
-                        _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
-
-                        await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
-                        await _backupsViewModel.Remove(this).ConfigureAwait(false);
-
-                        _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
-                    }
-                    finally
-                    {
-                        subscription?.Dispose();
-                    }
-                });
-
-                await Task.WhenAll(t1, t2).ConfigureAwait(false);
+                await DeleteImpl().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -293,7 +323,7 @@ namespace Dawn.Wpf
             }
         }
 
-        private bool CanDelete()
+        private bool CanDeleteImpl()
         {
             return _configurationViewModel?.HasErrors == false
                 && _onDeleteRequested != null

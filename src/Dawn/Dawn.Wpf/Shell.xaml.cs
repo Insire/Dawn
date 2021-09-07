@@ -101,6 +101,7 @@ namespace Dawn.Wpf
         private readonly ShellViewModel _shellViewModel;
         private readonly LogViewModel _logViewModel;
         private readonly AboutViewModel _aboutViewModel;
+        private readonly ChangeDetectionViewModel _changeDetectionViewModel;
         private readonly ConfigurationService _configurationService;
         private readonly ILogger _log;
         private readonly IFileSystem _fileSystem;
@@ -109,6 +110,7 @@ namespace Dawn.Wpf
                      Tracker tracker,
                      LogViewModel logViewModel,
                      AboutViewModel aboutViewModel,
+                     ChangeDetectionViewModel changeDetectionViewModel,
                      ConfigurationService configurationService,
                      ILogger log,
                      IFileSystem fileSystem)
@@ -120,6 +122,7 @@ namespace Dawn.Wpf
 
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
+            _changeDetectionViewModel = changeDetectionViewModel ?? throw new ArgumentNullException(nameof(changeDetectionViewModel));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -172,6 +175,18 @@ namespace Dawn.Wpf
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
                 Buttons = MessageBoxButtons.YesNo(),
             })) == AdonisUI.Controls.MessageBoxResult.Yes;
+
+            _shellViewModel.Updates.OnDetectChanges = (vm) => Dispatcher.Invoke(() =>
+            {
+                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel)
+                {
+                    Owner = this
+                };
+
+                _ = _changeDetectionViewModel.DetectChanges(vm);
+
+                wnd.ShowDialog();
+            });
 
             SetImage();
         }

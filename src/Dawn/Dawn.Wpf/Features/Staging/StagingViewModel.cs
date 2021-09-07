@@ -1,23 +1,13 @@
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using System;
-
 namespace Dawn.Wpf
 {
     /// <summary>
     /// a file that will be copied to a folder
     /// </summary>
-    public sealed class StagingViewModel : ObservableObject
+    public sealed class StagingViewModel : FileSystemViewModel
     {
-        private string _path;
-        public string Path
+        public StagingViewModel(string fullPath)
+              : base(fullPath, true)
         {
-            get { return _path; }
-            private set { SetProperty(ref _path, value); }
-        }
-
-        public StagingViewModel(string path)
-        {
-            _path = path ?? throw new ArgumentNullException(nameof(path));
         }
     }
 }

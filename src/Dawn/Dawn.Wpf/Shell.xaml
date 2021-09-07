@@ -258,7 +258,6 @@
             </ScrollViewer.ContextMenu>
 
             <ItemsControl ItemsSource="{Binding Source={StaticResource Updates}}">
-
                 <ItemsControl.Style>
                     <Style BasedOn="{StaticResource {x:Type ItemsControl}}" TargetType="{x:Type ItemsControl}">
                         <Setter Property="ItemsPanel">
@@ -348,7 +347,7 @@
 
                                             <Button Width="32"
                                                     Height="32"
-                                                    Command="{Binding OpenExternallyCommand}"
+                                                    Command="{Binding DetectChangesCommand}"
                                                     DockPanel.Dock="Right"
                                                     ToolTip="Detect and display changes">
                                                 <icons:PackIconFontAwesome Kind="ExchangeAltSolid" />
@@ -363,9 +362,10 @@
                                                                     <VirtualizingStackPanel IsItemsHost="True" />
                                                                 </ItemsPanelTemplate>
                                                             </ItemsControl.ItemsPanel>
+
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
-                                                                    <TextBlock Text="{Binding Value}" />
+                                                                    <TextBlock Text="{Binding FullPath}" />
                                                                 </DataTemplate>
                                                             </ItemsControl.ItemTemplate>
                                                         </ItemsControl>
@@ -392,8 +392,7 @@
                                 <Setter Property="ItemTemplate">
                                     <Setter.Value>
                                         <DataTemplate DataType="{x:Type local:BackupViewModel}">
-
-                                            <DockPanel Margin="8,0,0,0">
+                                            <DockPanel>
                                                 <DockPanel.ToolTip>
                                                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                                         <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Items}">
@@ -404,7 +403,7 @@
                                                             </ItemsControl.ItemsPanel>
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
-                                                                    <TextBlock Text="{Binding Value}" />
+                                                                    <TextBlock Text="{Binding FullPath}" />
                                                                 </DataTemplate>
                                                             </ItemsControl.ItemTemplate>
                                                         </ItemsControl>
@@ -529,9 +528,7 @@
                 </Style>
             </DockPanel.Style>
 
-            <ListBox Margin="0,8,0,0"
-                     ItemsSource="{Binding Stagings.Items}"
-                     SelectedItem="{Binding Stagings.SelectedItem}">
+            <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding Stagings.Items}">
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -539,28 +536,23 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
 
-                <ListBox.ItemContainerStyle>
-                    <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.RippleListBoxItem}}" TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-
-                <ListBox.ItemTemplate>
+                <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:StagingViewModel}">
-                        <DockPanel HorizontalAlignment="Stretch">
+                        <DockPanel Margin="8,0" HorizontalAlignment="Stretch">
                             <icons:PackIconFontAwesome VerticalAlignment="Center"
                                                        DockPanel.Dock="Left"
                                                        Kind="FileSolid" />
                             <Button Command="{Binding Data.RemoveCommand, Source={StaticResource StagingsProxy}}"
+                                    CommandParameter="{Binding}"
                                     DockPanel.Dock="Right"
                                     ToolTip="Unstage this">
                                 <icons:PackIconFontAwesome Kind="TrashSolid" />
                             </Button>
-                            <TextBlock Margin="8,0" Text="{Binding Path}" />
+                            <TextBlock Margin="8,0" Text="{Binding FullPath}" />
                         </DockPanel>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </DockPanel>
 
         <!--  Staging bar  -->

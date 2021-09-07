@@ -3,6 +3,7 @@ using Jot;
 using Jot.Storage;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using MvvmScarletToolkit;
+using MvvmScarletToolkit.Commands;
 using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
@@ -62,12 +63,17 @@ namespace Dawn.Wpf
             c.Register<BackupFileTypesViewModel>(Reuse.Singleton);
             c.Register<BackupViewModelFactory>(Reuse.Singleton);
 
+            c.Register<ChangeDetectionViewModel>(Reuse.Singleton);
+            c.Register<ChangeDetectionService>(Reuse.Singleton);
+
             c.UseInstance(ScarletCommandBuilder.Default);
             c.UseInstance(ScarletDispatcher.Default);
-            c.UseInstance(StrongReferenceMessenger.Default);
             c.UseInstance(ScarletCommandManager.Default);
-            c.UseInstance(ScarletWeakEventManager.Default);
+            c.UseInstance(WeakReferenceMessenger.Default);
             c.UseInstance(ScarletExitService.Default);
+            c.UseInstance(ScarletWeakEventManager.Default);
+
+            c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
             return c;
         }
