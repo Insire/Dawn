@@ -74,6 +74,7 @@ namespace Dawn.Wpf
                 .Filter(q => q.Level >= LogEventLevel.Information)
                 .Merge(sourceObservable
                         .Filter(q => q.Level < LogEventLevel.Information))
+                .LimitSizeTo(50)
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
