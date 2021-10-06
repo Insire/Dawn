@@ -186,10 +186,10 @@ namespace Dawn.Wpf
             {
                 using (var archive = ZipFile.OpenRead(from))
                 {
-                    var count = 0m;
+                    var count = 0;
                     foreach (var entry in archive.Entries)
                     {
-                        progress?.Report(count * 100m / (archive.Entries.Count - 1));
+                        progress?.Report(count, archive.Entries.Count);
                         // Gets the full path to ensure that relative segments are removed.
                         var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
 

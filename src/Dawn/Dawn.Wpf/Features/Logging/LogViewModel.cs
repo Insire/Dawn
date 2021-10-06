@@ -19,7 +19,6 @@ namespace Dawn.Wpf
         private readonly ObservableCollectionExtended<LogEventViewModel> _errors;
 
         private readonly IScarletCommandBuilder _commandBuilder;
-        private readonly SynchronizationContext _context;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
 
         private readonly SourceCache<LogEventViewModel, long> _sourceCache;
@@ -35,10 +34,6 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _precentage, value); }
         }
 
-        public ReadOnlyObservableCollection<LogEventViewModel> Items { get; }
-
-        public ReadOnlyObservableCollection<LogEventViewModel> Errors { get; }
-
         private int _total;
         public int Total
         {
@@ -46,12 +41,13 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _total, value); }
         }
 
+        public ReadOnlyObservableCollection<LogEventViewModel> Items { get; }
+        public ReadOnlyObservableCollection<LogEventViewModel> Errors { get; }
         public IProgress<decimal> Progress => _dispatcherProgress;
 
         public LogViewModel(in IScarletCommandBuilder commandBuilder, SynchronizationContext context)
         {
             _commandBuilder = commandBuilder ?? throw new ArgumentNullException(nameof(commandBuilder));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
             _items = new ObservableCollectionExtended<LogEventViewModel>();

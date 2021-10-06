@@ -20,7 +20,7 @@ namespace Dawn.Wpf
         public string IconAuthorUrl { get; }
 
         public AboutViewModel(in IScarletCommandBuilder commandBuilder, Assembly assembly)
-                : base(commandBuilder)
+            : base(commandBuilder)
         {
             AssemblyVersion = GetVersion(assembly);
             AssemblyVersionString = AssemblyVersion.ToString(3);

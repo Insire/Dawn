@@ -17,21 +17,21 @@ namespace Dawn.Wpf
         private readonly LogEvent _logEvent;
         private readonly ILogEventSink _log;
 
-        public DateTimeOffset Timestamp => _logEvent.Timestamp;
-        public LogEventLevel Level => _logEvent.Level;
-        public Exception Exception => _logEvent.Exception;
-        public ObservableCollection<KeyValuePair<string, LogEventPropertyValue>> Properties { get; }
-
-        public ICommand RenderCommand { get; }
-
-        public ICommand CopyCommand { get; }
-
         private string _text;
         public string Text
         {
             get { return _text; }
             private set { SetProperty(ref _text, value); }
         }
+
+        public DateTimeOffset Timestamp => _logEvent.Timestamp;
+        public LogEventLevel Level => _logEvent.Level;
+        public Exception Exception => _logEvent.Exception;
+        public ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>> Properties { get; }
+
+        public ICommand RenderCommand { get; }
+
+        public ICommand CopyCommand { get; }
 
         public long Key { get; }
 
@@ -41,7 +41,8 @@ namespace Dawn.Wpf
             _logEvent = logEvent ?? throw new ArgumentNullException(nameof(logEvent));
             _log = log ?? throw new ArgumentNullException(nameof(log));
 
-            Properties = new ObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(_logEvent.Properties.Select(p => new KeyValuePair<string, LogEventPropertyValue>(p.Key, p.Value)));
+            var properties = new ObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(_logEvent.Properties.Select(p => new KeyValuePair<string, LogEventPropertyValue>(p.Key, p.Value)));
+            Properties = new ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(properties);
 
             RenderCommand = new RelayCommand(() =>
             {
