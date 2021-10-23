@@ -44,13 +44,18 @@ namespace Dawn.Wpf
                             pair.Source.CreationTime = info.CreationTime;
                             pair.Source.LastAccessTime = info.LastAccessTime;
                             pair.Source.LastWriteTime = info.LastWriteTime;
-                            pair.Source.Length = info.Length;
+                            pair.Source.Exists = info.Exists;
 
-                            using (var fs = new FileStream(pair.Source.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            if (info.Exists)
                             {
-                                pair.Source.Hash = ComputeHash(mySHA256, fs);
+                                pair.Source.Length = info.Length;
 
-                                pair.Source.IsNetAssembly = IsAssembly(fs);
+                                using (var fs = new FileStream(pair.Source.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                                {
+                                    pair.Source.Hash = ComputeHash(mySHA256, fs);
+
+                                    pair.Source.IsNetAssembly = IsAssembly(fs);
+                                }
                             }
 
                             info = new FileInfo(pair.Destination.FullPath);
@@ -59,13 +64,18 @@ namespace Dawn.Wpf
                             pair.Destination.CreationTime = info.CreationTime;
                             pair.Destination.LastAccessTime = info.LastAccessTime;
                             pair.Destination.LastWriteTime = info.LastWriteTime;
-                            pair.Destination.Length = info.Length;
+                            pair.Destination.Exists = info.Exists;
 
-                            using (var fs = new FileStream(pair.Destination.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            if (info.Exists)
                             {
-                                pair.Destination.Hash = ComputeHash(mySHA256, fs);
+                                pair.Destination.Length = info.Length;
 
-                                pair.Destination.IsNetAssembly = IsAssembly(fs);
+                                using (var fs = new FileStream(pair.Destination.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                                {
+                                    pair.Destination.Hash = ComputeHash(mySHA256, fs);
+
+                                    pair.Destination.IsNetAssembly = IsAssembly(fs);
+                                }
                             }
 
                             results.Add(pair);

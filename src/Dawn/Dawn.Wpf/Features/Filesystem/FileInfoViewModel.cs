@@ -26,6 +26,13 @@ namespace Dawn.Wpf
             set { SetProperty(ref _isReadOnly, value); }
         }
 
+        private bool _exists;
+        public bool Exists
+        {
+            get { return _exists; }
+            set { SetProperty(ref _exists, value); }
+        }
+
         private DateTime? _updatedOn;
         /// <summary>
         /// When this class instance has been updated last

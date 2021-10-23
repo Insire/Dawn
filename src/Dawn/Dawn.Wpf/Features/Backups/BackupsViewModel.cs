@@ -293,8 +293,7 @@ namespace Dawn.Wpf
                             return;
                         }
 
-                        var percentage = i * 100m / (array.Length - 1);
-                        _logViewModel.Progress.Report(percentage);
+                        _logViewModel.Progress.Report(i, array.Length);
 
                         var file = array[i];
                         var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
