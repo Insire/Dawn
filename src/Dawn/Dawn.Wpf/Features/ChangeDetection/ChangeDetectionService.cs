@@ -78,6 +78,7 @@ namespace Dawn.Wpf
                                 }
                             }
 
+                            pair.UpdateChangeState();
                             results.Add(pair);
                         }
                     }

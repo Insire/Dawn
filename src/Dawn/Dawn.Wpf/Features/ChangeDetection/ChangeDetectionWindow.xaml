@@ -17,6 +17,7 @@
                                                         IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        WindowStartupLocation="CenterOwner"
+                       WindowState="Maximized"
                        mc:Ignorable="d">
 
     <!--  DataContext: ChangeDetectionViewModel  -->
@@ -72,6 +73,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <!--  LEFT  -->
@@ -83,49 +85,238 @@
                                TextTrimming="CharacterEllipsis"
                                TextWrapping="NoWrap" />
 
-                    <TextBlock Grid.Row="1" Text="Length:" />
-                    <TextBlock Grid.Row="1"
+                    <TextBlock Grid.Row="1" Text="Exists:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding ExistsChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding ExistsChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding ExistsChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding ExistsChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <CheckBox Grid.Row="1"
+                              Grid.Column="2"
+                              IsChecked="{Binding Exists}"
+                              IsHitTestVisible="False"
+                              IsThreeState="True" />
+
+                    <TextBlock Grid.Row="2" Text="Length:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding LengthChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding LengthChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding LengthChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding LengthChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="2"
                                Grid.Column="2"
                                Text="{Binding Length, Converter={local:LongToFileSize}, Mode=OneWay}" />
 
-                    <TextBlock Grid.Row="2" Text="SHA256 Hash:" />
-                    <TextBlock Grid.Row="2"
+                    <TextBlock Grid.Row="3" Text="SHA256 Hash:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding HashChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding HashChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding HashChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding HashChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="3"
                                Grid.Column="2"
                                Text="{Binding Hash}" />
 
-                    <TextBlock Grid.Row="3" Text="Attributes:" />
-                    <TextBlock Grid.Row="3"
+                    <TextBlock Grid.Row="4" Text="Attributes:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding AttributesChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding AttributesChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding AttributesChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding AttributesChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="4"
                                Grid.Column="2"
                                Text="{Binding Attributes}" />
 
-                    <TextBlock Grid.Row="4" Text=".NET Assembly:" />
-                    <CheckBox Grid.Row="4"
+                    <TextBlock Grid.Row="5" Text=".NET Assembly:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding IsNetAssemblyChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding IsNetAssemblyChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding IsNetAssemblyChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding IsNetAssemblyChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <CheckBox Grid.Row="5"
                               Grid.Column="2"
                               IsChecked="{Binding IsNetAssembly}"
                               IsHitTestVisible="False"
                               IsThreeState="True" />
 
-                    <TextBlock Grid.Row="5" Text="Readonly:" />
-                    <CheckBox Grid.Row="5"
+                    <TextBlock Grid.Row="6" Text="Readonly:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding IsReadOnlyChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding IsReadOnlyChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding IsReadOnlyChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding IsReadOnlyChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <CheckBox Grid.Row="6"
                               Grid.Column="2"
                               IsChecked="{Binding IsReadOnly}"
                               IsHitTestVisible="False"
                               IsThreeState="True" />
 
-                    <TextBlock Grid.Row="6" Text="Creation time:" />
-                    <TextBlock Grid.Row="6"
+                    <TextBlock Grid.Row="7" Text="Creation time:">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <!--  NONE  -->
+                                    <DataTrigger Binding="{Binding CreationTimeChangeState}" Value="0">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AccentForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Identical  -->
+                                    <DataTrigger Binding="{Binding CreationTimeChangeState}" Value="1">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Changed  -->
+                                    <DataTrigger Binding="{Binding CreationTimeChangeState}" Value="2">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <!--  Missing  -->
+                                    <DataTrigger Binding="{Binding CreationTimeChangeState}" Value="4">
+                                        <Setter Property="Foreground" Value="{StaticResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Row="7"
                                Grid.Column="2"
                                IsEnabled="False"
-                               Text="{Binding CreationTime, Mode=OneWay}" />
+                               Text="{Binding CreationTime, Mode=OneWay, StringFormat=o}" />
 
-                    <TextBlock Grid.Row="7" Text="Last access time:" />
-                    <TextBlock Grid.Row="7"
+                    <TextBlock Grid.Row="8" Text="Last access time:" />
+                    <TextBlock Grid.Row="8"
                                Grid.Column="2"
                                IsEnabled="False"
                                Text="{Binding LastAccessTime, Mode=OneWay}" />
 
-                    <TextBlock Grid.Row="8" Text="Last write time:" />
-                    <TextBlock Grid.Row="8"
+                    <TextBlock Grid.Row="9" Text="Last write time:" />
+                    <TextBlock Grid.Row="9"
                                Grid.Column="2"
                                IsEnabled="False"
                                Text="{Binding LastWriteTime, Mode=OneWay}" />
@@ -164,12 +355,11 @@
             </Button>
         </DockPanel>
 
-        <Expander Margin="8"
+        <GroupBox Margin="8"
                   DockPanel.Dock="Bottom"
-                  ExpandDirection="Up"
                   Header="{Binding SelectedItem.Source.Name}">
             <ContentControl Content="{Binding SelectedItem}" />
-        </Expander>
+        </GroupBox>
 
         <ListBox Margin="8"
                  ItemsSource="{Binding Items}"
