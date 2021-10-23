@@ -26,9 +26,89 @@
 
     <controls:AdonisWindow.Resources>
         <mvvm:BindingProxy x:Key="WindowProxy" Data="{Binding ElementName=rootView}" />
+
+        <DataTemplate DataType="{x:Type local:LogEventViewModel}">
+            <Border BorderBrush="{x:Null}" BorderThickness="0">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Command="{Binding CopyCommand}" Header="Copy">
+                            <MenuItem.Icon>
+                                <icons:PackIconFontAwesome Kind="CopySolid" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </Border.ContextMenu>
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Loaded">
+                        <i:InvokeCommandAction Command="{Binding RenderCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+                <Border.ToolTip>
+                    <ToolTip>
+                        <ItemsControl ItemsSource="{Binding Properties}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel IsItemsHost="True" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Text="{Binding Key, Mode=OneWay}" />
+                                        <Run Text="{Binding Value, Mode=OneWay}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ToolTip>
+                </Border.ToolTip>
+
+                <TextBlock>
+                    <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
+                    <Run Text="{Binding Level, Mode=OneWay}">
+                        <Run.Style>
+                            <Style TargetType="{x:Type Run}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Verbose}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Debug}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Information}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Warning}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Error}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Fatal}">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Run.Style>
+                    </Run>
+
+                    <Run Text="{Binding Text, Mode=OneWay}" />
+                </TextBlock>
+            </Border>
+        </DataTemplate>
     </controls:AdonisWindow.Resources>
 
     <DockPanel>
+        <!--  Notification Area  -->
         <DockPanel Background="{DynamicResource {x:Static adonisUi:Brushes.Layer2BackgroundBrush}}" DockPanel.Dock="Bottom">
 
             <ContentControl Margin="8"
@@ -37,79 +117,36 @@
                 <ContentControl.Style>
                     <Style TargetType="{x:Type ContentControl}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="False">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <TextBlock>
-                                            <Run Text="There have been" />
-                                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding Errors.Count, Mode=OneWay}" />
-                                            <Run Text="Errors." />
+                            <DataTrigger Binding="{Binding Errors.Count, Converter={mvvm:GreaterThan}, ConverterParameter=1}" Value="True">
 
-                                            <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Show them?</Hyperlink>
-                                        </TextBlock>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <TextBlock>
-                                            <Run Text="There have been" />
-                                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding Errors.Count, Mode=OneWay}" />
-                                            <Run Text="Errors." />
-
-                                            <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Hide them?</Hyperlink>
-                                        </TextBlock>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Errors.Count}" Value="1" />
-                                    <Condition Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="False" />
-                                </MultiDataTrigger.Conditions>
-
-                                <MultiDataTrigger.Setters>
+                                <DataTrigger.Setters>
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Setter Property="Content">
                                         <Setter.Value>
                                             <TextBlock>
-                                                <Run Text="There has been" />
-                                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="1" />
-                                                <Run Text="Error." />
-
-                                                <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Show it?</Hyperlink>
+                                                <Run Text="There were" />
+                                                <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding Errors.Count, Mode=OneWay}" />
+                                                <Run Text="Errors" />
                                             </TextBlock>
                                         </Setter.Value>
                                     </Setter>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
 
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Errors.Count}" Value="1" />
-                                    <Condition Binding="{Binding Data.ShowErrors, Source={StaticResource WindowProxy}}" Value="True" />
-                                </MultiDataTrigger.Conditions>
-
-                                <MultiDataTrigger.Setters>
+                            <DataTrigger Binding="{Binding Errors.Count}" Value="1">
+                                <DataTrigger.Setters>
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Setter Property="Content">
                                         <Setter.Value>
                                             <TextBlock>
-                                                <Run Text="There has been" />
+                                                <Run Text="There were" />
                                                 <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="1" />
-                                                <Run Text="Error." />
-
-                                                <Hyperlink Command="{Binding Data.ToggleViewCommand, Source={StaticResource WindowProxy}}">Hide it?</Hyperlink>
+                                                <Run Text="Error" />
                                             </TextBlock>
                                         </Setter.Value>
                                     </Setter>
-                                </MultiDataTrigger.Setters>
-                            </MultiDataTrigger>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
 
                             <DataTrigger Binding="{Binding Errors.Count}" Value="0">
                                 <Setter Property="Visibility" Value="Hidden" />
@@ -135,106 +172,104 @@
             </i:Interaction.Behaviors>
         </ProgressBar>
 
-        <ScrollViewer Margin="8">
-            <ItemsControl>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel IsItemsHost="True" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+        <!--  CONTENT  -->
+        <TabControl>
+            <TabItem Header="Overview">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="5*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type local:LogEventViewModel}">
-                        <Border BorderBrush="{x:Null}" BorderThickness="0">
-                            <Border.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Command="{Binding CopyCommand}" Header="Copy">
-                                        <MenuItem.Icon>
-                                            <icons:PackIconFontAwesome Kind="CopySolid" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </Border.ContextMenu>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Loaded">
-                                    <i:InvokeCommandAction Command="{Binding RenderCommand}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="1"
+                               HorizontalAlignment="Center"
+                               Text="{Binding Percentage, Mode=OneWay, StringFormat='{}{0}%'}"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="Wrap" />
 
-                            <Border.ToolTip>
-                                <ToolTip>
-                                    <ItemsControl ItemsSource="{Binding Properties}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel IsItemsHost="True" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
+                    <DockPanel Grid.Row="2"
+                               Grid.Column="1"
+                               VerticalAlignment="Bottom"
+                               LastChildFill="False">
 
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock>
-                                                    <Run Text="{Binding Key, Mode=OneWay}" />
-                                                    <Run Text="{Binding Value, Mode=OneWay}" />
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ToolTip>
-                            </Border.ToolTip>
 
-                            <TextBlock>
-                                <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
-                                <Run Text="{Binding Level, Mode=OneWay}">
-                                    <Run.Style>
-                                        <Style TargetType="{x:Type Run}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Verbose}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.DisabledForegroundBrush}}" />
-                                                </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Debug}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}" />
-                                                </DataTrigger>
+                        <TextBlock DockPanel.Dock="Bottom"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="Wrap">
+                            <Run Text="Last Error" />
+                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" Text="{Binding CurrentError.Text, Mode=OneWay}" />
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Errors.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Information}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" />
-                                                </DataTrigger>
+                        <TextBlock DockPanel.Dock="Bottom"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="WrapWithOverflow">
+                            <Run Text="Last Message" />
+                            <Run Foreground="{DynamicResource {x:Static adonisUi:Brushes.SuccessBrush}}" Text="{Binding CurrentInfo.Text, Mode=OneWay}" />
+                        </TextBlock>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
 
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Warning}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.AlertBrush}}" />
-                                                </DataTrigger>
+            <TabItem Header="Log">
+                <ScrollViewer Margin="8">
+                    <ScrollViewer Margin="8">
+                        <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel IsItemsHost="True" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </ScrollViewer>
+            </TabItem>
 
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Error}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
-                                                </DataTrigger>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Errors.Count}" Value="0">
+                                        <Setter Property="Text" Value="Errors" />
+                                    </DataTrigger>
 
-                                                <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Fatal}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
-                                                    <Setter Property="FontWeight" Value="Bold" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Run.Style>
-                                </Run>
-
-                                <Run Text="{Binding Text, Mode=OneWay}" />
-                            </TextBlock>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-
-                <ItemsControl.Style>
-                    <Style TargetType="{x:Type ItemsControl}">
-                        <Setter Property="ItemsSource" Value="{Binding Items}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowErrors, ElementName=rootView}" Value="True">
-                                <Setter Property="ItemsSource" Value="{Binding Errors}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ItemsControl.Style>
-            </ItemsControl>
-        </ScrollViewer>
+                                    <DataTrigger Binding="{Binding Errors.Count, Converter={mvvm:GreaterThan}, ConverterParameter=0}" Value="True">
+                                        <Setter Property="Text" Value="{Binding Errors.Count, StringFormat='{}Errors {0}'}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </TabItem.Header>
+                <ScrollViewer Margin="8">
+                    <ItemsControl ItemsSource="{Binding Errors}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel IsItemsHost="True" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </controls:AdonisWindow>

@@ -41,6 +41,20 @@ namespace Dawn.Wpf
             private set { SetProperty(ref _total, value); }
         }
 
+        private LogEventViewModel _currentInfo;
+        public LogEventViewModel CurrentInfo
+        {
+            get { return _currentInfo; }
+            private set { SetProperty(ref _currentInfo, value); }
+        }
+
+        private LogEventViewModel _currentError;
+        public LogEventViewModel CurrentError
+        {
+            get { return _currentError; }
+            private set { SetProperty(ref _currentError, value); }
+        }
+
         public ReadOnlyObservableCollection<LogEventViewModel> Items { get; }
         public ReadOnlyObservableCollection<LogEventViewModel> Errors { get; }
         public IProgress<decimal> Progress => _dispatcherProgress;
@@ -74,12 +88,30 @@ namespace Dawn.Wpf
                 .Filter(q => q.Level >= LogEventLevel.Information)
                 .Merge(sourceObservable
                         .Filter(q => q.Level < LogEventLevel.Information))
-                .LimitSizeTo(50)
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
+                .Batch(TimeSpan.FromMilliseconds(500))
                 .DisposeMany()
-                .Subscribe();
+                .Subscribe(changes =>
+                {
+                    var changed = false;
+                    var logEvent = default(LogEventViewModel);
+                    foreach (var change in changes)
+                    {
+                        if (change.Reason == ChangeReason.Add)
+                        {
+                            logEvent = change.Current;
+                            changed = true;
+                        }
+                    }
+
+                    if (changed)
+                    {
+                        CurrentInfo = logEvent;
+                        logEvent.RenderCommand.Execute(null);
+                    }
+                });
 
             var errorsSubscription = sourceObservable
                 .Filter(q => q.Level > LogEventLevel.Warning)
@@ -87,7 +119,25 @@ namespace Dawn.Wpf
                 .ObserveOn(context)
                 .Bind(_errors)
                 .DisposeMany()
-                .Subscribe();
+                .Subscribe(changes =>
+                {
+                    var changed = false;
+                    var logEvent = default(LogEventViewModel);
+                    foreach (var change in changes)
+                    {
+                        if (change.Reason == ChangeReason.Add)
+                        {
+                            logEvent = change.Current;
+                            changed = true;
+                        }
+                    }
+
+                    if (changed)
+                    {
+                        CurrentError = logEvent;
+                        logEvent.RenderCommand.Execute(null);
+                    }
+                });
 
             _subscription = new CompositeDisposable(itemsSubscription, errorsSubscription, countSubscription, _sourceCache);
         }

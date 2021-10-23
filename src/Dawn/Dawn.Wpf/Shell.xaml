@@ -117,7 +117,7 @@
                           IsChecked="False">
                 <ToggleButton.Style>
                     <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.WindowToggleButton}}" TargetType="{x:Type ToggleButton}">
-                        <Setter Property="ToolTip" Value="Show backups as cards" />
+                        <Setter Property="ToolTip" Value="Show backups as list" />
                         <Setter Property="Content">
                             <Setter.Value>
                                 <icons:PackIconFontAwesome Kind="ThListSolid" />
@@ -126,7 +126,7 @@
                         <Style.Triggers>
                             <Trigger Property="IsChecked" Value="True">
 
-                                <Setter Property="ToolTip" Value="Show backups as list" />
+                                <Setter Property="ToolTip" Value="Show backups as cards" />
                                 <Setter Property="Content">
                                     <Setter.Value>
                                         <icons:PackIconFontAwesome Kind="ThSolid" />
