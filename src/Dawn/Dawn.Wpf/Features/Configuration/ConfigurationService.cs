@@ -64,7 +64,7 @@ namespace Dawn.Wpf
 
                 var jsonString = JsonSerializer.Serialize(_configuration, new JsonSerializerOptions()
                 {
-                    IgnoreNullValues = true,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
                     WriteIndented = true
                 });
 

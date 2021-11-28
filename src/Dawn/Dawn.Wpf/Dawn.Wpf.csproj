@@ -1,16 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net5.0-windows7.0</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>dawn.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-        <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
-        <PublishReadyToRun>false</PublishReadyToRun>
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
-        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,17 +19,17 @@
     <ItemGroup>
         <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
         <PackageReference Include="Octokit" Version="0.50.0" />
-        <PackageReference Include="Ookii.Dialogs.Wpf" Version="4.0.0" />
+        <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.0" />
         <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
-        <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
         <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-        <PackageReference Include="DryIoc.dll" Version="4.8.3" />
+        <PackageReference Include="DryIoc.dll" Version="4.8.4" />
         <PackageReference Include="Jot" Version="2.1.11" />
         <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="4.11.0" />
-        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.111" />
+        <PackageReference Include="MvvmScarletToolkit.Wpf" Version="2.2.141" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.240">
+        <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.244">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
