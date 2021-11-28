@@ -46,12 +46,12 @@ A utility to quickly update a directories contents while automatically backing u
 
 ## Build Requirements
 
-This app uses a SDK-style project file, which means you are required to use [Visual Studio 2019](https://visualstudio.microsoft.com/vs/community/) or newer. Visual Studio will prompt you to install any missing components once you open the [sln](./Dawn.sln) file.
+This app uses a SDK-style project file, which means you are required to use [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/) or newer. Visual Studio will prompt you to install any missing components once you open the [sln](./Dawn.sln) file.
 
 For anyone not wishing to install that, they atleast need:
 
 - Windows 10 (older versions work probably too, but the repository is not configured for those)
-- [Net 5.0](https://dotnet.microsoft.com/download/dotnet-core/5.0)
+- [Net 6.0](https://dotnet.microsoft.com/download/dotnet-core/6.0)
 - [Visual Studio Code](https://code.visualstudio.com/) with the [C# Extension](https://github.com/OmniSharp/omnisharp-vscode) provided by Microsoft
 - [git](https://git-scm.com/)
 
