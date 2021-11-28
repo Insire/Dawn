@@ -40,10 +40,9 @@ namespace Dawn.Wpf
             _isFile = isFile;
             _isFolder = !isFile;
 
-            if(isFile)
+            if (isFile)
             {
-              _name=  Path.GetFileName(fullPath);
-
+                _name = Path.GetFileName(fullPath);
             }
             else
             {

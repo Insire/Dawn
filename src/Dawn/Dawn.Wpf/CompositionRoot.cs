@@ -3,7 +3,6 @@ using Jot;
 using Jot.Storage;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using MvvmScarletToolkit;
-using MvvmScarletToolkit.Commands;
 using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
