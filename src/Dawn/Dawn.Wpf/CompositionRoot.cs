@@ -1,7 +1,7 @@
 using DryIoc;
 using Jot;
 using Jot.Storage;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
@@ -34,12 +34,12 @@ namespace Dawn.Wpf
                                                     || Matching.FromSource<ShellViewModel>().Invoke(o))
                                 .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
 
-            c.UseInstance(SynchronizationContext.Current);
-            c.UseInstance<ILogger>(logConfiguration.CreateLogger());
-            c.UseInstance(logViewModel);
-            c.UseInstance(Assembly.GetAssembly(typeof(CompositionRoot)));
-            c.UseInstance(new HttpClient());
-            c.UseInstance(Process.GetCurrentProcess());
+            c.Use(SynchronizationContext.Current);
+            c.Use<ILogger>(logConfiguration.CreateLogger());
+            c.Use(logViewModel);
+            c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
+            c.Use(new HttpClient());
+            c.Use(Process.GetCurrentProcess());
 
             c.Register<Shell>(Reuse.Singleton);
             var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
@@ -48,7 +48,7 @@ namespace Dawn.Wpf
                 .Properties(w => new { w.Height, w.Width, w.Left, w.Top, w.WindowState })
                 .PersistOn(nameof(Window.Closing))
                 .StopTrackingOn(nameof(Window.Closing));
-            c.UseInstance(tracker);
+            c.Use(tracker);
 
             c.Register<ConfigurationService>(Reuse.Singleton);
             c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
@@ -65,12 +65,12 @@ namespace Dawn.Wpf
             c.Register<ChangeDetectionViewModel>(Reuse.Singleton);
             c.Register<ChangeDetectionService>(Reuse.Singleton);
 
-            c.UseInstance(ScarletCommandBuilder.Default);
-            c.UseInstance(ScarletDispatcher.Default);
-            c.UseInstance(ScarletCommandManager.Default);
-            c.UseInstance(WeakReferenceMessenger.Default);
-            c.UseInstance(ScarletExitService.Default);
-            c.UseInstance(ScarletWeakEventManager.Default);
+            c.Use(ScarletCommandBuilder.Default);
+            c.Use(ScarletDispatcher.Default);
+            c.Use(ScarletCommandManager.Default);
+            c.Use(WeakReferenceMessenger.Default);
+            c.Use(ScarletExitService.Default);
+            c.Use(ScarletWeakEventManager.Default);
 
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
