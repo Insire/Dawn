@@ -1,8 +1,8 @@
-using ImTools;
 using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -99,22 +99,15 @@ namespace Dawn.Wpf
                 }
             }
 
-            if (_configuration.UpdateTimeStampOnApply is null)
-            {
-                _configuration.UpdateTimeStampOnApply = false;
-            }
-
-            if (_configuration.UpdateTimeStampOnRestore is null)
-            {
-                _configuration.UpdateTimeStampOnRestore = true;
-            }
+            _configuration.UpdateTimeStampOnApply ??= false;
+            _configuration.UpdateTimeStampOnRestore ??= true;
 
             return _configuration;
         }
 
         private bool GetFromUrl(string[] args)
         {
-            var url = args.FindFirst(p => p.StartsWith("url=", StringComparison.InvariantCultureIgnoreCase));
+            var url = args.FirstOrDefault(p => p.StartsWith("url=", StringComparison.InvariantCultureIgnoreCase));
             if (url == null)
             {
                 return false;
@@ -146,7 +139,7 @@ namespace Dawn.Wpf
 
         private bool GetFromJson(string[] args)
         {
-            var json = args.FindFirst(p => p.StartsWith("json=", StringComparison.InvariantCultureIgnoreCase));
+            var json = args.FirstOrDefault(p => p.StartsWith("json=", StringComparison.InvariantCultureIgnoreCase));
             if (json != null)
             {
                 Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));

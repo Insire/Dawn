@@ -86,17 +86,17 @@ namespace Dawn.Wpf
                     {
                         try
                         {
-                            if (!int.TryParse(key.Substring(0, 2), out var days))
+                            if (!int.TryParse(key.AsSpan(0, 2), out var days))
                             {
                                 days = 1;
                             }
 
-                            if (!int.TryParse(key.Substring(2, 2), out var months))
+                            if (!int.TryParse(key.AsSpan(2, 2), out var months))
                             {
                                 months = 1;
                             }
 
-                            if (!int.TryParse(key.Substring(4, 4), out var years))
+                            if (!int.TryParse(key.AsSpan(4, 4), out var years))
                             {
                                 years = 2001;
                             }
@@ -107,17 +107,17 @@ namespace Dawn.Wpf
 
                             if (key.Length >= 10)
                             {
-                                int.TryParse(key.Substring(8, 2), out hours);
+                                int.TryParse(key.AsSpan(8, 2), out hours);
                             }
 
                             if (key.Length >= 12)
                             {
-                                int.TryParse(key.Substring(10, 2), out minutes);
+                                int.TryParse(key.AsSpan(10, 2), out minutes);
                             }
 
                             if (key.Length >= 14)
                             {
-                                int.TryParse(key.Substring(12, 2), out seconds);
+                                int.TryParse(key.AsSpan(12, 2), out seconds);
                             }
 
                             days--;
