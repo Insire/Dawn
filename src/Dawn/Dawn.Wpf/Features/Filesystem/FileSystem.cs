@@ -1,4 +1,4 @@
-using Ookii.Dialogs.Wpf;
+using Microsoft.Win32;
 using Serilog;
 using System;
 using System.IO;
@@ -11,8 +11,9 @@ namespace Dawn.Wpf
     {
         public bool TrySelectFiles(out string[] files)
         {
-            var dlg = new VistaOpenFileDialog
+            var dlg = new OpenFileDialog
             {
+                ClientGuid = Guid.Parse("7b75d7d5-005a-44c1-a9f4-73b520517189"),
                 CheckFileExists = true,
                 CheckPathExists = true,
                 DereferenceLinks = true,
@@ -39,18 +40,20 @@ namespace Dawn.Wpf
 
         public bool TrySelectFolder(out string folder)
         {
-            var dlg = new VistaFolderBrowserDialog
+            var dlg = new OpenFolderDialog
             {
-                ShowNewFolderButton = true,
-                UseDescriptionForTitle = true,
-                Description = "Select a folder"
+                ClientGuid = Guid.Parse("7b75d7d5-005a-44c1-a9f4-73b520517189"),
+                Title = "Select a folder",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                Multiselect = false,
+                AddToRecent = false,
             };
 
             var result = dlg.ShowDialog();
 
             if (result == true)
             {
-                folder = dlg.SelectedPath;
+                folder = dlg.FolderName;
             }
             else
             {

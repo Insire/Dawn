@@ -17,7 +17,7 @@ namespace Build
                 .UseWorkingDirectory(".")
                 .WithArguments(builder => builder
                     .Append("publish")
-                    .AppendQuoted(BuildContext.SolutionPath)
+                    .AppendQuoted(BuildContext.ProjectFilePath)
                     .Append("--nologo")
                     .Append($"-c {BuildContext.BuildConfiguration}")
                     .Append("-r win-x64")

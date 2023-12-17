@@ -7,12 +7,12 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("SoftThorn")]
 [assembly: AssemblyProduct("Dawn")]
-[assembly: AssemblyCopyright("© 2020 Insire")]
+[assembly: AssemblyCopyright("© 2023 Insire")]
 [assembly: AssemblyTrademark("")]
 
 // Metadata Attributes
 [assembly: AssemblyMetadata("Platform", "AnyCPU")]
-[assembly: AssemblyMetadata("CompileDate", "[UTC]14.08.2020 18:28:29")]
-[assembly: AssemblyMetadata("Branch", "master")]
-[assembly: AssemblyMetadata("Commit", "a41a5349a87f46fad41f75cf1e500db4efd4d33a")]
-[assembly: AssemblyMetadata("Version", "2.1.0")]
+[assembly: AssemblyMetadata("CompileDate", "[UTC]17.12.2023 16:05:13")]
+[assembly: AssemblyMetadata("Branch", "dev")]
+[assembly: AssemblyMetadata("Commit", "c9adab1e9c1d01844163697ab11f82f0249d3105")]
+[assembly: AssemblyMetadata("Version", "2.2.46-gc9adab1e9c")]
