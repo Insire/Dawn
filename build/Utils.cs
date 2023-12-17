@@ -9,7 +9,7 @@ namespace Build
     {
         public static void Clean(this BuildContext context, bool cleanBin, bool cleanObj, bool cleanOutput, bool cleanMisc)
         {
-            var solution = context.ParseSolution(BuildContext.SolutionPath);
+            var solution = context.ParseSolution(BuildContext.ProjectFilePath);
 
             foreach (var project in solution.Projects)
             {

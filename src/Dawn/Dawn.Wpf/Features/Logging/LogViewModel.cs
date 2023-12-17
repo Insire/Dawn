@@ -1,6 +1,6 @@
 using DynamicData;
 using DynamicData.Binding;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MvvmScarletToolkit;
 using Serilog.Core;
 using Serilog.Events;

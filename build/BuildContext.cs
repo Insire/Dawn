@@ -13,7 +13,7 @@ namespace Build
         public const string BuildConfiguration = "Release";
 
         public const string ProjectFolderPath = @".\src\Dawn\Dawn.Wpf";
-        public const string SolutionPath = @".\Dawn.sln";
+        public const string ProjectFilePath = @".\src\Dawn\Dawn.Wpf\Dawn.Wpf.csproj";
         public const string AssemblyInfoPath = @".\src\Dawn\SharedAssemblyInfo.cs";
 
         public const string ResultsPath = "./binaries";
