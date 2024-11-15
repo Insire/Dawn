@@ -22,6 +22,7 @@ namespace Dawn.Wpf
         public ReadOnlyObservableCollection<FilePairViewModel> Items { get; }
 
         private FilePairViewModel _selectedItem;
+
         public FilePairViewModel SelectedItem
         {
             get { return _selectedItem; }
@@ -43,7 +44,7 @@ namespace Dawn.Wpf
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
                 .DistinctUntilChanged()
-                .Sort(SortExpressionComparer<FilePairViewModel>.Ascending(p => p.ChangeState), SortOptimisations.ComparesImmutableValuesOnly)
+                .Sort(SortExpressionComparer<FilePairViewModel>.Ascending(p => p.ChangeState).ThenByDescending(p => p.SizeChange), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_items)
                 .DisposeMany()

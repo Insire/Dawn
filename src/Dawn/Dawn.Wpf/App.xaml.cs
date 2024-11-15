@@ -1,4 +1,5 @@
 using AdonisUI;
+using Dawn.Wpf.Util;
 using DryIoc;
 using Jot;
 using Serilog;
@@ -14,15 +15,14 @@ namespace Dawn.Wpf
 
         private ConfigurationService _configurationService;
 
-        public App()
-        {
-        }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             _container = CompositionRoot.Get();
+
+            Resources.Register(_container);
+
             _tracker = _container.Resolve<Tracker>();
             _configurationService = _container.Resolve<ConfigurationService>();
 

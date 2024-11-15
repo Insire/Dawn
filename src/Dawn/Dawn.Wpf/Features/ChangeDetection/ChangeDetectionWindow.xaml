@@ -1,13 +1,13 @@
 <controls:AdonisWindow x:Class="Dawn.Wpf.ChangeDetectionWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                       xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
                        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        Name="rootView"
                        Title="Changes"
                        Width="700"
@@ -331,12 +331,12 @@
                     </Grid.ColumnDefinitions>
 
                     <!--  LEFT  -->
-                    <GroupBox Grid.Column="0" Header="Source">
+                    <GroupBox Grid.Column="0" Header="{Binding Source.DisplayName}">
                         <ContentControl Content="{Binding Source}" />
                     </GroupBox>
 
                     <!--  RIGHT  -->
-                    <GroupBox Grid.Column="2" Header="Destination">
+                    <GroupBox Grid.Column="2" Header="{Binding Destination.DisplayName}">
                         <ContentControl Content="{Binding Destination}" />
                     </GroupBox>
                 </Grid>
@@ -381,7 +381,10 @@
 
                         <ContentControl Content="{Binding ChangeState}" />
 
-                        <TextBlock Grid.Column="2" Text="{Binding Source.Name}" />
+                        <TextBlock Grid.Column="2">
+                            <Run Text="{Binding Source.Name, Mode=OneWay}" />
+                            <Run Text="{Binding SizeChange, Mode=OneWay, StringFormat={}({0}), Converter={local:LongToFileSize}}" />
+                        </TextBlock>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

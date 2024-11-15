@@ -6,6 +6,7 @@ namespace Dawn.Wpf
     public sealed class FileInfoViewModel : FileSystemViewModel
     {
         private string _hash;
+
         public string Hash
         {
             get { return _hash; }
@@ -13,6 +14,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _hashChangeState;
+
         public ChangeDetectionState HashChangeState
         {
             get { return _hashChangeState; }
@@ -20,6 +22,7 @@ namespace Dawn.Wpf
         }
 
         private bool? _isNetAssembly;
+
         public bool? IsNetAssembly
         {
             get { return _isNetAssembly; }
@@ -27,6 +30,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _isNetAssemblyChangeState;
+
         public ChangeDetectionState IsNetAssemblyChangeState
         {
             get { return _isNetAssemblyChangeState; }
@@ -34,6 +38,7 @@ namespace Dawn.Wpf
         }
 
         private bool? _isReadOnly;
+
         public bool? IsReadOnly
         {
             get { return _isReadOnly; }
@@ -41,6 +46,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _isReadOnlyChangeState;
+
         public ChangeDetectionState IsReadOnlyChangeState
         {
             get { return _isReadOnlyChangeState; }
@@ -48,6 +54,7 @@ namespace Dawn.Wpf
         }
 
         private bool _exists;
+
         public bool Exists
         {
             get { return _exists; }
@@ -55,6 +62,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _existsChangeState;
+
         public ChangeDetectionState ExistsChangeState
         {
             get { return _existsChangeState; }
@@ -62,6 +70,7 @@ namespace Dawn.Wpf
         }
 
         private DateTime? _updatedOn;
+
         /// <summary>
         /// When this class instance has been updated last
         /// </summary>
@@ -72,6 +81,7 @@ namespace Dawn.Wpf
         }
 
         private DateTime? _lastAccessTime;
+
         public DateTime? LastAccessTime
         {
             get { return _lastAccessTime; }
@@ -79,6 +89,7 @@ namespace Dawn.Wpf
         }
 
         private DateTime? _lastWriteTime;
+
         public DateTime? LastWriteTime
         {
             get { return _lastWriteTime; }
@@ -86,6 +97,7 @@ namespace Dawn.Wpf
         }
 
         private DateTime? _creationTime;
+
         public DateTime? CreationTime
         {
             get { return _creationTime; }
@@ -93,6 +105,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _creationTimeChangeState;
+
         public ChangeDetectionState CreationTimeChangeState
         {
             get { return _creationTimeChangeState; }
@@ -100,6 +113,7 @@ namespace Dawn.Wpf
         }
 
         private long? _length;
+
         /// <summary>
         /// In Bytes
         /// </summary>
@@ -110,6 +124,7 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _lengthChangeState;
+
         public ChangeDetectionState LengthChangeState
         {
             get { return _lengthChangeState; }
@@ -117,6 +132,7 @@ namespace Dawn.Wpf
         }
 
         private FileAttributes? _attributes;
+
         public FileAttributes? Attributes
         {
             get { return _attributes; }
@@ -124,15 +140,25 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _attributesChangeState;
+
         public ChangeDetectionState AttributesChangeState
         {
             get { return _attributesChangeState; }
             set { SetProperty(ref _attributesChangeState, value); }
         }
 
+        private string _displayName;
+
+        public string DisplayName
+        {
+            get { return _displayName; }
+            set { SetProperty(ref _displayName, value); }
+        }
+
         public FileInfoViewModel(string fullPath)
             : base(fullPath, true)
         {
+            _displayName = string.Empty;
         }
     }
 }

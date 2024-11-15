@@ -6,6 +6,7 @@ namespace Dawn.Wpf
     public sealed class FilePairViewModel : ObservableObject
     {
         private FileInfoViewModel _source;
+
         public FileInfoViewModel Source
         {
             get { return _source; }
@@ -13,6 +14,7 @@ namespace Dawn.Wpf
         }
 
         private FileInfoViewModel _destination;
+
         public FileInfoViewModel Destination
         {
             get { return _destination; }
@@ -20,10 +22,19 @@ namespace Dawn.Wpf
         }
 
         private ChangeDetectionState _changeState;
+
         public ChangeDetectionState ChangeState
         {
             get { return _changeState; }
             private set { SetProperty(ref _changeState, value); }
+        }
+
+        private long? _sizeChange;
+
+        public long? SizeChange
+        {
+            get { return _sizeChange; }
+            set { SetProperty(ref _sizeChange, value); }
         }
 
         public FilePairViewModel(FileInfoViewModel source, FileInfoViewModel destination)
@@ -68,9 +79,16 @@ namespace Dawn.Wpf
         {
             if (other is null)
             {
-                oneState(ChangeDetectionState.Missing);
                 otherState(ChangeDetectionState.Missing);
+            }
 
+            if (one is null)
+            {
+                otherState(ChangeDetectionState.Missing);
+            }
+
+            if (one == null && other is null)
+            {
                 return false;
             }
 
