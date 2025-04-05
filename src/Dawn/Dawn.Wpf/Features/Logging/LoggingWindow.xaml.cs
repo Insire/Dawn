@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Dawn.Core.Features.Logging;
 using System;
 using System.Windows.Input;
 

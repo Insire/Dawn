@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net9.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>dawn.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,5 +38,9 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Dawn.Core\Dawn.Core.csproj" />
     </ItemGroup>
 </Project>

@@ -1,3 +1,5 @@
+using Dawn.Core.Features.About;
+
 namespace Dawn.Wpf
 {
     public sealed partial class AboutWindow

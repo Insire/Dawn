@@ -1,5 +1,11 @@
 using AdonisUI;
 using AdonisUI.Controls;
+using Dawn.Core.Features.About;
+using Dawn.Core.Features.Backups;
+using Dawn.Core.Features.ChangeDetection;
+using Dawn.Core.Features.Configuration;
+using Dawn.Core.Features.Filesystem;
+using Dawn.Core.Features.Logging;
 using Jot;
 using Serilog;
 using System;

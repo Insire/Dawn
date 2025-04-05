@@ -1,25 +1,11 @@
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
-using Dawn.Core.Features.Configuration;
-using Dawn.Core.Features.Filesystem;
-using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Staging;
-using Dawn.Core.Features.Util;
-using MvvmScarletToolkit;
-using MvvmScarletToolkit.Observables;
 using Octokit;
-using Serilog;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
-namespace Dawn.Wpf
+namespace Dawn.Core
 {
     public sealed class ShellViewModel : ViewModelBase
     {
@@ -75,8 +61,9 @@ namespace Dawn.Wpf
                               AboutViewModel aboutViewModel,
                               LogViewModel logViewModel,
                               ILogger log,
-                              IFileSystem fileSystem)
-            : base(ScarletCommandBuilder.Default)
+                              IFileSystem fileSystem,
+                              IScarletCommandBuilder commandBuilder)
+            : base(commandBuilder)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Updates = updates ?? throw new ArgumentNullException(nameof(updates));
@@ -92,21 +79,21 @@ namespace Dawn.Wpf
 
             Title = $"{aboutViewModel.Product} v{aboutViewModel.AssemblyVersionString}";
 
-            CheckForApplicationUpdateCommand = ScarletCommandBuilder.Default
+            CheckForApplicationUpdateCommand = commandBuilder
                 .Create(CheckForApplicationUpdate, CanCheckForApplicationUpdate)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .WithCancellation()
                 .Build();
 
-            GetApplicationUpdateCommand = ScarletCommandBuilder.Default
+            GetApplicationUpdateCommand = commandBuilder
                 .Create(GetApplicationUpdate, CanGetApplicationUpdate)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .WithCancellation()
                 .Build();
 
-            ShowLogCommand = ScarletCommandBuilder.Default
+            ShowLogCommand = commandBuilder
                 .Create(ShowLog)
                 .WithSingleExecution()
                 .WithCancellation()
