@@ -51,11 +51,11 @@ namespace Dawn.Core.Features.Logging
                 Text = _logEvent.RenderMessage();
             });
 
-            CopyCommand = new RelayCommand(() =>
+            CopyCommand = new AsyncRelayCommand(async () =>
             {
                 try
                 {
-                    _clipboardService.SetData(Text);
+                    await _clipboardService.SetData(Text);
                 }
                 catch (Exception ex)
                 {

@@ -4,8 +4,8 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using Dawn.Avalonia.ViewModels;
-using Dawn.Avalonia.Views;
+using Dawn.Core;
+using DryIoc;
 
 namespace Dawn.Avalonia;
 
@@ -20,10 +20,16 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
+            // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel(), };
+
+            var container = CompositionRoot.Get();
+
+            var shell = container.Resolve<Shell>();
+            shell.DataContext = container.Resolve<ShellViewModel>();
+
+            desktop.MainWindow = shell;
         }
 
         base.OnFrameworkInitializationCompleted();
