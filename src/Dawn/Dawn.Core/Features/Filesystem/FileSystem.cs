@@ -12,14 +12,15 @@ namespace Dawn.Core.Features.Filesystem
             _fileDialogs = fileDialogs;
         }
 
-        public bool TrySelectFiles(out string[] files)
+        public bool TrySelectFiles(out string[]? files)
         {
             return _fileDialogs.TrySelectFiles(out files);
         }
 
-        public bool TrySelectFolder(out string folder)
+        public bool TrySelectFolder(out string? folder)
         {
-            return _fileDialogs.TrySelectFolder(out folder);}
+            return _fileDialogs.TrySelectFolder(out folder);
+        }
 
         public void WriteAllText(string path, string contents, Encoding encoding)
         {

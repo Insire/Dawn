@@ -1,4 +1,4 @@
-namespace Dawn.Core.Features.Logging
+namespace Dawn.Core.Features.Util
 {
     public interface IFileDialogs
     {

@@ -30,9 +30,9 @@ namespace Dawn.Core.Features.Filesystem
 
         void CreateDirectory(string path);
 
-        bool TrySelectFiles(out string[] files);
+        bool TrySelectFiles(out string[]? files);
 
-        bool TrySelectFolder(out string folder);
+        bool TrySelectFolder(out string? folder);
 
         string ReadAllText(string path, Encoding encoding);
 

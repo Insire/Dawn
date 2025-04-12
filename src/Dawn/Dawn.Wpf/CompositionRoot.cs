@@ -7,6 +7,7 @@ using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Staging;
+using Dawn.Core.Features.Util;
 using Dawn.Wpf.Util;
 using DryIoc;
 using Jot;
@@ -60,11 +61,14 @@ namespace Dawn.Wpf
                 .PersistOn(nameof(Window.Closing))
                 .StopTrackingOn(nameof(Window.Closing));
             c.Use(tracker);
+            c.Use<IClipboardService>(clipboardService);
 
             c.Register<ConfigurationService>(Reuse.Singleton);
             c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
+            c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
+
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);

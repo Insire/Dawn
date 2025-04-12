@@ -39,8 +39,9 @@ namespace Dawn.Avalonia
             c.Register<ConfigurationService>(Reuse.Singleton);
             c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
-            c.Register<LogViewModel>(Reuse.Singleton);
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
+            c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
+            c.Register<LogViewModel>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);
@@ -48,7 +49,6 @@ namespace Dawn.Avalonia
             c.Register<BackupsViewModel>(Reuse.Singleton);
             c.Register<BackupFileTypesViewModel>(Reuse.Singleton);
             c.Register<BackupViewModelFactory>(Reuse.Singleton);
-            c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
 
             c.Register<ChangeDetectionViewModel>(Reuse.Singleton);
             c.Register<ChangeDetectionService>(Reuse.Singleton);

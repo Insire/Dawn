@@ -6,10 +6,15 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     </PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Properties\licenses.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,16 +36,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Serilog">
-        <HintPath>..\..\..\.nuget\packages\serilog\4.2.0\lib\net9.0\Serilog.dll</HintPath>
-      </Reference>
+      <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Dawn\Dawn.Core\Dawn.Core.csproj" />
+      <EmbeddedResource Include="Properties\licenses.json" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Properties\" />
+      <ProjectReference Include="..\Dawn.Core\Dawn.Core.csproj" />
     </ItemGroup>
 </Project>

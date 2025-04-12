@@ -24,6 +24,7 @@ namespace Dawn.Wpf
             base.OnStartup(e);
 
             _container = CompositionRoot.Get();
+
             _tracker = _container.Resolve<Tracker>();
             _configurationService = _container.Resolve<ConfigurationService>();
 
