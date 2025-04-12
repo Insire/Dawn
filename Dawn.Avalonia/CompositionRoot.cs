@@ -26,21 +26,20 @@ namespace Dawn.Avalonia
         {
             var c = new Container();
 
-            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current);
-
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext();
 
             c.Use(SynchronizationContext.Current);
             c.Use<ILogger>(logConfiguration.CreateLogger());
-            c.Use(logViewModel);
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
             c.Use(new HttpClient());
             c.Use(Process.GetCurrentProcess());
 
-            c.Register<Shell>(Reuse.Singleton);
+            c.Register<ConfigurationService>(Reuse.Singleton);
+            c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
+            c.Register<LogViewModel>(Reuse.Singleton);
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);
@@ -54,14 +53,19 @@ namespace Dawn.Avalonia
             c.Register<ChangeDetectionViewModel>(Reuse.Singleton);
             c.Register<ChangeDetectionService>(Reuse.Singleton);
 
-            c.Use(WeakReferenceMessenger.Default);
-
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
             c.Register<Shell>(Reuse.Singleton);
             c.Register<IClipboardService, ClipbboardService>();
 
             c.Register(made: Made.Of(_ => ServiceInfo.Of<Shell>(), f => f.Clipboard));
+
+            c.Use(ScarletCommandBuilder.Default);
+            c.Use(ScarletDispatcher.Default);
+            c.Use(ScarletCommandManager.Default);
+            c.Use(WeakReferenceMessenger.Default);
+            c.Use(ScarletExitService.Default);
+            c.Use(ScarletWeakEventManager.Default);
 
             return c;
         }
