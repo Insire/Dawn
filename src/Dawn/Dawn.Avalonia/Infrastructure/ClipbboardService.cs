@@ -19,14 +19,15 @@ namespace Dawn.Avalonia.Infrastructure
 
         public async Task SetTextAsync(string text)
         {
-            if (_lifetime.MainWindow?.Clipboard is null)
+            var clipboard = _lifetime.MainWindow?.Clipboard;
+            if (clipboard is null)
             {
                 return;
             }
 
             try
             {
-                await _lifetime.MainWindow?.Clipboard?.SetTextAsync(text);
+                await clipboard.SetTextAsync(text);
             }
             catch (Exception ex)
             {
@@ -36,7 +37,8 @@ namespace Dawn.Avalonia.Infrastructure
 
         public async Task SetDataAsync(string text)
         {
-            if (_lifetime.MainWindow?.Clipboard is null)
+            var clipboard = _lifetime.MainWindow?.Clipboard;
+            if (clipboard is null)
             {
                 return;
             }
@@ -46,7 +48,7 @@ namespace Dawn.Avalonia.Infrastructure
 
             try
             {
-                await _lifetime.MainWindow?.Clipboard?.SetDataObjectAsync(dataObject);
+                await clipboard.SetDataObjectAsync(dataObject);
             }
             catch (Exception ex)
             {

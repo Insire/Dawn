@@ -5,6 +5,7 @@
                        xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
                        xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                       xmlns:core="clr-namespace:Dawn.Core;assembly=Dawn.Core"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -16,7 +17,7 @@
                        Title="{Binding Title}"
                        Width="900"
                        Height="450"
-                       d:DataContext="{d:DesignInstance Type=local:ShellViewModel,
+                       d:DataContext="{d:DesignInstance Type=core:ShellViewModel,
                                                         IsDesignTimeCreatable=False}"
                        AllowDrop="True"
                        Drop="OnDrop"
