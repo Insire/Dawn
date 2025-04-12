@@ -8,6 +8,7 @@
                        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
                        xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:logging="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
                        xmlns:serilog="clr-namespace:Serilog.Events;assembly=Serilog"
@@ -15,7 +16,7 @@
                        Title="Log"
                        Width="700"
                        Height="350"
-                       d:DataContext="{d:DesignInstance Type=local:LogViewModel,
+                       d:DataContext="{d:DesignInstance Type=logging:LogViewModel,
                                                         IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        WindowStartupLocation="CenterOwner"
@@ -27,7 +28,7 @@
     <controls:AdonisWindow.Resources>
         <mvvm:BindingProxy x:Key="WindowProxy" Data="{Binding ElementName=rootView}" />
 
-        <DataTemplate DataType="{x:Type local:LogEventViewModel}">
+        <DataTemplate DataType="{x:Type logging:LogEventViewModel}">
             <Border BorderBrush="{x:Null}" BorderThickness="0">
                 <Border.ContextMenu>
                     <ContextMenu>

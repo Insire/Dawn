@@ -1,15 +1,17 @@
 <controls:AdonisWindow x:Class="Dawn.Wpf.Shell"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                       xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                       xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
+                       xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                       xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                       xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
-                       xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
-                       xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
-                       xmlns:local="clr-namespace:Dawn.Wpf"
-                       xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                       xmlns:staging="clr-namespace:Dawn.Core.Features.Staging;assembly=Dawn.Core"
                        Name="root"
                        Title="{Binding Title}"
                        Width="900"
@@ -269,7 +271,7 @@
                         </Setter>
                         <Setter Property="ItemTemplate">
                             <Setter.Value>
-                                <DataTemplate DataType="{x:Type local:BackupViewModel}">
+                                <DataTemplate DataType="{x:Type backups:BackupViewModel}">
                                     <GroupBox Width="200"
                                               Height="130"
                                               Margin="8">
@@ -391,7 +393,7 @@
                                 </Setter>
                                 <Setter Property="ItemTemplate">
                                     <Setter.Value>
-                                        <DataTemplate DataType="{x:Type local:BackupViewModel}">
+                                        <DataTemplate DataType="{x:Type backups:BackupViewModel}">
                                             <DockPanel>
                                                 <DockPanel.ToolTip>
                                                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -537,7 +539,7 @@
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type local:StagingViewModel}">
+                    <DataTemplate DataType="{x:Type staging:StagingViewModel}">
                         <DockPanel Margin="8,0" HorizontalAlignment="Stretch">
                             <icons:PackIconFontAwesome VerticalAlignment="Center"
                                                        DockPanel.Dock="Left"

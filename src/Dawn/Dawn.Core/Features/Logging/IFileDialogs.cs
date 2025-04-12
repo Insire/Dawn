@@ -1,7 +1,9 @@
-namespace Dawn.Core.Features.Logging;
-
-public interface IFileDialogs
+namespace Dawn.Core.Features.Logging
 {
-    bool TrySelectFiles(out string[] files);
-    bool TrySelectFolder(out string folder);
+    public interface IFileDialogs
+    {
+        bool TrySelectFiles(out string[]? files);
+
+        bool TrySelectFolder(out string? folder);
+    }
 }

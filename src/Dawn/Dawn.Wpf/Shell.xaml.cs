@@ -1,5 +1,6 @@
 using AdonisUI;
 using AdonisUI.Controls;
+using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
 using Dawn.Core.Features.ChangeDetection;

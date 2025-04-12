@@ -1,7 +1,5 @@
-using DryIoc;
-using Jot;
-using Jot.Storage;
 using CommunityToolkit.Mvvm.Messaging;
+using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
 using Dawn.Core.Features.ChangeDetection;
@@ -9,6 +7,10 @@ using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Staging;
+using Dawn.Wpf.Util;
+using DryIoc;
+using Jot;
+using Jot.Storage;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
@@ -28,7 +30,8 @@ namespace Dawn.Wpf
         {
             var c = new Container();
 
-            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current);
+            var clipboardService = new ClipboardService();
+            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!, clipboardService);
 
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
@@ -41,13 +44,14 @@ namespace Dawn.Wpf
                                                     || Matching.FromSource<ShellViewModel>().Invoke(o))
                                 .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
 
+            c.Use(ScarletCommandBuilder.Default);
             c.Use(SynchronizationContext.Current);
             c.Use<ILogger>(logConfiguration.CreateLogger());
-            c.Use(logViewModel);
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
             c.Use(new HttpClient());
             c.Use(Process.GetCurrentProcess());
 
+            c.Register<LogViewModel>(Reuse.Singleton);
             c.Register<Shell>(Reuse.Singleton);
             var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
             tracker.Configure<Shell>()

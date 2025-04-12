@@ -10,10 +10,10 @@ namespace Dawn.Wpf
 {
     public partial class App : Application
     {
-        private IContainer _container;
-        private Tracker _tracker;
+        private IContainer? _container;
+        private Tracker? _tracker;
 
-        private ConfigurationService _configurationService;
+        private ConfigurationService? _configurationService;
 
         public App()
         {

@@ -1,5 +1,3 @@
-using Avalonia.Input.Platform;
-using Avalonia.Logging;
 using CommunityToolkit.Mvvm.Messaging;
 using Dawn.Avalonia.Features;
 using Dawn.Core;
@@ -14,7 +12,6 @@ using Dawn.Core.Features.Util;
 using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
-using Serilog.Filters;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
@@ -52,7 +49,7 @@ namespace Dawn.Avalonia
             c.Register<BackupsViewModel>(Reuse.Singleton);
             c.Register<BackupFileTypesViewModel>(Reuse.Singleton);
             c.Register<BackupViewModelFactory>(Reuse.Singleton);
-            c.Register<IFileDialogs,FileDialogs>(Reuse.Singleton);
+            c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
 
             c.Register<ChangeDetectionViewModel>(Reuse.Singleton);
             c.Register<ChangeDetectionService>(Reuse.Singleton);

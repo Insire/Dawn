@@ -38,15 +38,17 @@ namespace Dawn.Core.Features.Logging
             private set { SetProperty(ref _total, value); }
         }
 
-        private LogEventViewModel _currentInfo;
-        public LogEventViewModel CurrentInfo
+        private LogEventViewModel? _currentInfo;
+
+        public LogEventViewModel? CurrentInfo
         {
             get { return _currentInfo; }
             private set { SetProperty(ref _currentInfo, value); }
         }
 
-        private LogEventViewModel _currentError;
-        public LogEventViewModel CurrentError
+        private LogEventViewModel? _currentError;
+
+        public LogEventViewModel? CurrentError
         {
             get { return _currentError; }
             private set { SetProperty(ref _currentError, value); }
@@ -93,21 +95,19 @@ namespace Dawn.Core.Features.Logging
                 .DisposeMany()
                 .Subscribe(changes =>
                 {
-                    var changed = false;
-                    var logEvent = default(LogEventViewModel);
+                    var changedLogEvent = default(LogEventViewModel);
                     foreach (var change in changes)
                     {
                         if (change.Reason == ChangeReason.Add)
                         {
-                            logEvent = change.Current;
-                            changed = true;
+                            changedLogEvent = change.Current;
                         }
                     }
 
-                    if (changed)
+                    if (changedLogEvent is not null)
                     {
-                        CurrentInfo = logEvent;
-                        logEvent.RenderCommand.Execute(null);
+                        CurrentInfo = changedLogEvent;
+                        changedLogEvent.RenderCommand.Execute(null);
                     }
                 });
 
@@ -119,21 +119,19 @@ namespace Dawn.Core.Features.Logging
                 .DisposeMany()
                 .Subscribe(changes =>
                 {
-                    var changed = false;
-                    var logEvent = default(LogEventViewModel);
+                    var changedLogEvent = default(LogEventViewModel);
                     foreach (var change in changes)
                     {
                         if (change.Reason == ChangeReason.Add)
                         {
-                            logEvent = change.Current;
-                            changed = true;
+                            changedLogEvent = change.Current;
                         }
                     }
 
-                    if (changed)
+                    if (changedLogEvent is not null)
                     {
-                        CurrentError = logEvent;
-                        logEvent.RenderCommand.Execute(null);
+                        CurrentError = changedLogEvent;
+                        changedLogEvent.RenderCommand.Execute(null);
                     }
                 });
 
