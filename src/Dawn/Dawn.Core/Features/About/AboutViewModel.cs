@@ -1,9 +1,9 @@
-using Newtonsoft.Json;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Dawn.Core.Features.About
 {
-    public sealed class AboutViewModel : ViewModelListBase<Package>
+    public sealed class AboutViewModel : ViewModelListBase<PackageViewModel>
     {
         public string AssemblyVersionString { get; }
         public string Copyright { get; }
@@ -32,9 +32,18 @@ namespace Dawn.Core.Features.About
             {
                 var json = reader.ReadToEnd();
 
-                foreach (var package in JsonConvert.DeserializeObject<Package[]>(json))
+                foreach (var package in JsonSerializer.Deserialize<PackageModel[]>(json))
                 {
-                    AddUnchecked(package);
+                    AddUnchecked(new PackageViewModel()
+                    {
+                        Authors = package.Authors,
+                        Copyright = package.Copyright,
+                        LicenseUrl = package.LicenseUrl,
+                        License = package.License,
+                        PackageId = package.PackageId,
+                        PackageProjectUrl = package.PackageProjectUrl,
+                        PackageVersion = package.PackageVersion
+                    });
                 }
             }
         }

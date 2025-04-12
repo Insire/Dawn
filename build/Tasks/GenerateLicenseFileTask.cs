@@ -8,8 +8,8 @@ namespace Build
     [TaskName("GenerateLicenseFile")]
     public sealed class GenerateLicenseFileTask : FrostingTask<BuildContext>
     {
-        private const string DotnetToolName = "dotnet-project-licenses";
-        private const string DotnetToolVersion = "2.7.1";
+        private const string DotnetToolName = "nuget-license";
+        private const string DotnetToolVersion = "3.1.3";
 
         public override void Run(BuildContext context)
         {
@@ -45,8 +45,9 @@ namespace Build
                 var settings = new ProcessSettings()
                     .UseWorkingDirectory(".")
                     .WithArguments(builder => builder
-                        .AppendSwitchQuoted("-i", BuildContext.WpfProjectFolderPath)
-                        .Append("-j")
+                        .AppendSwitchQuoted("-i", BuildContext.WpfProjectFilePath)
+                        .AppendSwitch("-o", "json")
+                        .AppendSwitchQuoted("-fo", BuildContext.WpfLicenseFilePath)
                     );
 
                 context.StartProcess(DotnetToolName, settings);
@@ -57,8 +58,9 @@ namespace Build
                 var settings = new ProcessSettings()
                     .UseWorkingDirectory(".")
                     .WithArguments(builder => builder
-                        .AppendSwitchQuoted("-i", BuildContext.AvaloniaProjectFolderPath)
-                        .Append("-j")
+                        .AppendSwitchQuoted("-i", BuildContext.AvaloniaProjectFilePath)
+                        .AppendSwitch("-o", "json")
+                        .AppendSwitchQuoted("-fo", BuildContext.AvaloniaLicenseFilePath)
                     );
 
                 context.StartProcess(DotnetToolName, settings);

@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 
 namespace Dawn.Core.Features.Backups
 {
@@ -161,7 +161,7 @@ namespace Dawn.Core.Features.Backups
                 }
 
                 var json = _fileSystem.ReadAllText(fileName, Encoding.UTF8);
-                var model = JsonConvert.DeserializeObject<BackupMetaDataModel>(json);
+                var model = JsonSerializer.Deserialize<BackupMetaDataModel>(json);
 
                 if (model is null)
                 {
@@ -217,7 +217,7 @@ namespace Dawn.Core.Features.Backups
                     return;
                 }
 
-                var json = JsonConvert.SerializeObject(new BackupMetaDataModel()
+                var json = JsonSerializer.Serialize(new BackupMetaDataModel()
                 {
                     Name = CustomName,
                     Comment = Comment

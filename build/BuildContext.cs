@@ -18,6 +18,9 @@ namespace Build
         public const string WpfProjectFilePath = WpfProjectFolderPath + @"\Dawn.Wpf.csproj";
         public const string AvaloniaProjectFilePath = AvaloniaProjectFolderPath + @"\Dawn.Avalonia.csproj";
 
+        public const string WpfLicenseFilePath = WpfProjectFolderPath + @"\Properties\licenses.json";
+        public const string AvaloniaLicenseFilePath = AvaloniaProjectFolderPath + @"\Properties\licenses.json";
+
         public const string AssemblyInfoPath = @".\src\Dawn\SharedAssemblyInfo.cs";
 
         public const string WpfResultsPath = ResultsPath + "/wpf";

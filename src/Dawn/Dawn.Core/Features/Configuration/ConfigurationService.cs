@@ -22,7 +22,7 @@ namespace Dawn.Core.Features.Configuration
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _currentProcess = currentProcess ?? throw new ArgumentNullException(nameof(currentProcess));
 
-            var path = _currentProcess.MainModule.FileName;
+            var path = _currentProcess.MainModule!.FileName;
             var location = path.Replace(Path.GetFileName(path), "");
 
             _settingsFilePath = Path.Combine(location, "Dawn.Wpf.Settings.json");
