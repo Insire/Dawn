@@ -14,7 +14,8 @@ namespace Build
         public override void Run(BuildContext context)
         {
             Install();
-            Run();
+            RunForWpfApp();
+            RunForAvaloniaApp();
             Uninstall();
 
             void Install()
@@ -39,12 +40,24 @@ namespace Build
                 context.StartProcess("dotnet", settings);
             }
 
-            void Run()
+            void RunForWpfApp()
             {
                 var settings = new ProcessSettings()
                     .UseWorkingDirectory(".")
                     .WithArguments(builder => builder
-                        .AppendSwitchQuoted("-i", BuildContext.ProjectFolderPath)
+                        .AppendSwitchQuoted("-i", BuildContext.WpfProjectFolderPath)
+                        .Append("-j")
+                    );
+
+                context.StartProcess(DotnetToolName, settings);
+            }
+
+            void RunForAvaloniaApp()
+            {
+                var settings = new ProcessSettings()
+                    .UseWorkingDirectory(".")
+                    .WithArguments(builder => builder
+                        .AppendSwitchQuoted("-i", BuildContext.AvaloniaProjectFolderPath)
                         .Append("-j")
                     );
 

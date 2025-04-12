@@ -12,10 +12,16 @@ namespace Build
         public const string Platform = "AnyCPU";
         public const string BuildConfiguration = "Release";
 
-        public const string ProjectFolderPath = @".\src\Dawn\Dawn.Wpf";
-        public const string ProjectFilePath = @".\src\Dawn\Dawn.Wpf\Dawn.Wpf.csproj";
+        public const string WpfProjectFolderPath = @".\src\Dawn\Dawn.Wpf";
+        public const string AvaloniaProjectFolderPath = @".\src\Dawn\Dawn.Avalonia";
+
+        public const string WpfProjectFilePath = WpfProjectFolderPath + @"\Dawn.Wpf.csproj";
+        public const string AvaloniaProjectFilePath = AvaloniaProjectFolderPath + @"\Dawn.Avalonia.csproj";
+
         public const string AssemblyInfoPath = @".\src\Dawn\SharedAssemblyInfo.cs";
 
+        public const string WpfResultsPath = ResultsPath + "/wpf";
+        public const string AvaloniaResultsPath = ResultsPath + "/avalonia";
         public const string ResultsPath = "./binaries";
 
         public VersionOracle GitVersion { get; }
