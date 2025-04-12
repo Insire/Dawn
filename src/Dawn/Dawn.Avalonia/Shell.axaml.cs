@@ -10,11 +10,12 @@ using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Util;
 using MvvmScarletToolkit;
+using SukiUI.Controls;
 using System;
 
 namespace Dawn.Avalonia
 {
-    public partial class Shell : Window
+    public partial class Shell : SukiWindow
     {
         private readonly ShellViewModel _shellViewModel;
         private readonly LogViewModel _logViewModel;
