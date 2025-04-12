@@ -1,11 +1,11 @@
 {
-  "profiles": {
-    "Build": {
-      "commandName": "Project"
-    },
-    "Generate license file": {
-      "commandName": "Project",
-      "commandLineArgs": "--target=generatelicensefile"
+    "profiles": {
+        "Build": {
+            "commandName": "Project"
+        },
+        "Generate license file": {
+            "commandName": "Project",
+            "commandLineArgs": "--target=generatelicensefile -v diagnostic"
+        }
     }
-  }
 }

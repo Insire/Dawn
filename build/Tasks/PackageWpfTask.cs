@@ -18,7 +18,7 @@ namespace Build
                 .GetFiles("*", SearchScope.Current)
                 .Select(p => p.Path);
 
-            context.ZipCompress(bin, bin.CombineWithFilePath(new FilePath($".\\Dawn_{context.GitVersion.SemVer2}.zip")), files);
+            context.ZipCompress(bin, bin.CombineWithFilePath(new FilePath($".\\Dawn_{context.SemVer2}.zip")), files);
 
             foreach (var file in files)
             {

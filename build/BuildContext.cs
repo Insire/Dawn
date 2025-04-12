@@ -27,7 +27,9 @@ namespace Build
         public const string AvaloniaResultsPath = ResultsPath + "/avalonia";
         public const string ResultsPath = "./binaries";
 
-        public VersionOracle GitVersion { get; }
+        private VersionOracle GitVersion { get; }
+
+        public string SemVer2 => GitVersion.SemVer2;
 
         public BuildContext(ICakeContext context)
             : base(context)
@@ -37,7 +39,7 @@ namespace Build
             this.Information($"Provider: {context.BuildSystem().Provider}");
             this.Information($"Platform: {context.Environment.Platform.Family} ({(context.Environment.Platform.Is64Bit ? "x64" : "x86")})");
 
-            this.Information($"Version: {GitVersion.SemVer2}");
+            this.Information($"Version: {SemVer2}");
         }
     }
 }
