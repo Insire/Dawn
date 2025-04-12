@@ -1,14 +1,12 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 
-namespace Dawn.Avalonia.Features;
-
-public partial class ChangeDetectionWindow : Window
+namespace Dawn.Avalonia.Features
 {
-    public ChangeDetectionWindow()
+    public partial class ChangeDetectionWindow : Window
     {
-        InitializeComponent();
+        public ChangeDetectionWindow()
+        {
+            InitializeComponent();
+        }
     }
 }
-

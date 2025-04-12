@@ -1,5 +1,6 @@
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.Messaging;
-using Dawn.Avalonia.Features;
+using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
@@ -22,7 +23,7 @@ namespace Dawn.Avalonia
 {
     internal static class CompositionRoot
     {
-        public static IContainer Get()
+        public static IContainer Get(IClassicDesktopStyleApplicationLifetime lifetime)
         {
             var c = new Container();
 
@@ -30,6 +31,7 @@ namespace Dawn.Avalonia
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext();
 
+            c.Use(lifetime);
             c.Use(SynchronizationContext.Current);
             c.Use<ILogger>(logConfiguration.CreateLogger());
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
@@ -55,10 +57,8 @@ namespace Dawn.Avalonia
 
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
-            c.Register<Shell>(Reuse.Singleton);
-            c.Register<IClipboardService, ClipbboardService>();
-
-            c.Register(made: Made.Of(_ => ServiceInfo.Of<Shell>(), f => f.Clipboard));
+            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>())));
+            c.Register<IClipboardService, ClipboardService>();
 
             c.Use(ScarletCommandBuilder.Default);
             c.Use(ScarletDispatcher.Default);

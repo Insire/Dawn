@@ -2,11 +2,10 @@ using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Util;
-using Newtonsoft.Json;
-using Serilog;
 using System;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -17,37 +16,29 @@ namespace Dawn.Wpf
     {
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly IFileSystem _fileSystem;
-        private readonly ILogger _log;
+        private readonly IClipboardService _clipboardService;
 
         public ICommand CloseCommand { get; }
         public ICommand CopyToClipboardCommand { get; }
 
-        public ConfigurationWindow(ConfigurationViewModel configurationViewModel, IFileSystem fileSystem, ILogger log)
+        public ConfigurationWindow(ConfigurationViewModel configurationViewModel, IFileSystem fileSystem, IClipboardService clipboardService)
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
-
+            _clipboardService = clipboardService;
             CloseCommand = new RelayCommand(CloseInternal, CanClose);
-            CopyToClipboardCommand = new RelayCommand(CopyToClipboard);
+            CopyToClipboardCommand = new AsyncRelayCommand(CopyToClipboard);
 
             InitializeComponent();
         }
 
-        private void CopyToClipboard()
+        private async Task CopyToClipboard()
         {
-            var json = JsonConvert.SerializeObject(_configurationViewModel.Model, Formatting.None);
+            var json = System.Text.Json.JsonSerializer.Serialize(_configurationViewModel.Model);
             var bytes = Encoding.UTF8.GetBytes(json);
             var base64 = Convert.ToBase64String(bytes);
 
-            try
-            {
-                Clipboard.SetDataObject($"json='{base64}'");
-            }
-            catch (Exception ex)
-            {
-                _log.LogError(ex);
-            }
+            await _clipboardService.SetDataAsync(base64);
         }
 
         private void CloseInternal()
@@ -68,7 +59,7 @@ namespace Dawn.Wpf
 
         private void SelectTargetFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder))
+            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
             {
                 _configurationViewModel.DeploymentFolder = folder;
             }
@@ -76,7 +67,7 @@ namespace Dawn.Wpf
 
         private void SelectBackupFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder))
+            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
             {
                 _configurationViewModel.BackupFolder = folder;
             }

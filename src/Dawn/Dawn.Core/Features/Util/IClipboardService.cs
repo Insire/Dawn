@@ -2,6 +2,8 @@ namespace Dawn.Core.Features.Util
 {
     public interface IClipboardService
     {
-        Task SetData(string text);
+        Task SetDataAsync(string text);
+
+        Task SetTextAsync(string text);
     }
 }

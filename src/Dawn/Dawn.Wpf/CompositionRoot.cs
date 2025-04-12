@@ -45,9 +45,11 @@ namespace Dawn.Wpf
                                                     || Matching.FromSource<ShellViewModel>().Invoke(o))
                                 .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
 
+            var logger = logConfiguration.CreateLogger();
+
             c.Use(ScarletCommandBuilder.Default);
             c.Use(SynchronizationContext.Current);
-            c.Use<ILogger>(logConfiguration.CreateLogger());
+            c.Use<ILogger>(logger);
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
             c.Use(new HttpClient());
             c.Use(Process.GetCurrentProcess());

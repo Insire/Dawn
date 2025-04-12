@@ -30,7 +30,7 @@ namespace Dawn.Core.Features.Logging
 
         public long Key { get; }
 
-        public LogEventViewModel(long key, LogEvent logEvent, ILogEventSink log,IClipboardService clipboardService)
+        public LogEventViewModel(long key, LogEvent logEvent, ILogEventSink log, IClipboardService clipboardService)
         {
             Key = key;
             _logEvent = logEvent ?? throw new ArgumentNullException(nameof(logEvent));
@@ -55,7 +55,7 @@ namespace Dawn.Core.Features.Logging
             {
                 try
                 {
-                    await _clipboardService.SetData(Text);
+                    await _clipboardService.SetTextAsync(Text);
                 }
                 catch (Exception ex)
                 {

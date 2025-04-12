@@ -1,14 +1,20 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+using Dawn.Core.Features.About;
 
-namespace Dawn.Avalonia.Features;
-
-public partial class AboutWindow : Window
+namespace Dawn.Avalonia.Features
 {
-    public AboutWindow()
+    public partial class AboutWindow : Window
     {
-        InitializeComponent();
+        public AboutWindow()
+        {
+            InitializeComponent();
+        }
+
+        public AboutWindow(AboutViewModel aboutViewModel)
+        {
+            DataContext = aboutViewModel ?? throw new System.ArgumentNullException(nameof(aboutViewModel));
+
+            InitializeComponent();
+        }
     }
 }
-

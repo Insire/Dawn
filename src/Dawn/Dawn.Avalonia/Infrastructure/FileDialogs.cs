@@ -1,6 +1,6 @@
 using Dawn.Core.Features.Util;
 
-namespace Dawn.Avalonia
+namespace Dawn.Avalonia.Infrastructure
 {
     public sealed class FileDialogs : IFileDialogs
     {

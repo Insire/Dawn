@@ -7,6 +7,7 @@ using Dawn.Core.Features.ChangeDetection;
 using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
+using Dawn.Core.Features.Util;
 using Jot;
 using Serilog;
 using System;
@@ -112,15 +113,18 @@ namespace Dawn.Wpf
         private readonly ConfigurationService _configurationService;
         private readonly ILogger _log;
         private readonly IFileSystem _fileSystem;
+        private readonly IClipboardService _clipboardService;
 
-        public Shell(ShellViewModel shellViewModel,
-                     Tracker tracker,
-                     LogViewModel logViewModel,
-                     AboutViewModel aboutViewModel,
-                     ChangeDetectionViewModel changeDetectionViewModel,
-                     ConfigurationService configurationService,
-                     ILogger log,
-                     IFileSystem fileSystem)
+        public Shell(
+            ShellViewModel shellViewModel,
+            Tracker tracker,
+            LogViewModel logViewModel,
+            AboutViewModel aboutViewModel,
+            ChangeDetectionViewModel changeDetectionViewModel,
+            ConfigurationService configurationService,
+            ILogger log,
+            IFileSystem fileSystem,
+            IClipboardService clipboardService)
         {
             if (tracker is null)
             {
@@ -133,7 +137,7 @@ namespace Dawn.Wpf
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-
+            _clipboardService = clipboardService;
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
@@ -228,7 +232,7 @@ namespace Dawn.Wpf
         {
             Dispatcher.Invoke(() =>
             {
-                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _log)
+                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService)
                 {
                     Owner = this
                 };
