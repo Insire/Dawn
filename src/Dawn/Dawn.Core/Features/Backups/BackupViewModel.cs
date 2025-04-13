@@ -9,7 +9,7 @@ namespace Dawn.Core.Features.Backups
     /// a file that belongs to an update
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public sealed class BackupViewModel : ViewModelListBase<FileSystemViewModel>
+    public sealed partial class BackupViewModel : ViewModelListBase<FileSystemViewModel>
     {
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly BackupsViewModel _backupsViewModel;
@@ -33,21 +33,27 @@ namespace Dawn.Core.Features.Backups
         public string Name
         {
             get { return _name; }
-            private set { SetProperty(ref _name, value); }
+            private set
+            {
+                if (SetProperty(ref _name, value))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
         }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayName))]
         private string _customName;
-        public string CustomName
-        {
-            get { return _customName; }
-            set { SetProperty(ref _customName, value); }
-        }
 
         private string _comment;
         public string Comment
         {
             get { return _comment; }
-            set { SetProperty(ref _comment, value); }
+            set
+            {
+                SetProperty(ref _comment, value);
+            }
         }
 
         private DateTime _timeStamp;
@@ -57,23 +63,37 @@ namespace Dawn.Core.Features.Backups
             private set { SetProperty(ref _timeStamp, value); }
         }
 
+        public string DisplayName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(CustomName))
+                {
+                    return $"Backup: {Name}";
+                }
+
+                return $"{CustomName} - {Name}";
+            }
+        }
+
         public ICommand DeleteCommand { get; }
         public ICommand OpenExternallyCommand { get; }
         public ICommand LoadMetaDataCommand { get; }
         public ICommand EditMetaDataCommand { get; }
         public ICommand DetectChangesCommand { get; }
 
-        public BackupViewModel(in IScarletCommandBuilder commandBuilder,
-                               IFileSystem fileSystem,
-                               BackupModel model,
-                               BackupsViewModel backupsViewModel,
-                               LogViewModel logViewModel,
-                               ILogger log,
-                               ConfigurationViewModel configurationViewModel,
-                               Func<bool> onDeleteRequested,
-                               Action onDeleting,
-                               Func<BackupViewModel, BackupViewModel> onMetaDataEdit,
-                               Action<BackupViewModel> onDetectChanges)
+        public BackupViewModel(
+            IScarletCommandBuilder commandBuilder,
+            IFileSystem fileSystem,
+            BackupModel model,
+            BackupsViewModel backupsViewModel,
+            LogViewModel logViewModel,
+            ILogger log,
+            ConfigurationViewModel configurationViewModel,
+            Func<bool> onDeleteRequested,
+            Action onDeleting,
+            Func<BackupViewModel, BackupViewModel> onMetaDataEdit,
+            Action<BackupViewModel> onDetectChanges)
             : base(commandBuilder)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));

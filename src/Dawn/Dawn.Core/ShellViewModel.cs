@@ -23,7 +23,7 @@ namespace Dawn.Core
         private readonly LogViewModel _logViewModel;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _log;
-        private readonly CompositeDisposable  _disposables;
+        private readonly CompositeDisposable _disposables;
 
         private bool _hasUpdatedApplication;
         private ReleaseAsset? _asset;
@@ -50,7 +50,7 @@ namespace Dawn.Core
             private set { SetProperty(ref _hasCheckedForApplicationUpdate, value); }
         }
 
-        public bool IsEmpty => Stagings.IsEmpty || !Updates.HasItems;
+        public bool IsEmpty => Stagings.IsEmpty && !Updates.HasItems;
 
         public Func<bool>? OnApplicationUpdated { get; set; }
 
@@ -107,7 +107,7 @@ namespace Dawn.Core
                 .Build();
 
             var subscription1 = Updates
-                .WhenPropertyChanged(p=> p.Count, notifyOnInitialValue:false)
+                .WhenPropertyChanged(p => p.HasItems, notifyOnInitialValue: true)
                 .ObserveOn(context)
                 .Subscribe(p =>
                 {
@@ -115,14 +115,14 @@ namespace Dawn.Core
                 });
 
             var subscription2 = Stagings
-                .WhenPropertyChanged(p=> p.Items.Count, notifyOnInitialValue:false)
+                .WhenPropertyChanged(p => p.IsEmpty, notifyOnInitialValue: true)
                 .ObserveOn(context)
                 .Subscribe(p =>
                 {
                     OnPropertyChanged(nameof(IsEmpty));
                 });
 
-             _disposables = new CompositeDisposable(subscription1,subscription2);
+            _disposables = new CompositeDisposable(subscription1, subscription2);
         }
 
         private Task ShowLog()

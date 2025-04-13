@@ -192,7 +192,6 @@
         </Grid.RowDefinitions>
 
         <!--  Busy overlay  -->
-
         <Border Grid.RowSpan="4"
                 Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
                 Opacity="0.90">
@@ -219,7 +218,6 @@
         </Border>
 
         <!--  Empty View  -->
-
         <DockPanel Grid.Row="0"
                    Grid.RowSpan="2"
                    HorizontalAlignment="Center"
@@ -255,7 +253,6 @@
         </DockPanel>
 
         <!--  Backups  -->
-
         <ScrollViewer Grid.Row="0" Grid.RowSpan="3">
             <ScrollViewer.ContextMenu>
                 <ContextMenu>
@@ -318,25 +315,7 @@
                                                     </Style>
                                                 </Button.Style>
 
-                                                <TextBlock TextTrimming="CharacterEllipsis">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="{x:Type TextBlock}">
-                                                            <Setter Property="Text" Value="{Binding Name, Mode=OneWay, StringFormat={}Backup: {0}}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding CustomName, Converter={mvvm:IsNullOrEmpty}}" Value="False">
-                                                                    <Setter Property="Text">
-                                                                        <Setter.Value>
-                                                                            <MultiBinding StringFormat="{}{0} - {1}">
-                                                                                <Binding Mode="OneWay" Path="CustomName" />
-                                                                                <Binding Mode="OneWay" Path="Name" />
-                                                                            </MultiBinding>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                <TextBlock Text="{Binding DisplayName, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
                                             </Button>
                                         </GroupBox.Header>
 

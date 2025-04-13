@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
 using Dawn.Avalonia.Features;
 using Dawn.Core;
 using Dawn.Core.Features.About;
@@ -12,13 +11,11 @@ using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Util;
+using DynamicData.Binding;
 using MvvmScarletToolkit;
 using SukiUI.Controls;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using Avalonia.Platform.Storage.FileIO;
-using DynamicData.Binding;
 using System.Reactive.Linq;
 using System.Threading;
 
@@ -66,16 +63,16 @@ namespace Dawn.Avalonia
 
             InitializeComponent();
 
-
             AddHandler(DragDrop.DropEvent, OnDrop);
+            AddHandler(LoadedEvent, OnLoaded);
 
-                var subscription1 = _shellViewModel.Stagings
-                    .WhenPropertyChanged(p=> p.IsEmpty, notifyOnInitialValue:false)
-                    .ObserveOn(context)
-                    .Subscribe(p =>
-                    {
-                            SetValue(StagingCheckedProperty, !p.Value);
-                    });
+            var subscription1 = _shellViewModel.Stagings
+                .WhenPropertyChanged(p => p.IsEmpty, notifyOnInitialValue: false)
+                .ObserveOn(context)
+                .Subscribe(p =>
+                {
+                    SetValue(StagingCheckedProperty, !p.Value);
+                });
 
             StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
         }
@@ -91,9 +88,18 @@ namespace Dawn.Avalonia
 
         private static void OnStagingCheckedChanged(Shell sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if(e.NewValue is bool staging)
+            if (e.NewValue is bool staging)
             {
                 sender.StagingDetails.SetCurrentValue(DockPanel.IsVisibleProperty, staging);
+            }
+        }
+
+        private void OnLoaded(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is ShellViewModel shellViewModel)
+            {
+                shellViewModel.Configuration.ValidateCommand.Execute(null);
+                shellViewModel.Updates.LoadCommand.Execute(null);
             }
         }
 
