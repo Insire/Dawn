@@ -57,7 +57,7 @@ namespace Dawn.Avalonia
 
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
-            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>())));
+            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>())));
             c.Register<IClipboardService, ClipboardService>();
 
             c.Use(ScarletCommandBuilder.Default);

@@ -4,6 +4,7 @@ using DynamicData;
 using DynamicData.Binding;
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Dawn.Core.Features.Staging
@@ -20,8 +21,8 @@ namespace Dawn.Core.Features.Staging
         private readonly LogViewModel _logViewModel;
         private readonly BackupsViewModel _backupsViewModel;
         private readonly IFileSystem _fileSystem;
-        private readonly IDisposable _subscription;
         private readonly ILogger _log;
+        private readonly CompositeDisposable  _disposables;
 
         private bool _reuseLastBackup;
         public bool ReuseLastBackup
@@ -35,6 +36,13 @@ namespace Dawn.Core.Features.Staging
         {
             get { return _selectedItem; }
             set { SetProperty(ref _selectedItem, value); }
+        }
+
+        private bool _isEmpty;
+        public bool IsEmpty
+        {
+            get { return _isEmpty; }
+            private set { SetProperty(ref _isEmpty, value); }
         }
 
         public ReadOnlyObservableCollection<StagingViewModel> Items { get; }
@@ -67,7 +75,7 @@ namespace Dawn.Core.Features.Staging
             _items = new ObservableCollectionExtended<StagingViewModel>();
             Items = new ReadOnlyObservableCollection<StagingViewModel>(_items);
 
-            _subscription = _sourceCache
+            var subscription1 = _sourceCache
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
                 .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.FullPath), SortOptimisations.ComparesImmutableValuesOnly)
@@ -96,6 +104,17 @@ namespace Dawn.Core.Features.Staging
 
             RemoveCommand = new RelayCommand<object>(RemoveImpl, CanRemoveImpl);
             ClearCommand = new RelayCommand(ClearImpl);
+            IsEmpty = true;
+
+            var subscription2 = Items
+                .WhenPropertyChanged(p=> p.Count, notifyOnInitialValue:false)
+                .ObserveOn(context)
+                .Subscribe(p =>
+                {
+                    IsEmpty = (p.Value == 0);
+                });
+
+            _disposables = new CompositeDisposable(subscription1,subscription2);
         }
 
         private void RemoveImpl(object args)
@@ -299,7 +318,7 @@ namespace Dawn.Core.Features.Staging
 
         protected override void Dispose(bool disposing)
         {
-            _subscription?.Dispose();
+            _disposables.Dispose();
 
             base.Dispose(disposing);
         }

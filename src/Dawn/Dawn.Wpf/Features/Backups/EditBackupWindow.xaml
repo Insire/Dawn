@@ -8,11 +8,11 @@
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
                        xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
-                       xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
                        Name="rootView"
                        Title="Edit Backup"
                        Width="600"
-                       d:DataContext="{d:DesignInstance Type=local:BackupViewModel,
+                       d:DataContext="{d:DesignInstance Type=backups:BackupViewModel,
                                                         IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        ResizeMode="NoResize"

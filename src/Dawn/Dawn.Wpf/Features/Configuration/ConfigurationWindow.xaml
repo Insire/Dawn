@@ -7,12 +7,12 @@
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                       xmlns:local="clr-namespace:Dawn.Wpf"
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:configuration="clr-namespace:Dawn.Core.Features.Configuration;assembly=Dawn.Core"
                        x:Name="rootView"
                        Title="Configuration"
                        Width="600"
-                       d:DataContext="{d:DesignInstance Type=local:ConfigurationViewModel,
+                       d:DataContext="{d:DesignInstance Type=configuration:ConfigurationViewModel,
                                                         IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        ResizeMode="NoResize"

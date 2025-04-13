@@ -6,12 +6,12 @@
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared"
                        xmlns:controls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
-                       xmlns:local="clr-namespace:Dawn.Wpf"
+                       xmlns:about="clr-namespace:Dawn.Core.Features.About;assembly=Dawn.Core"
                        x:Name="rootView"
                        Title="About"
                        Width="700"
                        Height="400"
-                       d:DataContext="{d:DesignInstance Type=local:AboutViewModel,
+                       d:DataContext="{d:DesignInstance Type=about:AboutViewModel,
                                                         IsDesignTimeCreatable=False}"
                        IconVisibility="Collapsed"
                        ResizeMode="NoResize"

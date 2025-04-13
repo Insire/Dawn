@@ -1,5 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Dawn.Avalonia.Features;
 using Dawn.Core;
 using Dawn.Core.Features.About;
@@ -12,6 +15,12 @@ using Dawn.Core.Features.Util;
 using MvvmScarletToolkit;
 using SukiUI.Controls;
 using System;
+using System.Diagnostics;
+using System.Linq;
+using Avalonia.Platform.Storage.FileIO;
+using DynamicData.Binding;
+using System.Reactive.Linq;
+using System.Threading;
 
 namespace Dawn.Avalonia
 {
@@ -43,7 +52,8 @@ namespace Dawn.Avalonia
             ConfigurationService configurationService,
             IFileSystem fileSystem,
             IScarletDispatcher dispatcher,
-            IClipboardService clipboardService)
+            IClipboardService clipboardService,
+            SynchronizationContext context)
         {
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
@@ -55,6 +65,49 @@ namespace Dawn.Avalonia
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
+
+
+            AddHandler(DragDrop.DropEvent, OnDrop);
+
+                var subscription1 = _shellViewModel.Stagings
+                    .WhenPropertyChanged(p=> p.IsEmpty, notifyOnInitialValue:false)
+                    .ObserveOn(context)
+                    .Subscribe(p =>
+                    {
+                            SetValue(StagingCheckedProperty, !p.Value);
+                    });
+
+            StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
+        }
+
+        public static readonly StyledProperty<bool> StagingCheckedProperty =
+            AvaloniaProperty.Register<Shell, bool>(nameof(StagingChecked), defaultValue: false);
+
+        public bool StagingChecked
+        {
+            get => GetValue(StagingCheckedProperty);
+            set => SetValue(StagingCheckedProperty, value);
+        }
+
+        private static void OnStagingCheckedChanged(Shell sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if(e.NewValue is bool staging)
+            {
+                sender.StagingDetails.SetCurrentValue(DockPanel.IsVisibleProperty, staging);
+            }
+        }
+
+        private async void OnDrop(object? sender, DragEventArgs e)
+        {
+            var files = e.Data.GetFiles();
+            if (files == null)
+            {
+                return;
+            }
+
+            var filesOrFolders = files.Select(f => f.Path.LocalPath).ToArray();
+
+            await _shellViewModel.Stagings.Add(filesOrFolders).ConfigureAwait(false);
         }
 
         private void OpenConfiguration(object sender, RoutedEventArgs e)

@@ -1,9 +1,12 @@
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
 using Dawn.Core.Features.Staging;
+using DynamicData.Binding;
 using Octokit;
 using System.Diagnostics;
 using System.Net;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 namespace Dawn.Core
 {
@@ -20,9 +23,10 @@ namespace Dawn.Core
         private readonly LogViewModel _logViewModel;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _log;
+        private readonly CompositeDisposable  _disposables;
 
         private bool _hasUpdatedApplication;
-        private ReleaseAsset _asset;
+        private ReleaseAsset? _asset;
 
         public string Title { get; }
 
@@ -46,14 +50,16 @@ namespace Dawn.Core
             private set { SetProperty(ref _hasCheckedForApplicationUpdate, value); }
         }
 
-        public Func<bool> OnApplicationUpdated { get; set; }
+        public bool IsEmpty => Stagings.IsEmpty || !Updates.HasItems;
+
+        public Func<bool>? OnApplicationUpdated { get; set; }
 
         public ICommand CheckForApplicationUpdateCommand { get; }
 
         public ICommand GetApplicationUpdateCommand { get; }
         public ICommand ShowLogCommand { get; }
 
-        public Action ShowLogAction { get; set; }
+        public Action? ShowLogAction { get; set; }
 
         public ShellViewModel(ConfigurationViewModel configuration,
                               BackupsViewModel updates,
@@ -62,7 +68,8 @@ namespace Dawn.Core
                               LogViewModel logViewModel,
                               ILogger log,
                               IFileSystem fileSystem,
-                              IScarletCommandBuilder commandBuilder)
+                              IScarletCommandBuilder commandBuilder,
+                              SynchronizationContext context)
             : base(commandBuilder)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -98,6 +105,24 @@ namespace Dawn.Core
                 .WithSingleExecution()
                 .WithCancellation()
                 .Build();
+
+            var subscription1 = Updates
+                .WhenPropertyChanged(p=> p.Count, notifyOnInitialValue:false)
+                .ObserveOn(context)
+                .Subscribe(p =>
+                {
+                    OnPropertyChanged(nameof(IsEmpty));
+                });
+
+            var subscription2 = Stagings
+                .WhenPropertyChanged(p=> p.Items.Count, notifyOnInitialValue:false)
+                .ObserveOn(context)
+                .Subscribe(p =>
+                {
+                    OnPropertyChanged(nameof(IsEmpty));
+                });
+
+             _disposables = new CompositeDisposable(subscription1,subscription2);
         }
 
         private Task ShowLog()
@@ -291,6 +316,12 @@ namespace Dawn.Core
             {
                 _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting {from}", from);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _disposables.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
