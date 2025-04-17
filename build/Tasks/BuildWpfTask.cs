@@ -14,7 +14,7 @@ namespace Build
                 .UseWorkingDirectory(".")
                 .WithArguments(builder => builder
                     .Append("publish")
-                    .AppendQuoted(BuildContext.WpfProjectFilePath)
+                    .AppendQuoted(context.WpfProjectFilePath.FullPath)
                     .Append("--nologo")
                     .Append($"-c {BuildContext.BuildConfiguration}")
                     .Append("-r win-x64")
@@ -28,6 +28,11 @@ namespace Build
                 );
 
             context.StartProcess("dotnet", settings);
+        }
+
+        public override bool ShouldRun(BuildContext context)
+        {
+            return context.Environment.Platform.IsWindows();
         }
     }
 }

@@ -1,5 +1,6 @@
 using Cake.Common.IO;
 using Cake.Compression;
+using Cake.Core;
 using Cake.Core.IO;
 using Cake.Frosting;
 using System.Linq;
@@ -24,6 +25,11 @@ namespace Build
             {
                 context.DeleteFile(file);
             }
+        }
+
+        public override bool ShouldRun(BuildContext context)
+        {
+            return context.Environment.Platform.IsWindows();
         }
     }
 }

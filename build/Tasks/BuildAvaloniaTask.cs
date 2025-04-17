@@ -14,7 +14,7 @@ namespace Build
                 .UseWorkingDirectory(".")
                 .WithArguments(builder => builder
                     .Append("publish")
-                    .AppendQuoted(BuildContext.AvaloniaProjectFilePath)
+                    .AppendQuoted(context.AvaloniaProjectFilePath.FullPath)
                     .Append("--nologo")
                     .Append($"-c {BuildContext.BuildConfiguration}")
                     .Append("-r win-x64")

@@ -12,7 +12,7 @@ using System.Reflection;
 
 // Metadata Attributes
 [assembly: AssemblyMetadata("Platform", "AnyCPU")]
-[assembly: AssemblyMetadata("CompileDate", "[UTC]17.04.2025 16:10:44")]
+[assembly: AssemblyMetadata("CompileDate", "[UTC]17.04.2025 16:44:04")]
 [assembly: AssemblyMetadata("Branch", "avalonia_version")]
-[assembly: AssemblyMetadata("Commit", "503c0e9c44d0a96b38e2dca8aadcf048f4ae2035")]
-[assembly: AssemblyMetadata("Version", "2.2.67-g503c0e9c44")]
+[assembly: AssemblyMetadata("Commit", "a3ebbda40f0d2a5ec9d45200b9f65aef81cc0fd0")]
+[assembly: AssemblyMetadata("Version", "2.2.68-ga3ebbda40f")]

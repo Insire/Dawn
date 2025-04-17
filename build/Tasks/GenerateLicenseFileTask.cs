@@ -8,62 +8,41 @@ namespace Build
     [TaskName("GenerateLicenseFile")]
     public sealed class GenerateLicenseFileTask : FrostingTask<BuildContext>
     {
-        private const string DotnetToolName = "nuget-license";
-        private const string DotnetToolVersion = "3.1.3";
-
         public override void Run(BuildContext context)
         {
-            Install();
-            RunForWpfApp();
+            if (context.Environment.Platform.IsWindows())
+            {
+                RunForWpfApp();
+            }
+
             RunForAvaloniaApp();
-            Uninstall();
-
-            void Install()
-            {
-                var settings = new ProcessSettings()
-                    .UseWorkingDirectory(".")
-                    .WithArguments(builder => builder
-                        .Append($"tool install --global {DotnetToolName} --version {DotnetToolVersion}")
-                );
-
-                context.StartProcess("dotnet", settings);
-            }
-
-            void Uninstall()
-            {
-                var settings = new ProcessSettings()
-                    .UseWorkingDirectory(".")
-                    .WithArguments(builder => builder
-                        .Append($"tool uninstall --global {DotnetToolName} ")
-                );
-
-                context.StartProcess("dotnet", settings);
-            }
 
             void RunForWpfApp()
             {
                 var settings = new ProcessSettings()
-                    .UseWorkingDirectory(".")
+                    .UseWorkingDirectory(context.Environment.WorkingDirectory)
                     .WithArguments(builder => builder
-                        .AppendSwitchQuoted("-i", BuildContext.WpfProjectFilePath)
+                        .Append("nuget-license")
+                        .AppendSwitchQuoted("-i", context.WpfProjectFilePath.FullPath)
                         .AppendSwitch("-o", "json")
-                        .AppendSwitchQuoted("-fo", BuildContext.WpfLicenseFilePath)
+                        .AppendSwitchQuoted("-fo", context.WpfLicenseFilePath.FullPath)
                     );
 
-                context.StartProcess(DotnetToolName, settings);
+                context.StartProcess("dotnet", settings);
             }
 
             void RunForAvaloniaApp()
             {
                 var settings = new ProcessSettings()
-                    .UseWorkingDirectory(".")
+                    .UseWorkingDirectory(context.Environment.WorkingDirectory)
                     .WithArguments(builder => builder
-                        .AppendSwitchQuoted("-i", BuildContext.AvaloniaProjectFilePath)
+                        .Append("nuget-license")
+                        .AppendSwitchQuoted("-i", context.AvaloniaProjectFilePath.FullPath)
                         .AppendSwitch("-o", "json")
-                        .AppendSwitchQuoted("-fo", BuildContext.AvaloniaLicenseFilePath)
+                        .AppendSwitchQuoted("-fo", context.AvaloniaLicenseFilePath.FullPath)
                     );
 
-                context.StartProcess(DotnetToolName, settings);
+                context.StartProcess("dotnet", settings);
             }
         }
     }
