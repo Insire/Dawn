@@ -46,7 +46,15 @@ A utility to quickly update a directories contents while automatically backing u
 
 ## Build Requirements
 
+### Visual Studio
+
 This app uses a SDK-style project file, which means you are required to use [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/) or newer. Visual Studio will prompt you to install any missing components once you open the [sln](./Dawn.sln) file.
+
+### Rider
+
+Generally supports what Visual Studio 2022 supports. I'm using version 2025.1.
+
+### Visual Studio Code
 
 For anyone not wishing to install that, they atleast need:
 
