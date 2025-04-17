@@ -10,7 +10,7 @@ namespace Build
             return new CakeHost()
                 .UseContext<BuildContext>()
                 .UseWorkingDirectory("..")
-                .InstallTool(new Uri("nuget:?package=GitVersion.CommandLine&version=5.12.0"))
+                .InstallTool(new Uri("dotnet:?package=GitVersion.Tool&version=6.2.0"))
                 .Run(args);
         }
     }
