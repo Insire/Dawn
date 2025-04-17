@@ -50,11 +50,29 @@ This app uses a SDK-style project file, which means you are required to use [Vis
 
 For anyone not wishing to install that, they atleast need:
 
-- Windows 10 (older versions work probably too, but the repository is not configured for those)
-- [Net 6.0](https://dotnet.microsoft.com/download/dotnet-core/6.0)
+- Windows 10,11 (older versions work probably too, but the repository is not configured for those)
+- linux (i'm testing this on fedora 41)
+- [Net 9.0](https://dotnet.microsoft.com/download/dotnet-core/9.0)
 - [Visual Studio Code](https://code.visualstudio.com/) with the [C# Extension](https://github.com/OmniSharp/omnisharp-vscode) provided by Microsoft
 - [git](https://git-scm.com/)
 
 (This should be everything, but it's possible i missed something. So please tell me if that's the case.)
 
-Once you got the requirements setup, you can compile this yourself, by running the ``build.ps1`` file on Windows.
+Once you got the requirements setup, you can compile this yourself, by running the ``build.ps1`` file on Windows like this:
+
+```ps1
+powershell -noexit -ExecutionPolicy Bypass -File Build.ps1
+```
+
+On linux and OSX you run this instead:
+
+```sh
+./build.sh
+```
+
+### Troubleshooting
+
+#### LibGit2Sharp.LibGit2SharpException: repository path 'path to this repo' is not owned by current user
+
+Its possible, that the current directory isn't directly owner by your current user. But you can 'trust' the code in here by running this
+```git config --global --add safe.directory 'path to this repo'```
