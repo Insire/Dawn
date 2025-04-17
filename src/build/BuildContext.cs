@@ -13,14 +13,29 @@ namespace Build
         public const string Platform = "AnyCPU";
         public const string BuildConfiguration = "Release";
 
-        public DirectoryPath WpfProjectFolderPath => new DirectoryPath(@".\src\Dawn\Dawn.Wpf").MakeAbsolute(Environment.WorkingDirectory);
-        public DirectoryPath AvaloniaProjectFolderPath =>  new DirectoryPath(@".\src\Dawn\Dawn.Avalonia").MakeAbsolute(Environment.WorkingDirectory);
+        public DirectoryPath WpfProjectFolderPath
+            => Environment.WorkingDirectory
+            .Combine("src")
+            .Combine("Dawn")
+            .Combine("Dawn.Wpf");
 
-        public FilePath WpfProjectFilePath => WpfProjectFolderPath.CombineWithFilePath(@"Dawn.Wpf.csproj");
-        public FilePath AvaloniaProjectFilePath => AvaloniaProjectFolderPath.CombineWithFilePath( "Dawn.Avalonia.csproj");
+        public DirectoryPath AvaloniaProjectFolderPath
+            => Environment.WorkingDirectory
+            .Combine("src")
+            .Combine("Dawn")
+            .Combine("Dawn.Avalonia");
 
-        public FilePath WpfLicenseFilePath => WpfProjectFolderPath.Combine("Properties").CombineWithFilePath( "licenses.json");
-        public FilePath AvaloniaLicenseFilePath => AvaloniaProjectFolderPath.Combine("Properties").CombineWithFilePath( "licenses.json");
+        public FilePath WpfProjectFilePath
+            => WpfProjectFolderPath.CombineWithFilePath(@"Dawn.Wpf.csproj");
+
+        public FilePath AvaloniaProjectFilePath
+            => AvaloniaProjectFolderPath.CombineWithFilePath("Dawn.Avalonia.csproj");
+
+        public FilePath WpfLicenseFilePath
+            => WpfProjectFolderPath.Combine("Properties").CombineWithFilePath("licenses.json");
+
+        public FilePath AvaloniaLicenseFilePath
+            => AvaloniaProjectFolderPath.Combine("Properties").CombineWithFilePath("licenses.json");
 
         public const string AssemblyInfoPath = @".\src\Dawn\SharedAssemblyInfo.cs";
 

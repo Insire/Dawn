@@ -1,3 +1,3 @@
 dotnet tool restore
-& dotnet run --project build/Build.csproj -- $args
+& dotnet run --project src/build/Build.csproj -- $args
 exit $LASTEXITCODE;
