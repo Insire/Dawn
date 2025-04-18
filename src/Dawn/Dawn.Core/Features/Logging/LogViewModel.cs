@@ -11,9 +11,6 @@ namespace Dawn.Core.Features.Logging
 {
     public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
-        private readonly ObservableCollectionExtended<LogEventViewModel> _items;
-        private readonly ObservableCollectionExtended<LogEventViewModel> _errors;
-
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly IClipboardService _clipboardService;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
@@ -64,11 +61,11 @@ namespace Dawn.Core.Features.Logging
             _clipboardService = clipboardService;
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
-            _items = new ObservableCollectionExtended<LogEventViewModel>();
-            Items = new ReadOnlyObservableCollection<LogEventViewModel>(_items);
+            var items = new ObservableCollectionExtended<LogEventViewModel>();
+            Items = new ReadOnlyObservableCollection<LogEventViewModel>(items);
 
-            _errors = new ObservableCollectionExtended<LogEventViewModel>();
-            Errors = new ReadOnlyObservableCollection<LogEventViewModel>(_errors);
+            var errors = new ObservableCollectionExtended<LogEventViewModel>();
+            Errors = new ReadOnlyObservableCollection<LogEventViewModel>(errors);
 
             _sourceCache = new SourceCache<LogEventViewModel, long>(vm => vm.Key);
             var comparer = SortExpressionComparer<LogEventViewModel>.Descending(p => p.Timestamp);
@@ -90,7 +87,7 @@ namespace Dawn.Core.Features.Logging
                         .Filter(q => q.Level < LogEventLevel.Information))
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(_items)
+                .Bind(items)
                 .Batch(TimeSpan.FromMilliseconds(500))
                 .DisposeMany()
                 .Subscribe(changes =>
@@ -104,18 +101,20 @@ namespace Dawn.Core.Features.Logging
                         }
                     }
 
-                    if (changedLogEvent is not null)
+                    if (changedLogEvent is null)
                     {
-                        CurrentInfo = changedLogEvent;
-                        changedLogEvent.RenderCommand.Execute(null);
+                        return;
                     }
+
+                    CurrentInfo = changedLogEvent;
+                    changedLogEvent.RenderCommand.Execute(null);
                 });
 
             var errorsSubscription = sourceObservable
                 .Filter(q => q.Level > LogEventLevel.Warning)
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(_errors)
+                .Bind(errors)
                 .DisposeMany()
                 .Subscribe(changes =>
                 {
@@ -128,19 +127,16 @@ namespace Dawn.Core.Features.Logging
                         }
                     }
 
-                    if (changedLogEvent is not null)
+                    if (changedLogEvent is null)
                     {
-                        CurrentError = changedLogEvent;
-                        changedLogEvent.RenderCommand.Execute(null);
+                        return;
                     }
+
+                    CurrentError = changedLogEvent;
+                    changedLogEvent.RenderCommand.Execute(null);
                 });
 
             _subscription = new CompositeDisposable(itemsSubscription, errorsSubscription, countSubscription, _sourceCache);
-        }
-
-        public IDisposable Begin()
-        {
-            return new Subscription(this);
         }
 
         private void SetPercentage(decimal percentage)
@@ -171,38 +167,23 @@ namespace Dawn.Core.Features.Logging
 
         private void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    _subscription?.Dispose();
-                }
-
-                _disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                _subscription?.Dispose();
+            }
+
+            _disposedValue = true;
         }
 
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        private sealed class Subscription : IDisposable
-        {
-            private readonly LogViewModel _viewModel;
-
-            public Subscription(LogViewModel viewModel)
-            {
-                _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-
-                _viewModel.Setup();
-            }
-
-            public void Dispose()
-            {
-            }
         }
     }
 }

@@ -207,8 +207,8 @@ namespace Dawn.Core.Features.Backups
 
             var t2 = Task.Run(async () =>
             {
-                using (_logViewModel.Begin())
-                {
+                _logViewModel.Setup();
+
                     _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
 
                     try
@@ -237,7 +237,7 @@ namespace Dawn.Core.Features.Backups
 
                     _logViewModel.Progress.Report(100);
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
-                }
+
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -278,8 +278,8 @@ namespace Dawn.Core.Features.Backups
 
             var t2 = Task.Run(() =>
             {
-                using (_logViewModel.Begin())
-                {
+                _logViewModel.Setup();
+
                     var array = backupViewModel.Items.ToArray();
                     for (var i = 0; i < array.Length; i++)
                     {
@@ -307,7 +307,7 @@ namespace Dawn.Core.Features.Backups
 
                     _logViewModel.Progress.Report(100);
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
-                }
+
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);

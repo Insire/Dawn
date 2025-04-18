@@ -214,8 +214,8 @@ namespace Dawn.Core.Features.Staging
            {
                try
                {
-                   using (_logViewModel.Begin())
-                   {
+                   _logViewModel.Setup();
+
                        for (var i = 0; i < Items.Count; i++)
                        {
                            var newFile = Items[i];
@@ -252,7 +252,7 @@ namespace Dawn.Core.Features.Staging
                        }
 
                        _logViewModel.Progress.Report(100);
-                   }
+
                }
                catch (Exception ex)
                {

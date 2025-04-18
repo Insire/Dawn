@@ -3,12 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Logging;
+using SukiUI.Controls;
 using System.Windows.Input;
 using System;
 
 namespace Dawn.Avalonia
 {
-    public partial class LoggingWindow : Window
+    public partial class LoggingWindow : SukiWindow
     {
         public ICommand CloseCommand { get; }
 
