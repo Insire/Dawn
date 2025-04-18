@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Globalization;
 
 namespace Dawn.Core.Features.Backups
@@ -15,26 +16,28 @@ namespace Dawn.Core.Features.Backups
 
         private bool _isMassDeleting;
 
-        public ICommand RestoreCommand { get; }
+        public ICommand RestoreCommand { [UsedImplicitly] get; }
 
         public ICommand DeleteAllCommand { get; }
 
-        public Func<bool> OnDeleteAllRequested { get; set; }
-        public Func<bool> OnDeleteRequested { get; set; }
+        public Func<bool>? OnDeleteAllRequested { get; set; }
+        public Func<bool>? OnDeleteRequested { get; set; }
 
-        public Action OnDeletingAll { get; set; }
-        public Action OnDeleting { get; set; }
-        public Action OnRestoring { get; set; }
-        public Action<BackupViewModel> OnDetectChanges { get; set; }
+        public Action? OnDeletingAll { get; set; }
+        public Action? OnDeleting { get; set; }
+        public Action? OnRestoring { get; set; }
 
-        public Func<BackupViewModel, BackupViewModel> OnMetaDataEditing { get; set; }
+        public Action<BackupViewModel>? OnDetectChanges { get; set; }
 
-        public BackupsViewModel(in IScarletCommandBuilder commandBuilder,
-                                ConfigurationViewModel configurationViewModel,
-                                ILogger log,
-                                LogViewModel logViewModel,
-                                BackupViewModelFactory viewModelFactory,
-                                IFileSystem fileSystem)
+        public Func<BackupViewModel, BackupViewModel>? OnMetaDataEditing { get; set; }
+
+        public BackupsViewModel(
+            in IScarletCommandBuilder commandBuilder,
+            ConfigurationViewModel configurationViewModel,
+            ILogger log,
+            LogViewModel logViewModel,
+            BackupViewModelFactory viewModelFactory,
+            IFileSystem fileSystem)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
@@ -67,86 +70,88 @@ namespace Dawn.Core.Features.Backups
                 }
 
                 var lookup = new Dictionary<string, BackupViewModel>();
-                var directories = await Task.Run(() => _fileSystem.GetDirectories(_configurationViewModel.BackupFolder, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
+                var directories = await Task.Run(() => _fileSystem.GetDirectories(_configurationViewModel.BackupFolder, "*", SearchOption.TopDirectoryOnly), token).ConfigureAwait(false);
 
                 foreach (var directory in directories)
                 {
                     var key = Path.GetFileName(directory);
-                    if (key.Length >= 8)
+                    if (key.Length < 8)
                     {
-                        try
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (!int.TryParse(key.AsSpan(0, 2), out var days))
                         {
-                            if (!int.TryParse(key.AsSpan(0, 2), out var days))
-                            {
-                                days = 1;
-                            }
-
-                            if (!int.TryParse(key.AsSpan(2, 2), out var months))
-                            {
-                                months = 1;
-                            }
-
-                            if (!int.TryParse(key.AsSpan(4, 4), out var years))
-                            {
-                                years = 2001;
-                            }
-
-                            var hours = 0;
-                            var minutes = 0;
-                            var seconds = 0;
-
-                            if (key.Length >= 10)
-                            {
-                                int.TryParse(key.AsSpan(8, 2), out hours);
-                            }
-
-                            if (key.Length >= 12)
-                            {
-                                int.TryParse(key.AsSpan(10, 2), out minutes);
-                            }
-
-                            if (key.Length >= 14)
-                            {
-                                int.TryParse(key.AsSpan(12, 2), out seconds);
-                            }
-
-                            days--;
-                            months--;
-                            years--;
-
-                            var date = DateTime.MinValue
-                                .AddDays(days)
-                                .AddMonths(months)
-                                .AddYears(years)
-                                .AddHours(hours)
-                                .AddMinutes(minutes)
-                                .AddSeconds(seconds);
-
-                            key = date.ToString("yyyy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture);
-                            if (!lookup.ContainsKey(key))
-                            {
-                                var model = new BackupModel()
-                                {
-                                    FullPath = directory,
-                                    Name = key,
-                                    TimeStamp = date
-                                };
-                                var group = _viewModelFactory.Get(model, this, OnDeleteRequestedImpl, OnDeletingImpl, OnMetaDataEditImpl, OnDetectChangesImpl);
-                                var files = await Task.Run(() => _fileSystem.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)).ConfigureAwait(false);
-
-                                await group.AddRange(files.Where(p => !p.EndsWith(IFileSystem.MetaDataFileName, StringComparison.InvariantCultureIgnoreCase)).Select(p => new FileInfoViewModel(p)), token).ConfigureAwait(false);
-
-                                lookup.Add(key, group);
-                            }
-                            else
-                            {
-                                await lookup[key].Add(new DirectoryViewModel(directory), token).ConfigureAwait(false);
-                            }
+                            days = 1;
                         }
-                        catch (Exception ex)
+
+                        if (!int.TryParse(key.AsSpan(2, 2), out var months))
                         {
-                            _log.LogError(ex);
+                            months = 1;
                         }
+
+                        if (!int.TryParse(key.AsSpan(4, 4), out var years))
+                        {
+                            years = 2001;
+                        }
+
+                        var hours = 0;
+                        var minutes = 0;
+                        var seconds = 0;
+
+                        if (key.Length >= 10)
+                        {
+                            int.TryParse(key.AsSpan(8, 2), out hours);
+                        }
+
+                        if (key.Length >= 12)
+                        {
+                            int.TryParse(key.AsSpan(10, 2), out minutes);
+                        }
+
+                        if (key.Length >= 14)
+                        {
+                            int.TryParse(key.AsSpan(12, 2), out seconds);
+                        }
+
+                        days--;
+                        months--;
+                        years--;
+
+                        var date = DateTime.MinValue
+                            .AddDays(days)
+                            .AddMonths(months)
+                            .AddYears(years)
+                            .AddHours(hours)
+                            .AddMinutes(minutes)
+                            .AddSeconds(seconds);
+
+                        key = date.ToString("yyyy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        if (!lookup.TryGetValue(key, out var value))
+                        {
+                            var model = new BackupModel()
+                            {
+                                FullPath = directory,
+                                Name = key,
+                                TimeStamp = date
+                            };
+                            var group = _viewModelFactory.Get(model, this, OnDeleteRequestedImpl, OnDeletingImpl, OnMetaDataEditImpl, OnDetectChangesImpl);
+                            var files = await Task.Run(() => _fileSystem.GetFiles(directory, "*", SearchOption.TopDirectoryOnly), token).ConfigureAwait(false);
+
+                            await group.AddRange(files.Where(p => !p.EndsWith(IFileSystem.MetaDataFileName, StringComparison.InvariantCultureIgnoreCase)).Select(p => new FileInfoViewModel(p)), token).ConfigureAwait(false);
+
+                            lookup.Add(key, group);
+                        }
+                        else
+                        {
+                            await value.Add(new DirectoryViewModel(directory), token).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogError(ex);
                     }
                 }
 
@@ -173,7 +178,7 @@ namespace Dawn.Core.Features.Backups
 
         private BackupViewModel OnMetaDataEditImpl(BackupViewModel backup)
         {
-            return OnMetaDataEditing?.Invoke(backup);
+            return OnMetaDataEditing!.Invoke(backup);
         }
 
         private void OnDetectChangesImpl(BackupViewModel backup)
@@ -316,7 +321,7 @@ namespace Dawn.Core.Features.Backups
             }
         }
 
-        private void RestoreArchive(string from, string to, DateTime timeStamp, IProgress<decimal> progress)
+        private void RestoreArchive(string from, string to, DateTime timeStamp, IProgress<decimal>? progress)
         {
             if (_fileSystem.ExtractFor<BackupsViewModel>(from, to, _log, timeStamp, progress, true, _configurationViewModel.UpdateTimeStampOnRestore))
             {
@@ -324,7 +329,7 @@ namespace Dawn.Core.Features.Backups
             }
         }
 
-        private bool CanRestore(BackupViewModel backupViewModel)
+        private bool CanRestore(BackupViewModel? backupViewModel)
         {
             return !IsBusy
                 && backupViewModel != null

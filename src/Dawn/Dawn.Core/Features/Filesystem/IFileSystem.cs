@@ -6,7 +6,7 @@ namespace Dawn.Core.Features.Filesystem
     {
         internal const string MetaDataFileName = "backup.json";
 
-        bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal> progress, bool overwrite = false, bool setLastWriteTime = false);
+        bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal>? progress, bool overwrite = false, bool setLastWriteTime = false);
 
         bool MoveFor<T>(string from, string to, ILogger log, bool overwrite = false);
 

@@ -142,48 +142,47 @@ namespace Dawn.Core.Features.Filesystem
             return false;
         }
 
-        public bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal> progress, bool overwrite = false, bool setLastWriteTime = false)
+        public bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal>? progress, bool overwrite = false, bool setLastWriteTime = false)
         {
             try
             {
-                using (var archive = ZipFile.OpenRead(from))
+                using var archive = ZipFile.OpenRead(from);
+
+                var count = 0;
+                foreach (var entry in archive.Entries)
                 {
-                    var count = 0;
-                    foreach (var entry in archive.Entries)
+                    progress?.Report(count, archive.Entries.Count);
+                    // Gets the full path to ensure that relative segments are removed.
+                    var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
+
+                    // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
+                    // are case-insensitive.
+                    if (destinationPath.StartsWith(to, StringComparison.Ordinal))
                     {
-                        progress?.Report(count, archive.Entries.Count);
-                        // Gets the full path to ensure that relative segments are removed.
-                        var destinationPath = Path.GetFullPath(Path.Combine(to, entry.FullName));
-
-                        // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
-                        // are case-insensitive.
-                        if (destinationPath.StartsWith(to, StringComparison.Ordinal))
+                        // IsDirectory ?
+                        var fileName = Path.GetFileName(destinationPath);
+                        if (fileName.Length == 0)
                         {
-                            // IsDirectory ?
-                            var fileName = Path.GetFileName(destinationPath);
-                            if (fileName.Length == 0)
-                            {
-                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Creating destination directory {FolderPath}", destinationPath);
-                                CreateDirectory(destinationPath);
-                            }
-                            else // is file
-                            {
-                                var directoryName = destinationPath.Replace(fileName, "");
-                                CreateDirectory(directoryName);
+                            log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Creating destination directory {FolderPath}", destinationPath);
+                            CreateDirectory(destinationPath);
+                        }
+                        else // is file
+                        {
+                            var directoryName = destinationPath.Replace(fileName, "");
+                            CreateDirectory(directoryName);
 
-                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {File}", destinationPath);
-                                entry.ExtractToFile(destinationPath, overwrite);
+                            log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {File}", destinationPath);
+                            entry.ExtractToFile(destinationPath, overwrite);
 
-                                if (setLastWriteTime)
-                                {
-                                    log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", destinationPath, timeStamp);
-                                    File.SetLastWriteTime(destinationPath, timeStamp);
-                                }
+                            if (setLastWriteTime)
+                            {
+                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", destinationPath, timeStamp);
+                                File.SetLastWriteTime(destinationPath, timeStamp);
                             }
                         }
-
-                        count++;
                     }
+
+                    count++;
                 }
 
                 return true;

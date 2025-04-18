@@ -2,6 +2,7 @@ using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
 using Dawn.Core.Features.Staging;
 using DynamicData.Binding;
+using JetBrains.Annotations;
 using Octokit;
 using System.Diagnostics;
 using System.Net;
@@ -54,10 +55,10 @@ namespace Dawn.Core
 
         public Func<bool>? OnApplicationUpdated { get; set; }
 
-        public ICommand CheckForApplicationUpdateCommand { get; }
+        public ICommand CheckForApplicationUpdateCommand { [UsedImplicitly] get; }
 
-        public ICommand GetApplicationUpdateCommand { get; }
-        public ICommand ShowLogCommand { get; }
+        public ICommand GetApplicationUpdateCommand { [UsedImplicitly] get; }
+        public ICommand ShowLogCommand { [UsedImplicitly] get; }
 
         public Action? ShowLogAction { get; set; }
 
@@ -80,7 +81,7 @@ namespace Dawn.Core
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
-            _log = log?.ForContext<ShellViewModel>() ?? throw new ArgumentNullException(nameof(log));
+            _log = log.ForContext<ShellViewModel>() ?? throw new ArgumentNullException(nameof(log));
 
             _client = new GitHubClient(new ProductHeaderValue(GithubRepositoryOwner));
 
@@ -109,7 +110,7 @@ namespace Dawn.Core
             var subscription1 = Updates
                 .WhenPropertyChanged(p => p.HasItems, notifyOnInitialValue: true)
                 .ObserveOn(context)
-                .Subscribe(p =>
+                .Subscribe(_ =>
                 {
                     OnPropertyChanged(nameof(IsEmpty));
                 });
@@ -117,7 +118,7 @@ namespace Dawn.Core
             var subscription2 = Stagings
                 .WhenPropertyChanged(p => p.IsEmpty, notifyOnInitialValue: true)
                 .ObserveOn(context)
-                .Subscribe(p =>
+                .Subscribe(_ =>
                 {
                     OnPropertyChanged(nameof(IsEmpty));
                 });
@@ -176,28 +177,34 @@ namespace Dawn.Core
 
         private async Task GetApplicationUpdate(CancellationToken token)
         {
+            var asset = _asset;
+            if (asset is null)
+            {
+                return;
+            }
+
             try
             {
                 _logViewModel.Progress.Report(0);
                 var tempDirectory = Path.GetTempPath();
-                var tempZipFile = Path.Combine(tempDirectory, $"{_asset.Name}");
-                var tempExtractDirectory = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(_asset.Name));
+                var tempZipFile = Path.Combine(tempDirectory, $"{asset.Name}");
+                var tempExtractDirectory = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(asset.Name));
 
-                _log.Write(Serilog.Events.LogEventLevel.Debug, "Downloading release from {url}", _asset.Url);
-                if (!await DownloadRelease(tempZipFile, token).ConfigureAwait(false))
+                _log.Write(Serilog.Events.LogEventLevel.Debug, "Downloading release from {url}", asset.Url);
+                if (!await DownloadRelease(asset,tempZipFile, token).ConfigureAwait(false))
                 {
                     return;
                 }
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Extracting release to {directory}", tempExtractDirectory);
-                if (!_fileSystem.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, DateTime.MinValue, _logViewModel.Progress, true, false))
+                if (!_fileSystem.ExtractFor<ShellViewModel>(tempZipFile, tempExtractDirectory, _log, DateTime.MinValue, _logViewModel.Progress, true))
                 {
                     return;
                 }
 
-                var thisProcess = ReplaceApplicaionFiles(tempExtractDirectory);
+                var thisProcess = ReplaceApplicationFiles(tempExtractDirectory);
 
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Update to {version} completed succssfully", _asset.Name);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Update to {version} completed successfully", asset.Name);
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Cleaning up temporary files");
                 CleanUpFiles(tempDirectory);
@@ -220,7 +227,7 @@ namespace Dawn.Core
         {
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Spawning new process.");
 
-            var spawn = Process.Start(thisProcess.MainModule.FileName);
+            var spawn = Process.Start(thisProcess.MainModule!.FileName);
 
             _log.Write(Serilog.Events.LogEventLevel.Debug, "New process ID is {0}", spawn.Id);
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Closing old running process {0}.", thisProcess.Id);
@@ -230,11 +237,11 @@ namespace Dawn.Core
             thisProcess.Dispose();
         }
 
-        private Process ReplaceApplicaionFiles(string from)
+        private Process ReplaceApplicationFiles(string from)
         {
             var thisProcess = Process.GetCurrentProcess();
 
-            var me = thisProcess.MainModule.FileName;
+            var me = thisProcess.MainModule!.FileName;
             var currentDirectory = Path.GetDirectoryName(me);
             var bak = me + ".bak";
 
@@ -280,9 +287,9 @@ namespace Dawn.Core
             }
         }
 
-        private async Task<bool> DownloadRelease(string to, CancellationToken token)
+        private async Task<bool> DownloadRelease(ReleaseAsset asset, string to, CancellationToken token)
         {
-            var response = await _client.Connection.Get<object>(new Uri(_asset.Url), new Dictionary<string, string>(), ZipDownloadType, token).ConfigureAwait(false);
+            var response = await _client.Connection.Get<object>(new Uri(asset.Url), new Dictionary<string, string>(), ZipDownloadType, token).ConfigureAwait(false);
 
             if (response?.HttpResponse?.StatusCode != HttpStatusCode.OK)
             {
@@ -292,7 +299,7 @@ namespace Dawn.Core
             var responseData = response.HttpResponse.Body;
 
             _log.Write(Serilog.Events.LogEventLevel.Debug, "Writing release to {file}", to);
-            File.WriteAllBytes(to, (byte[])responseData);
+            await File.WriteAllBytesAsync(to, (byte[])responseData, token);
 
             return true;
         }

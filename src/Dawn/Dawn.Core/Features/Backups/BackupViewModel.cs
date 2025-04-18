@@ -131,7 +131,9 @@ namespace Dawn.Core.Features.Backups
                 .Build();
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         private BackupViewModel(in IScarletCommandBuilder commandBuilder, BackupViewModel backupViewModel)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
             : base(commandBuilder)
         {
             FullPath = backupViewModel.FullPath ?? throw new ArgumentNullException(nameof(BackupModel.FullPath));
@@ -200,7 +202,7 @@ namespace Dawn.Core.Features.Backups
             return Task.Run(() =>
             {
                 var copy = new BackupViewModel(CommandBuilder, this);
-                var name = _onMetaDataEdit.Invoke(copy);
+                copy = _onMetaDataEdit.Invoke(copy);
 
                 Comment = copy.Comment?.Length > 0
                     ? copy.Comment

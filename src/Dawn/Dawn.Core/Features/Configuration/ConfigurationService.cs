@@ -11,7 +11,6 @@ namespace Dawn.Core.Features.Configuration
         private readonly string _settingsFilePath;
         private readonly ConfigurationModel _configuration;
         private readonly HttpClient _httpClient;
-        private readonly Process _currentProcess;
         private readonly ILogger _log;
         private readonly IFileSystem _fileSystem;
 
@@ -20,9 +19,9 @@ namespace Dawn.Core.Features.Configuration
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _currentProcess = currentProcess ?? throw new ArgumentNullException(nameof(currentProcess));
+            var currentProcess1 = currentProcess ?? throw new ArgumentNullException(nameof(currentProcess));
 
-            var path = _currentProcess.MainModule!.FileName;
+            var path = currentProcess1.MainModule!.FileName;
             var location = path.Replace(Path.GetFileName(path), "");
 
             _settingsFilePath = Path.Combine(location, "Dawn.Wpf.Settings.json");
@@ -32,7 +31,7 @@ namespace Dawn.Core.Features.Configuration
                 DeploymentFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "TestDeployment"),
                 BackupFolder = Path.Combine(location, "backups"),
                 FirstStart = true,
-                BackupFileTypes = new System.Collections.Generic.List<BackupFileTypeModel>()
+                BackupFileTypes = new List<BackupFileTypeModel>()
                 {
                     new BackupFileTypeModel( ".dll","DLL",true),
                     new BackupFileTypeModel( ".lst","LST",true),
@@ -73,16 +72,24 @@ namespace Dawn.Core.Features.Configuration
 
         public ConfigurationModel Get()
         {
+            if (string.IsNullOrEmpty(_configuration.BackupFolder))
+            {
+             throw new InvalidOperationException("Backup folder not set.");
+            }
+
             var args = Environment.GetCommandLineArgs();
-            foreach (var func in new Func<bool>[] { () => GetFromJson(args), () => GetFromUrl(args), () => GetFromFile() })
+            foreach (var func in new[] { () => GetFromJson(args), () => GetFromUrl(args), GetFromFile })
             {
                 try
                 {
-                    if (func.Invoke())
+
+                    if (!func.Invoke())
                     {
-                        _fileSystem.CreateDirectory(_configuration.BackupFolder);
-                        break;
+                        continue;
                     }
+
+                    _fileSystem.CreateDirectory(_configuration.BackupFolder);
+                    break;
                 }
                 catch (FormatException)
                 {
@@ -121,8 +128,14 @@ namespace Dawn.Core.Features.Configuration
                     t.Result.EnsureSuccessStatusCode();
 
                     var content = await t.Result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var model = JsonSerializer.Deserialize<ConfigurationModel>(content);
 
-                    Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(content));
+                    if (model == null)
+                    {
+                        return false;
+                    }
+
+                    Update(_configuration, model);
                     _configuration.IsLocalConfig = false;
 
                     return true;
@@ -137,7 +150,13 @@ namespace Dawn.Core.Features.Configuration
             var json = args.FirstOrDefault(p => p.StartsWith("json=", StringComparison.InvariantCultureIgnoreCase));
             if (json != null)
             {
-                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json)));
+                var model = JsonSerializer.Deserialize<ConfigurationModel>(GetArgument(json));
+                if (model == null)
+                {
+                    return false;
+                }
+
+                Update(_configuration, model);
                 _configuration.IsLocalConfig = false;
 
                 return true;
@@ -150,7 +169,14 @@ namespace Dawn.Core.Features.Configuration
         {
             if (_fileSystem.FileExists(_settingsFilePath))
             {
-                Update(_configuration, JsonSerializer.Deserialize<ConfigurationModel>(_fileSystem.ReadAllText(_settingsFilePath, Encoding.UTF8)));
+                var json = _fileSystem.ReadAllText(_settingsFilePath, Encoding.UTF8);
+                var model = JsonSerializer.Deserialize<ConfigurationModel>(json);
+                if (model == null)
+                {
+                    return false;
+                }
+
+                Update(_configuration, model);
                 _configuration.IsLocalConfig = true;
 
                 return true;
@@ -189,7 +215,7 @@ namespace Dawn.Core.Features.Configuration
                 target.BackupFolder = update.BackupFolder;
             }
 
-            if (update.BackupFileTypes?.Count > 0)
+            if (update.BackupFileTypes.Count > 0)
             {
                 target.BackupFileTypes = update.BackupFileTypes;
             }

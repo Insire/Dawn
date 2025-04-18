@@ -27,13 +27,13 @@ namespace Dawn.Core.Features.Backups
         }
 
         public BackupFileTypeViewModel(BackupFileTypeModel model)
-            : this(model?.Name, model?.Extension, model?.IsEnabled ?? false)
+            : this(model.Name, model.Extension, model?.IsEnabled ?? false)
         {
         }
 
-        public BackupFileTypeViewModel(string type, string extension, bool isEnabled)
+        public BackupFileTypeViewModel(string? name, string? extension, bool isEnabled)
         {
-            _name = type ?? throw new ArgumentNullException(nameof(type));
+            _name = name ?? throw new ArgumentNullException(nameof(name));
             _extension = extension ?? throw new ArgumentNullException(nameof(extension));
             _isEnabled = isEnabled;
         }

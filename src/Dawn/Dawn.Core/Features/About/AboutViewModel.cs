@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Reflection;
 using System.Text.Json;
 
@@ -6,13 +7,13 @@ namespace Dawn.Core.Features.About
     public sealed class AboutViewModel : ViewModelListBase<PackageViewModel>
     {
         public string AssemblyVersionString { get; }
-        public string Copyright { get; }
+        public string Copyright { [UsedImplicitly] get; }
         public string Product { get; }
         public Version AssemblyVersion { get; }
 
-        public string ProjectUrl { get; }
-        public string IconUrl { get; }
-        public string IconAuthorUrl { get; }
+        public string ProjectUrl { [UsedImplicitly] get; }
+        public string IconUrl { [UsedImplicitly] get; }
+        public string IconAuthorUrl { [UsedImplicitly] get; }
 
         public AboutViewModel(in IScarletCommandBuilder commandBuilder, Assembly assembly)
             : base(commandBuilder)
@@ -27,24 +28,27 @@ namespace Dawn.Core.Features.About
 
             var licenses = assembly.GetManifestResourceNames().Single(p => p.EndsWith("licenses.json"));
 
-            using (var stream = assembly.GetManifestResourceStream(licenses))
-            using (var reader = new StreamReader(stream))
-            {
-                var json = reader.ReadToEnd();
+            using var stream = assembly.GetManifestResourceStream(licenses)!;
+            using var reader = new StreamReader(stream);
+            var json = reader.ReadToEnd();
 
-                foreach (var package in JsonSerializer.Deserialize<PackageModel[]>(json))
+            var packages = JsonSerializer.Deserialize<PackageModel[]>(json);
+            if (packages is null)
+            {
+                return;
+            }
+            foreach (var package in packages)
+            {
+                AddUnchecked(new PackageViewModel()
                 {
-                    AddUnchecked(new PackageViewModel()
-                    {
-                        Authors = package.Authors,
-                        Copyright = package.Copyright,
-                        LicenseUrl = package.LicenseUrl,
-                        License = package.License,
-                        PackageId = package.PackageId,
-                        PackageProjectUrl = package.PackageProjectUrl,
-                        PackageVersion = package.PackageVersion
-                    });
-                }
+                    Authors = package.Authors,
+                    Copyright = package.Copyright,
+                    LicenseUrl = package.LicenseUrl,
+                    License = package.License,
+                    PackageId = package.PackageId,
+                    PackageProjectUrl = package.PackageProjectUrl,
+                    PackageVersion = package.PackageVersion
+                });
             }
         }
 

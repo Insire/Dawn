@@ -71,7 +71,7 @@ namespace Dawn.Core.Features.ChangeDetection
                 return false;
             }
 
-            if (one.Equals(other))
+            if (one?.Equals(other) ?? false)
             {
                 oneState(ChangeDetectionState.Identical);
                 otherState(ChangeDetectionState.Identical);

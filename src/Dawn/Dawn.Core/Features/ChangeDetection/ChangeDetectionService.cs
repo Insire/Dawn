@@ -22,65 +22,59 @@ namespace Dawn.Core.Features.ChangeDetection
         {
             return Task.Run(() =>
             {
-                using (var mySHA256 = SHA256.Create())
+                using var mySHA256 = SHA256.Create();
+                var results = new List<FilePairViewModel>();
+                foreach (var entry in backup.Items)
                 {
-                    var results = new List<FilePairViewModel>();
-                    foreach (var entry in backup.Items)
+                    if (entry.IsFile && entry is FileInfoViewModel fileInfo)
                     {
-                        if (entry.IsFile && entry is FileInfoViewModel fileInfo)
+                        var fileName = Path.GetFileName(fileInfo.FullPath);
+                        var deploymentFileName = Path.Combine(_configuration.DeploymentFolder, fileName);
+                        var destination = new FileInfoViewModel(deploymentFileName);
+                        var pair = new FilePairViewModel(fileInfo, destination);
+
+                        var info = new FileInfo(pair.Source.FullPath);
+                        pair.Source.Attributes = info.Attributes;
+                        pair.Source.IsReadOnly = info.IsReadOnly;
+                        pair.Source.CreationTime = info.CreationTime;
+                        pair.Source.LastAccessTime = info.LastAccessTime;
+                        pair.Source.LastWriteTime = info.LastWriteTime;
+                        pair.Source.Exists = info.Exists;
+
+                        if (info.Exists)
                         {
-                            var fileName = Path.GetFileName(fileInfo.FullPath);
-                            var deploymentFileName = Path.Combine(_configuration.DeploymentFolder, fileName);
-                            var destination = new FileInfoViewModel(deploymentFileName);
-                            var pair = new FilePairViewModel(fileInfo, destination);
+                            pair.Source.Length = info.Length;
 
-                            var info = new FileInfo(pair.Source.FullPath);
-                            pair.Source.Attributes = info.Attributes;
-                            pair.Source.IsReadOnly = info.IsReadOnly;
-                            pair.Source.CreationTime = info.CreationTime;
-                            pair.Source.LastAccessTime = info.LastAccessTime;
-                            pair.Source.LastWriteTime = info.LastWriteTime;
-                            pair.Source.Exists = info.Exists;
+                            using var fs = new FileStream(pair.Source.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            pair.Source.Hash = ComputeHash(mySHA256, fs);
 
-                            if (info.Exists)
-                            {
-                                pair.Source.Length = info.Length;
-
-                                using (var fs = new FileStream(pair.Source.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                                {
-                                    pair.Source.Hash = ComputeHash(mySHA256, fs);
-
-                                    pair.Source.IsNetAssembly = IsAssembly(fs);
-                                }
-                            }
-
-                            info = new FileInfo(pair.Destination.FullPath);
-                            pair.Destination.Attributes = info.Attributes;
-                            pair.Destination.IsReadOnly = info.IsReadOnly;
-                            pair.Destination.CreationTime = info.CreationTime;
-                            pair.Destination.LastAccessTime = info.LastAccessTime;
-                            pair.Destination.LastWriteTime = info.LastWriteTime;
-                            pair.Destination.Exists = info.Exists;
-
-                            if (info.Exists)
-                            {
-                                pair.Destination.Length = info.Length;
-
-                                using (var fs = new FileStream(pair.Destination.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                                {
-                                    pair.Destination.Hash = ComputeHash(mySHA256, fs);
-
-                                    pair.Destination.IsNetAssembly = IsAssembly(fs);
-                                }
-                            }
-
-                            pair.UpdateChangeState();
-                            results.Add(pair);
+                            pair.Source.IsNetAssembly = IsAssembly(fs);
                         }
-                    }
 
-                    return results;
+                        info = new FileInfo(pair.Destination.FullPath);
+                        pair.Destination.Attributes = info.Attributes;
+                        pair.Destination.IsReadOnly = info.IsReadOnly;
+                        pair.Destination.CreationTime = info.CreationTime;
+                        pair.Destination.LastAccessTime = info.LastAccessTime;
+                        pair.Destination.LastWriteTime = info.LastWriteTime;
+                        pair.Destination.Exists = info.Exists;
+
+                        if (info.Exists)
+                        {
+                            pair.Destination.Length = info.Length;
+
+                            using var fs = new FileStream(pair.Destination.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            pair.Destination.Hash = ComputeHash(mySHA256, fs);
+
+                            pair.Destination.IsNetAssembly = IsAssembly(fs);
+                        }
+
+                        pair.UpdateChangeState();
+                        results.Add(pair);
+                    }
                 }
+
+                return results;
             });
         }
 
@@ -90,18 +84,16 @@ namespace Dawn.Core.Features.ChangeDetection
             {
                 fs.Position = 0;
                 // Try to read CLI metadata from the PE file.
-                using (var peReader = new PEReader(fs))
+                using var peReader = new PEReader(fs);
+                if (!peReader.HasMetadata)
                 {
-                    if (!peReader.HasMetadata)
-                    {
-                        return false; // File does not have CLI metadata.
-                    }
-
-                    // Check that file has an assembly manifest.
-                    var reader = peReader.GetMetadataReader();
-
-                    return reader.IsAssembly;
+                    return false; // File does not have CLI metadata.
                 }
+
+                // Check that file has an assembly manifest.
+                var reader = peReader.GetMetadataReader();
+
+                return reader.IsAssembly;
             }
             catch (BadImageFormatException ex)
             {
@@ -116,13 +108,13 @@ namespace Dawn.Core.Features.ChangeDetection
             return false;
         }
 
-        private string ComputeHash(SHA256 sHA256, FileStream fs)
+        private string? ComputeHash(SHA256 sha256, FileStream fs)
         {
             try
             {
                 fs.Position = 0;
 
-                var hashValue = sHA256.ComputeHash(fs);
+                var hashValue = sha256.ComputeHash(fs);
 
                 return PrintByteArray(hashValue);
             }

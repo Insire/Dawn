@@ -1,4 +1,5 @@
 using Dawn.Core.Features.Backups;
+using JetBrains.Annotations;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dawn.Core.Features.Configuration
@@ -76,14 +77,14 @@ namespace Dawn.Core.Features.Configuration
         /// <summary>
         /// configuration was loaded from a local file
         /// </summary>
-        public bool IsLocalConfig { get; }
+        public bool IsLocalConfig { [UsedImplicitly] get; }
 
         public ConfigurationViewModel(IScarletCommandBuilder commandBuilder, ConfigurationModel model)
         {
             Model = model ?? throw new ArgumentNullException(nameof(model));
 
-            _deploymentFolder = Model.DeploymentFolder;
-            _backupFolder = Model.BackupFolder;
+            _deploymentFolder = Model.DeploymentFolder ?? throw new ArgumentNullException(nameof(model.DeploymentFolder));
+            _backupFolder = Model.BackupFolder ?? throw new ArgumentNullException(nameof(model.BackupFolder));
             _updateTimeStampOnApply = Model.UpdateTimeStampOnApply ?? false;
             _updateTimeStampOnRestore = model.UpdateTimeStampOnRestore ?? false;
 

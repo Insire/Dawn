@@ -6,8 +6,8 @@ namespace Dawn.Core.Features.Configuration
     public sealed class BackupFileTypeModel
     {
         public bool IsEnabled { get; set; }
-        public string Extension { get; set; }
-        public string Name { get; set; }
+        public string? Extension { get; set; }
+        public string? Name { get; set; }
 
         public BackupFileTypeModel()
         {

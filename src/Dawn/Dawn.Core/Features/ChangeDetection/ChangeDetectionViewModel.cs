@@ -1,6 +1,7 @@
 using Dawn.Core.Features.Backups;
 using DynamicData;
 using DynamicData.Binding;
+using JetBrains.Annotations;
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -10,13 +11,12 @@ namespace Dawn.Core.Features.ChangeDetection
     public sealed class ChangeDetectionViewModel : ViewModelBase
     {
         private readonly SourceCache<FilePairViewModel, string> _sourceCache;
-        private readonly ObservableCollectionExtended<FilePairViewModel> _items;
         private readonly ChangeDetectionService _service;
 
-        public ReadOnlyObservableCollection<FilePairViewModel> Items { get; }
+        public ReadOnlyObservableCollection<FilePairViewModel> Items {[UsedImplicitly]  get; }
 
-        private FilePairViewModel _selectedItem;
-        public FilePairViewModel SelectedItem
+        private FilePairViewModel? _selectedItem;
+        public FilePairViewModel? SelectedItem
         {
             get { return _selectedItem; }
             set { SetProperty(ref _selectedItem, value); }
@@ -30,8 +30,8 @@ namespace Dawn.Core.Features.ChangeDetection
             _service = service ?? throw new ArgumentNullException(nameof(service));
 
             _sourceCache = new SourceCache<FilePairViewModel, string>(vm => vm.Source.FullPath);
-            _items = new ObservableCollectionExtended<FilePairViewModel>();
-            Items = new ReadOnlyObservableCollection<FilePairViewModel>(_items);
+            var items = new ObservableCollectionExtended<FilePairViewModel>();
+            Items = new ReadOnlyObservableCollection<FilePairViewModel>(items);
 
             _sourceCache
                 .Connect()
@@ -39,21 +39,23 @@ namespace Dawn.Core.Features.ChangeDetection
                 .DistinctUntilChanged()
                 .Sort(SortExpressionComparer<FilePairViewModel>.Ascending(p => p.ChangeState), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(_items)
+                .Bind(items)
                 .DisposeMany()
                 .Subscribe(changes =>
                 {
-                    if (_selectedItem is null)
+                    if (_selectedItem is not null)
                     {
-                        foreach (var change in changes)
-                        {
-                            if (_selectedItem is not null)
-                            {
-                                break;
-                            }
+                        return;
+                    }
 
-                            SelectedItem = change.Current;
+                    foreach (var change in changes)
+                    {
+                        if (_selectedItem is not null)
+                        {
+                            break;
                         }
+
+                        SelectedItem = change.Current;
                     }
                 });
 

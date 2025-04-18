@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Backups;
 using DynamicData;
 using DynamicData.Binding;
+using JetBrains.Annotations;
 using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
@@ -15,7 +16,6 @@ namespace Dawn.Core.Features.Staging
     public sealed class StagingsViewModel : ViewModelBase
     {
         private readonly SourceCache<StagingViewModel, string> _sourceCache;
-        private readonly ObservableCollectionExtended<StagingViewModel> _items;
 
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly LogViewModel _logViewModel;
@@ -31,8 +31,9 @@ namespace Dawn.Core.Features.Staging
             set { SetProperty(ref _reuseLastBackup, value); }
         }
 
-        private StagingViewModel _selectedItem;
-        public StagingViewModel SelectedItem
+        private StagingViewModel? _selectedItem;
+        [UsedImplicitly]
+        public StagingViewModel? SelectedItem
         {
             get { return _selectedItem; }
             set { SetProperty(ref _selectedItem, value); }
@@ -53,16 +54,17 @@ namespace Dawn.Core.Features.Staging
         public ICommand RemoveCommand { get; }
 
         public ICommand ClearCommand { get; }
-        public Func<bool> OnEmptyDirectoryCreated { get; set; }
-        public Action OnApplyingStagings { get; set; }
+        public Func<bool>? OnEmptyDirectoryCreated { get; set; }
+        public Action? OnApplyingStagings { get; set; }
 
-        public StagingsViewModel(in IScarletCommandBuilder commandBuilder,
-                                 ConfigurationViewModel configurationViewModel,
-                                 ILogger log,
-                                 LogViewModel logViewModel,
-                                 BackupsViewModel backupsViewModel,
-                                 IFileSystem fileSystem,
-                                 SynchronizationContext context)
+        public StagingsViewModel(
+            IScarletCommandBuilder commandBuilder,
+            ConfigurationViewModel configurationViewModel,
+            ILogger log,
+            LogViewModel logViewModel,
+            BackupsViewModel backupsViewModel,
+            IFileSystem fileSystem,
+            SynchronizationContext context)
             : base(commandBuilder)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
@@ -72,15 +74,15 @@ namespace Dawn.Core.Features.Staging
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
 
             _sourceCache = new SourceCache<StagingViewModel, string>(vm => vm.FullPath);
-            _items = new ObservableCollectionExtended<StagingViewModel>();
-            Items = new ReadOnlyObservableCollection<StagingViewModel>(_items);
+            var items = new ObservableCollectionExtended<StagingViewModel>();
+            Items = new ReadOnlyObservableCollection<StagingViewModel>(items);
 
             var subscription1 = _sourceCache
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
                 .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.FullPath), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(_items)
+                .Bind(items)
                 .DisposeMany()
                 .Subscribe();
 
@@ -102,7 +104,7 @@ namespace Dawn.Core.Features.Staging
                 .WithSingleExecution()
                 .Build();
 
-            RemoveCommand = new RelayCommand<object>(RemoveImpl, CanRemoveImpl);
+            RemoveCommand = new RelayCommand<object?>(RemoveImpl, CanRemoveImpl);
             ClearCommand = new RelayCommand(ClearImpl);
             IsEmpty = true;
 
@@ -117,7 +119,7 @@ namespace Dawn.Core.Features.Staging
             _disposables = new CompositeDisposable(subscription1,subscription2);
         }
 
-        private void RemoveImpl(object args)
+        private void RemoveImpl(object? args)
         {
             if (args is StagingViewModel staging)
             {
@@ -125,7 +127,7 @@ namespace Dawn.Core.Features.Staging
             }
         }
 
-        private bool CanRemoveImpl(object args)
+        private static bool CanRemoveImpl(object? args)
         {
             return args is StagingViewModel;
         }
@@ -137,7 +139,7 @@ namespace Dawn.Core.Features.Staging
 
         private async Task AddFilesImpl()
         {
-            if (_fileSystem.TrySelectFiles(out var files))
+            if (_fileSystem.TrySelectFiles(out var files)&& files is not null)
             {
                 await Add(files).ConfigureAwait(false);
             }
@@ -151,7 +153,7 @@ namespace Dawn.Core.Features.Staging
 
         private async Task AddFolderImpl()
         {
-            if (_fileSystem.TrySelectFolder(out var folder))
+            if (_fileSystem.TrySelectFolder(out var folder) && folder is not null)
             {
                 await Add(new[] { folder }).ConfigureAwait(false);
             }
@@ -216,7 +218,7 @@ namespace Dawn.Core.Features.Staging
                    {
                        for (var i = 0; i < Items.Count; i++)
                        {
-                           var newfile = Items[i];
+                           var newFile = Items[i];
                            _logViewModel.Progress.Report(i, Items.Count);
 
                            if (token.IsCancellationRequested)
@@ -224,16 +226,16 @@ namespace Dawn.Core.Features.Staging
                                return;
                            }
 
-                           var fileName = Path.GetFileName(newfile.FullPath);
+                           var fileName = Path.GetFileName(newFile.FullPath);
                            var deploymentFileName = Path.Combine(deploymentFolder, fileName);
                            var backupFileName = Path.Combine(backupFileFolder, fileName);
 
                            if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                            {
-                               BackupFile(newfile.FullPath, backupFileName, now, true);
+                               BackupFile(newFile.FullPath, backupFileName, now, true);
                            }
 
-                           Update(newfile.FullPath, deploymentFileName, now, _logViewModel.Progress);
+                           Update(newFile.FullPath, deploymentFileName, now, _logViewModel.Progress);
                        }
 
                        if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
@@ -267,13 +269,14 @@ namespace Dawn.Core.Features.Staging
 
         private static string GetFolderName(IEnumerable<BackupViewModel> backups, string rootFolder, bool reuseLastBackup)
         {
-            if (reuseLastBackup)
+            if (!reuseLastBackup)
             {
-                var reuseBackup = backups.OrderByDescending(p => p.TimeStamp).First();
-                return Path.Combine(rootFolder, reuseBackup.TimeStamp.FormatAsBackup());
+                return Path.Combine(rootFolder, DateTime.Now.FormatAsBackup());
             }
 
-            return Path.Combine(rootFolder, DateTime.Now.FormatAsBackup());
+            var reuseBackup = backups.OrderByDescending(p => p.TimeStamp).First();
+            return Path.Combine(rootFolder, reuseBackup.TimeStamp.FormatAsBackup());
+
         }
 
         private bool CanApply()
@@ -287,7 +290,7 @@ namespace Dawn.Core.Features.Staging
             var extension = Path.GetExtension(from).ToLowerInvariant();
             if (extension == ".zip")
             {
-                CopyArchive(from, Path.GetDirectoryName(to), timeStamp, progress, true);
+                CopyArchive(from, Path.GetDirectoryName(to)!, timeStamp, progress, true);
             }
             else if (Copy(from, to, timeStamp, true, _configurationViewModel.UpdateTimeStampOnApply))
             {

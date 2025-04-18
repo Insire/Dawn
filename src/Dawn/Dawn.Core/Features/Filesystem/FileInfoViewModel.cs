@@ -4,8 +4,8 @@ namespace Dawn.Core.Features.Filesystem
 {
     public sealed class FileInfoViewModel : FileSystemViewModel
     {
-        private string _hash;
-        public string Hash
+        private string? _hash;
+        public string? Hash
         {
             get { return _hash; }
             set { SetProperty(ref _hash, value); }

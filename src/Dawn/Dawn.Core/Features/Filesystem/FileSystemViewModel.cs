@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace Dawn.Core.Features.Filesystem
 {
     public class FileSystemViewModel : ObservableObject
@@ -9,8 +11,8 @@ namespace Dawn.Core.Features.Filesystem
             private set { SetProperty(ref _fullPath, value); }
         }
 
-        private string _name;
-        public string Name
+        private string? _name;
+        public string? Name
         {
             get { return _name; }
             private set { SetProperty(ref _name, value); }
@@ -24,6 +26,7 @@ namespace Dawn.Core.Features.Filesystem
         }
 
         private bool _isFolder;
+        [UsedImplicitly]
         public bool IsFolder
         {
             get { return _isFolder; }
@@ -36,14 +39,9 @@ namespace Dawn.Core.Features.Filesystem
             _isFile = isFile;
             _isFolder = !isFile;
 
-            if (isFile)
-            {
-                _name = Path.GetFileName(fullPath);
-            }
-            else
-            {
-                _name = Path.GetDirectoryName(fullPath);
-            }
+            _name = isFile
+                ? Path.GetFileName(fullPath)
+                : Path.GetDirectoryName(fullPath);
         }
     }
 }
