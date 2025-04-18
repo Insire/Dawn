@@ -25,6 +25,10 @@
         <Button Classes="WindowControlsButton" Click="OpenConfiguration">
             <icons:Icon Value="fa-solid fa-cog" />
         </Button>
+
+        <Button Classes="WindowControlsButton" Click="ShowLog">
+            <icons:Icon Value="fa-solid fa-bars-staggered" />
+        </Button>
     </suki:SukiWindow.RightWindowTitleBarControls>
 
     <Grid Grid.RowDefinitions="2*,*,80">

@@ -136,7 +136,7 @@ namespace Dawn.Avalonia
             });
         }
 
-        private void ShowLog()
+        private void ShowLog(object sender, RoutedEventArgs e)
         {
             _dispatcher.Invoke(() =>
             {
