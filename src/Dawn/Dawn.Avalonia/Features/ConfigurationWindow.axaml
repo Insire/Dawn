@@ -10,10 +10,13 @@
                  Name="RootWindow"
                  Title="Configuration"
                  Width="700"
-                 d:DesignHeight="450"
+                 MinWidth="700"
+                 MinHeight="250"
+                 d:DesignHeight="250"
                  d:DesignWidth="700"
                  x:DataType="core:ConfigurationViewModel"
                  SizeToContent="Height"
+                 WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
 
     <!--  DataContext: ConfigurationViewModel  -->
