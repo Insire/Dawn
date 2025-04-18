@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -22,18 +23,18 @@ namespace Dawn.Core.Features.Backups
         private readonly Func<BackupViewModel, BackupViewModel> _onMetaDataEdit;
         private readonly Action<BackupViewModel> _onDetectChanges;
 
-        private string _fullPath;
+        private readonly string _fullPath;
         public string FullPath
         {
             get { return _fullPath; }
-            private set { SetProperty(ref _fullPath, value); }
+            private init { SetProperty(ref _fullPath, value); }
         }
 
-        private string _name;
+        private readonly string _name;
         public string Name
         {
             get { return _name; }
-            private set
+            private init
             {
                 if (SetProperty(ref _name, value))
                 {
@@ -44,42 +45,31 @@ namespace Dawn.Core.Features.Backups
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(DisplayName))]
-        private string _customName;
+        private string? _customName;
 
-        private string _comment;
-        public string Comment
+        private string? _comment;
+        public string? Comment
         {
             get { return _comment; }
-            set
-            {
-                SetProperty(ref _comment, value);
-            }
+            set { SetProperty(ref _comment, value); }
         }
 
-        private DateTime _timeStamp;
+        private readonly DateTime _timeStamp;
         public DateTime TimeStamp
         {
             get { return _timeStamp; }
-            private set { SetProperty(ref _timeStamp, value); }
+            private init { SetProperty(ref _timeStamp, value); }
         }
 
-        public string DisplayName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(CustomName))
-                {
-                    return $"Backup: {Name}";
-                }
-
-                return $"{CustomName} - {Name}";
-            }
-        }
+        public string DisplayName =>
+            string.IsNullOrEmpty(CustomName)
+                ? $"Backup: {Name}"
+                : $"{CustomName} - {Name}";
 
         public ICommand DeleteCommand { get; }
         public ICommand OpenExternallyCommand { get; }
         public ICommand LoadMetaDataCommand { get; }
-        public ICommand EditMetaDataCommand { get; }
+        public ICommand EditMetaDataCommand { [UsedImplicitly] get; }
         public ICommand DetectChangesCommand { get; }
 
         public BackupViewModel(
@@ -99,7 +89,7 @@ namespace Dawn.Core.Features.Backups
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _backupsViewModel = backupsViewModel ?? throw new ArgumentNullException(nameof(backupsViewModel));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
-            _log = log?.ForContext<BackupViewModel>() ?? throw new ArgumentNullException(nameof(log));
+            _log = log.ForContext<BackupViewModel>() ?? throw new ArgumentNullException(nameof(log));
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _onDeleteRequested = onDeleteRequested ?? throw new ArgumentNullException(nameof(onDeleteRequested));
             _onDeleting = onDeleting ?? throw new ArgumentNullException(nameof(onDeleting));
@@ -212,23 +202,13 @@ namespace Dawn.Core.Features.Backups
                 var copy = new BackupViewModel(CommandBuilder, this);
                 var name = _onMetaDataEdit.Invoke(copy);
 
-                if (copy.Comment?.Length > 0)
-                {
-                    Comment = copy.Comment;
-                }
-                else
-                {
-                    Comment = null;
-                }
+                Comment = copy.Comment?.Length > 0
+                    ? copy.Comment
+                    : null;
 
-                if (copy.CustomName?.Length > 0)
-                {
-                    CustomName = copy.CustomName;
-                }
-                else
-                {
-                    CustomName = null;
-                }
+                CustomName = copy.CustomName?.Length > 0
+                    ? copy.CustomName
+                    : null;
 
                 var fileName = GetMetaDataFileName();
                 if (CustomName is null && Comment is null && _fileSystem.FileExists(fileName))
@@ -249,7 +229,7 @@ namespace Dawn.Core.Features.Backups
 
         private bool CanEditMetaDataImpl()
         {
-            return _onMetaDataEdit != null;
+            return true;
         }
 
         private Task OpenExternallyImpl()
@@ -258,36 +238,30 @@ namespace Dawn.Core.Features.Backups
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    using (var process = Process.Start(new ProcessStartInfo("cmd", $"/c start {FullPath}")
+                    var info = new ProcessStartInfo("cmd", $"/c start {FullPath}")
                     {
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    }))
-                    {
-                        process.WaitForExit();
-                    }
+                        UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden
+                    };
+
+                    using var process = Process.Start(info)!;
+                    process.WaitForExit();
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    using (var process = Process.Start("xdg-open", FullPath))
-                    {
-                        process.WaitForExit();
-                    }
+                    using var process = Process.Start("xdg-open", FullPath);
+                    process.WaitForExit();
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    using (var process = Process.Start("open", FullPath))
-                    {
-                        process.WaitForExit();
-                    }
+                    using var process = Process.Start("open", FullPath);
+                    process.WaitForExit();
                 }
             });
         }
 
         private async Task DeleteImpl()
         {
-            var shouldDelete = _onDeleteRequested?.Invoke() ?? false;
+            var shouldDelete = _onDeleteRequested.Invoke();
 
             if (!shouldDelete)
             {
@@ -296,29 +270,21 @@ namespace Dawn.Core.Features.Backups
 
             _logViewModel.PrepareBegin();
 
-            var t1 = Dispatcher.Invoke(() => _onDeleting?.Invoke());
+            var t1 = Dispatcher.Invoke(() => _onDeleting.Invoke());
             var t2 = Task.Run(async () =>
             {
-                var subscription = default(IDisposable);
-                try
+                if (!_backupsViewModel.IsBusy)
                 {
-                    if (!_backupsViewModel.IsBusy)
-                    {
-                        // mass operation in progress
-                        subscription = _logViewModel.Begin();
-                    }
-
-                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
-
-                    await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
-                    await _backupsViewModel.Remove(this).ConfigureAwait(false);
-
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
+                    // mass operation in progress
+                    _logViewModel.Setup();
                 }
-                finally
-                {
-                    subscription?.Dispose();
-                }
+
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
+
+                await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
+                await _backupsViewModel.Remove(this).ConfigureAwait(false);
+
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
             });
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -338,11 +304,7 @@ namespace Dawn.Core.Features.Backups
 
         private bool CanDeleteImpl()
         {
-            return _configurationViewModel?.HasErrors == false
-                && _onDeleteRequested != null
-                && _onDeleting != null
-                && _log != null
-                && _logViewModel != null
+            return _configurationViewModel.HasErrors == false
                 && _fullPath.Length > 0
                 && _fileSystem.DirectoryExists(_fullPath);
         }

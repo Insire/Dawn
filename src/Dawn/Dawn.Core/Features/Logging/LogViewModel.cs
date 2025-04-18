@@ -24,11 +24,11 @@ namespace Dawn.Core.Features.Logging
         private bool _disposedValue;
         private long _index;
 
-        private int _precentage;
+        private int _percentage;
         public int Percentage
         {
-            get { return _precentage; }
-            private set { SetProperty(ref _precentage, value); }
+            get { return _percentage; }
+            private set { SetProperty(ref _percentage, value); }
         }
 
         private int _total;
@@ -163,7 +163,7 @@ namespace Dawn.Core.Features.Logging
             _sourceCache.Clear();
         }
 
-        private void Setup()
+        public void Setup()
         {
             _index = 0;
             Progress.Report(0);
