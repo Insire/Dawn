@@ -1,4 +1,4 @@
-﻿<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
+<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
@@ -237,7 +237,25 @@
             </TabItem>
 
             <!--  Log  -->
-            <TabItem Header="Log">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Items.Count}" Value="0">
+                                        <Setter Property="Text" Value="Log" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Items.Count, Converter={mvvm:GreaterThan}, ConverterParameter=0}" Value="True">
+                                        <Setter Property="Text" Value="{Binding Items.Count, StringFormat='{}Log {0}'}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </TabItem.Header>
+
                 <ScrollViewer Margin="8">
                     <ScrollViewer Margin="8">
                         <ItemsControl ItemsSource="{Binding Items}">
@@ -270,6 +288,7 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </TabItem.Header>
+
                 <ScrollViewer Margin="8">
                     <ItemsControl ItemsSource="{Binding Errors}">
                         <ItemsControl.ItemsPanel>

@@ -11,6 +11,7 @@ namespace Dawn.Core.Features.Logging
 {
     public sealed class LogViewModel : ObservableObject, ILogEventSink, IDisposable
     {
+        private readonly ObservableCollectionExtended<LogEventViewModel> _logs;
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly IClipboardService _clipboardService;
         private readonly DispatcherProgress<decimal> _dispatcherProgress;
@@ -61,8 +62,8 @@ namespace Dawn.Core.Features.Logging
             _clipboardService = clipboardService;
             _dispatcherProgress = new DispatcherProgress<decimal>(commandBuilder.Dispatcher, SetPercentage, TimeSpan.FromMilliseconds(250));
 
-            var items = new ObservableCollectionExtended<LogEventViewModel>();
-            Items = new ReadOnlyObservableCollection<LogEventViewModel>(items);
+            _logs = new ObservableCollectionExtended<LogEventViewModel>();
+            Items = new ReadOnlyObservableCollection<LogEventViewModel>(_logs);
 
             var errors = new ObservableCollectionExtended<LogEventViewModel>();
             Errors = new ReadOnlyObservableCollection<LogEventViewModel>(errors);
@@ -82,12 +83,12 @@ namespace Dawn.Core.Features.Logging
                 .ObserveOn(TaskPoolScheduler.Default);
 
             var itemsSubscription = sourceObservable
-                .Filter(q => q.Level >= LogEventLevel.Information)
+                //.Filter(q => q.Level >= LogEventLevel.Information)
                 .Merge(sourceObservable
                         .Filter(q => q.Level < LogEventLevel.Information))
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(items)
+                .Bind(_logs)
                 .Batch(TimeSpan.FromMilliseconds(500))
                 .DisposeMany()
                 .Subscribe(changes =>
@@ -148,7 +149,7 @@ namespace Dawn.Core.Features.Logging
 
         public void Emit(LogEvent logEvent)
         {
-            _sourceCache?.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this, _clipboardService));
+            _sourceCache.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this, _clipboardService));
         }
 
         /// <summary>

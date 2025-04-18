@@ -38,24 +38,25 @@ namespace Dawn.Wpf
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
                 .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
+                    .WriteTo.Debug()
+                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
                     .WriteTo.Logger(lc => lc.Filter
                                 .ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
                                                     || Matching.FromSource<BackupsViewModel>().Invoke(o)
                                                     || Matching.FromSource<BackupViewModel>().Invoke(o)
                                                     || Matching.FromSource<ShellViewModel>().Invoke(o))
-                                .WriteTo.Sink(logViewModel, LogEventLevel.Verbose)));
+                                );
 
             var logger = logConfiguration.CreateLogger();
 
+            c.Use(logViewModel);
+            c.Use<ILogger>(logger);
+
             c.Use(ScarletCommandBuilder.Default);
             c.Use(SynchronizationContext.Current);
-            c.Use<ILogger>(logger);
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
-            c.Use(new HttpClient());
             c.Use(Process.GetCurrentProcess());
 
-            c.Register<LogViewModel>(Reuse.Singleton);
-            c.Register<Shell>(Reuse.Singleton);
             var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
             tracker.Configure<Shell>()
                 .Id(_ => $"[Width={SystemParameters.VirtualScreenWidth},Height{SystemParameters.VirtualScreenHeight}]")
@@ -70,6 +71,9 @@ namespace Dawn.Wpf
 
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
+
+            c.Register<HttpClient>(Reuse.Singleton, made: Made.Of(() => new HttpClient()));
+            c.Register<Shell>(Reuse.Singleton);
 
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);

@@ -13,6 +13,7 @@ using Dawn.Core.Features.Util;
 using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
+using Serilog.Filters;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
@@ -27,15 +28,30 @@ namespace Dawn.Avalonia
         {
             var c = new Container();
 
+            var clipboardService = new ClipboardService(lifetime);
+            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!, clipboardService);
+
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
-                .Enrich.FromLogContext();
+                .Enrich.FromLogContext()
+                .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
+                    .WriteTo.Debug()
+                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
+                    .WriteTo.Logger(lc => lc.Filter
+                                .ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
+                                                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
+                                                    || Matching.FromSource<BackupViewModel>().Invoke(o)
+                                                    || Matching.FromSource<ShellViewModel>().Invoke(o))
+                                );
+
+            var logger = logConfiguration.CreateLogger();
+
+            c.Use(logViewModel);
+            c.Use<ILogger>(logger);
 
             c.Use(lifetime);
             c.Use(SynchronizationContext.Current);
-            c.Use<ILogger>(logConfiguration.CreateLogger());
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
-            c.Use(new HttpClient());
             c.Use(Process.GetCurrentProcess());
 
             c.Register<ConfigurationService>(Reuse.Singleton);
@@ -57,6 +73,7 @@ namespace Dawn.Avalonia
 
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
+            c.Register<HttpClient>(Reuse.Singleton, made: Made.Of(() => new HttpClient()));
             c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>())));
             c.Register<IClipboardService, ClipboardService>();
 

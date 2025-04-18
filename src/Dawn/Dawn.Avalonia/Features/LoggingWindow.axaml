@@ -35,14 +35,15 @@
             </Button>
         </DockPanel>
 
-        <ProgressBar DockPanel.Dock="Bottom" Value="{Binding Percentage}"/>
+        <ProgressBar DockPanel.Dock="Bottom" Value="{Binding Percentage}" />
 
         <!--  CONTENT  -->
         <TabControl>
             <TabItem Header="Overview">
                 <Grid ColumnDefinitions="*,5*,*" RowDefinitions="*,Auto,*">
-                    <suki:WaveProgress Grid.Column="1"
-                                       IsTextVisible="True" Grid.Row="1"
+                    <suki:WaveProgress Grid.Row="1"
+                                       Grid.Column="1"
+                                       IsTextVisible="True"
                                        Value="{Binding Percentage}" />
 
                     <DockPanel Grid.Row="2"

@@ -7,9 +7,11 @@ using System.Collections.ObjectModel;
 
 namespace Dawn.Core.Features.Logging
 {
-    public sealed class LogEventViewModel : ObservableObject
+    public sealed partial class LogEventViewModel : ObservableObject
     {
         private readonly LogEvent _logEvent;
+        private readonly ILogEventSink _log;
+        private readonly IClipboardService _clipboardService;
 
         private string? _text;
         public string? Text
@@ -18,14 +20,16 @@ namespace Dawn.Core.Features.Logging
             private set { SetProperty(ref _text, value); }
         }
 
-        public DateTimeOffset Timestamp => _logEvent.Timestamp;
-        public LogEventLevel Level => _logEvent.Level;
-        public Exception? Exception => _logEvent.Exception;
+        public DateTimeOffset Timestamp
+            => _logEvent.Timestamp;
+
+        public LogEventLevel Level
+            => _logEvent.Level;
+
+        public Exception? Exception
+            => _logEvent.Exception;
+
         public ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>> Properties { [UsedImplicitly] get; }
-
-        public ICommand RenderCommand { get; }
-
-        public ICommand CopyCommand { [UsedImplicitly] get; }
 
         public long Key { get; }
 
@@ -33,39 +37,42 @@ namespace Dawn.Core.Features.Logging
         {
             Key = key;
             _logEvent = logEvent ?? throw new ArgumentNullException(nameof(logEvent));
-            var log1 = log ?? throw new ArgumentNullException(nameof(log));
-            var clipboardService1 = clipboardService;
+            _log = log;
+            _clipboardService = clipboardService;
 
             var properties = new ObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(_logEvent.Properties.Select(p => new KeyValuePair<string, LogEventPropertyValue>(p.Key, p.Value)));
             Properties = new ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(properties);
+        }
 
-            RenderCommand = new RelayCommand(() =>
+        [RelayCommand]
+        private void Render()
+        {
+            if (Text is not null)
             {
-                if (Exception is not null)
-                {
-                    Text = Exception.ToString();
-                    return;
-                }
+                return;
+            }
 
-                Text = _logEvent.RenderMessage();
-            });
+            Text = Exception is null
+                ? _logEvent.RenderMessage()
+                : Exception.ToString();
+        }
 
-            CopyCommand = new AsyncRelayCommand(async () =>
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        private async Task Copy()
+        {
+            if (string.IsNullOrWhiteSpace(Text))
             {
-                if (string.IsNullOrWhiteSpace(Text))
-                {
-                    return;
-                }
+                return;
+            }
 
-                try
-                {
-                    await clipboardService1.SetTextAsync(Text);
-                }
-                catch (Exception ex)
-                {
-                    log1.Emit(new LogEvent(DateTimeOffset.Now, LogEventLevel.Error, ex, new MessageTemplate("Unexpected error occured, when copying data to clipboard", Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>()));
-                }
-            });
+            try
+            {
+                await _clipboardService.SetTextAsync(Text);
+            }
+            catch (Exception ex)
+            {
+                _log.Emit(new LogEvent(DateTimeOffset.Now, LogEventLevel.Error, ex, new MessageTemplate("Unexpected error occured, when copying data to clipboard", Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>()));
+            }
         }
     }
 }
