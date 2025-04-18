@@ -1,4 +1,4 @@
-<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
+﻿<controls:AdonisWindow x:Class="Dawn.Wpf.LoggingWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
@@ -94,8 +94,8 @@
                                     </DataTrigger>
 
                                     <DataTrigger Binding="{Binding Level}" Value="{x:Static serilog:LogEventLevel.Fatal}">
-                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
                                         <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUi:Brushes.ErrorBrush}}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

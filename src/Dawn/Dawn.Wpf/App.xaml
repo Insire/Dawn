@@ -1,4 +1,4 @@
-<Application x:Class="Dawn.Wpf.App"
+﻿<Application x:Class="Dawn.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
@@ -18,8 +18,8 @@
 
             <Style BasedOn="{StaticResource {x:Type ScrollViewer}}" TargetType="{x:Type ScrollViewer}">
                 <Setter Property="adonisExtensions:ScrollBarExtension.ExpansionMode" Value="ExpandOnHover" />
-                <Setter Property="adonisExtensions:ScrollViewerExtension.VerticalScrollBarPlacement" Value="Overlay" />
                 <Setter Property="adonisExtensions:ScrollViewerExtension.HideScrollBarsUntilMouseOver" Value="True" />
+                <Setter Property="adonisExtensions:ScrollViewerExtension.VerticalScrollBarPlacement" Value="Overlay" />
             </Style>
 
             <Style BasedOn="{StaticResource {x:Static adonisUi:Styles.RippleListBoxItem}}" TargetType="{x:Type ListBoxItem}">

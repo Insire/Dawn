@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Util;
+using SukiUI.Controls;
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace Dawn.Avalonia.Features
 {
-    public partial class ConfigurationWindow : Window
+    public partial class ConfigurationWindow : SukiWindow
     {
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly IFileSystem _fileSystem;

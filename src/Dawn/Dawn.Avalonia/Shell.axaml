@@ -1,4 +1,4 @@
-<suki:SukiWindow x:Class="Dawn.Avalonia.Shell"
+﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Shell"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:core="using:Dawn.Core"
@@ -7,6 +7,7 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:staging="clr-namespace:Dawn.Core.Features.Staging;assembly=Dawn.Core"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 xmlns:system="clr-namespace:System;assembly=System.Runtime"
                  Name="RootWindow"
                  Title="{Binding Title}"
                  Width="900"
@@ -18,7 +19,13 @@
                  DragDrop.AllowDrop="True"
                  mc:Ignorable="d">
 
-    <Grid RowDefinitions="3*,*,Auto,8">
+    <suki:SukiWindow.RightWindowTitleBarControls>
+        <Button Classes="WindowControlsButton" Click="OpenConfiguration">
+            <icons:Icon Value="fa-solid fa-cog" />
+        </Button>
+    </suki:SukiWindow.RightWindowTitleBarControls>
+
+    <Grid RowDefinitions="*,Auto">
         <!--  Empty View  -->
         <DockPanel Grid.Row="0"
                    Grid.RowSpan="2"
@@ -78,89 +85,88 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <!--  Busy overlay  -->
-        <Border Grid.Row="0"
-                Grid.RowSpan="4"
-                IsVisible="{Binding Updates.IsBusy}"
-                Opacity="0.90">
-            <ContentControl Width="64" Height="64" />
-        </Border>
+        <suki:GlassCard Grid.Row="1"
+                        Grid.RowSpan="2"
+                        Background="{StaticResource SukiGlassCardOpaqueBackground}"
+                        CornerRadius="0"
+                        IsVisible="{Binding !#RootWindow.((core:ShellViewModel)DataContext).Stagings.IsEmpty}">
+            <suki:GlassCard.Resources>
+                <system:Double x:Key="GlassOpacity">0.9</system:Double>
+            </suki:GlassCard.Resources>
 
-        <!--  Staging details  -->
-        <DockPanel Name="StagingDetails"
-                   Grid.Row="1"
-                   IsVisible="{Binding #RootWindow.((core:ShellViewModel)DataContext).Stagings.IsEmpty}">
-            <ItemsControl Margin="0 8 0 0" ItemsSource="{Binding Stagings.Items}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+            <DockPanel>
+                <!--  Staging details  -->
+                <ItemsControl Name="StagingDetails"
+                              Margin="0 0 0 8"
+                              DockPanel.Dock="Top"
+                              ItemsSource="{Binding Stagings.Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type staging:StagingViewModel}">
-                        <DockPanel Margin="8 4 8 0" HorizontalAlignment="Stretch">
-                            <icons:Icon VerticalAlignment="Center"
-                                        DockPanel.Dock="Left"
-                                        Value="fa-solid fa-file" />
-                            <Button Command="{Binding #RootWindow.((core:ShellViewModel)DataContext).Stagings.RemoveCommand}"
-                                    CommandParameter="{Binding}"
-                                    DockPanel.Dock="Right"
-                                    ToolTip.Tip="Unstage this">
-                                <icons:Icon Value="fa-solid fa-trash" />
-                            </Button>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type staging:StagingViewModel}">
+                            <DockPanel Margin="8 4 8 0" HorizontalAlignment="Stretch">
+                                <icons:Icon VerticalAlignment="Center"
+                                            DockPanel.Dock="Left"
+                                            Value="fa-solid fa-file" />
+                                <Button Command="{Binding #RootWindow.((core:ShellViewModel)DataContext).Stagings.RemoveCommand}"
+                                        CommandParameter="{Binding}"
+                                        DockPanel.Dock="Right"
+                                        ToolTip.Tip="Unstage this">
+                                    <icons:Icon Value="fa-solid fa-trash" />
+                                </Button>
 
-                            <TextBlock Margin="8 0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding FullPath}" />
-                        </DockPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </DockPanel>
+                                <TextBlock Margin="8 0"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding FullPath}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-        <!--  Staging bar  -->
-        <DockPanel Name="StagingBar"
-                   Grid.Row="2"
-                   Grid.RowSpan="1"
-                   IsVisible="{Binding !#RootWindow.((core:ShellViewModel)DataContext).Stagings.IsEmpty}">
-            <DockPanel Margin="8 8 8 8"
-                       DockPanel.Dock="Bottom"
-                       LastChildFill="False">
+                <!--  Staging bar  -->
+                <DockPanel Name="StagingBar"
+                           Margin="8 8 8 8"
+                           DockPanel.Dock="Bottom"
+                           LastChildFill="False">
 
-                <DockPanel.Styles>
-                    <Style Selector="icons|Icon.IsToggled">
-                        <Setter Property="Value" Value="fa-solid fa-chevron-up" />
-                    </Style>
-                    <Style Selector="icons|Icon.IsNotToggled">
-                        <Setter Property="Value" Value="fa-solid fa-chevron-down" />
-                    </Style>
-                </DockPanel.Styles>
+                    <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding #RootWindow.StagingChecked, Mode=TwoWay}">
+                        <ToggleButton.Styles>
+                            <Style Selector="icons|Icon.IsToggled">
+                                <Setter Property="Value" Value="fa-solid fa-chevron-up" />
+                            </Style>
+                            <Style Selector="icons|Icon.IsNotToggled">
+                                <Setter Property="Value" Value="fa-solid fa-chevron-down" />
+                            </Style>
+                        </ToggleButton.Styles>
 
-                <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding #RootWindow.StagingChecked, Mode=TwoWay}">
-                    <icons:Icon Classes.IsNotToggled="{Binding !#RootWindow.StagingChecked}" Classes.IsToggled="{Binding #RootWindow.StagingChecked}" />
-                </ToggleButton>
+                        <icons:Icon Classes.IsNotToggled="{Binding !#RootWindow.StagingChecked}" Classes.IsToggled="{Binding #RootWindow.StagingChecked}" />
+                    </ToggleButton>
 
-                <Button Command="{Binding Stagings.ApplyCommand}"
-                        DockPanel.Dock="Right"
-                        ToolTip.Tip="Apply Updates">
-                    <icons:Icon Value="fa-solid fa-file-arrow-up" />
-                </Button>
+                    <Button Command="{Binding Stagings.ApplyCommand}"
+                            DockPanel.Dock="Right"
+                            ToolTip.Tip="Apply Updates">
+                        <icons:Icon Value="fa-solid fa-file-arrow-up" />
+                    </Button>
 
-                <Button Margin="8 0"
-                        Command="{Binding Stagings.ClearCommand}"
-                        DockPanel.Dock="Right"
-                        ToolTip.Tip="Unstage everything">
-                    <icons:Icon Value="fa-solid fa-trash" />
-                </Button>
+                    <Button Margin="8 0"
+                            Command="{Binding Stagings.ClearCommand}"
+                            DockPanel.Dock="Right"
+                            ToolTip.Tip="Unstage everything">
+                        <icons:Icon Value="fa-solid fa-trash" />
+                    </Button>
 
-                <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Stagings.ReuseLastBackup}" />
-                <TextBlock VerticalAlignment="Center"
-                           DockPanel.Dock="Right"
-                           Text="Reuse latest Backup" />
+                    <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Stagings.ReuseLastBackup}" />
+                    <TextBlock VerticalAlignment="Center"
+                               DockPanel.Dock="Right"
+                               Text="Reuse latest Backup" />
 
-                <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Items.Count, StringFormat='{} Staging Area ({0} Files)'}" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Stagings.Items.Count, StringFormat='{} Staging Area ({0} Files)'}" />
+                </DockPanel>
             </DockPanel>
-        </DockPanel>
+        </suki:GlassCard>
     </Grid>
 </suki:SukiWindow>

@@ -16,6 +16,7 @@ using MvvmScarletToolkit;
 using SukiUI.Controls;
 using System;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 
@@ -31,6 +32,7 @@ namespace Dawn.Avalonia
         private readonly IFileSystem _fileSystem;
         private readonly IScarletDispatcher _dispatcher;
         private readonly IClipboardService _clipboardService;
+        private readonly CompositeDisposable _disposables;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -65,6 +67,7 @@ namespace Dawn.Avalonia
 
             AddHandler(DragDrop.DropEvent, OnDrop);
             AddHandler(LoadedEvent, OnLoaded);
+            AddHandler(WindowClosedEvent, OnClosed);
 
             var subscription1 = _shellViewModel.Stagings
                 .WhenPropertyChanged(p => p.IsEmpty, notifyOnInitialValue: false)
@@ -73,6 +76,8 @@ namespace Dawn.Avalonia
                 {
                     SetValue(StagingCheckedProperty, !p.Value);
                 });
+
+            _disposables = new CompositeDisposable(subscription1);
 
             StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
         }
@@ -90,7 +95,7 @@ namespace Dawn.Avalonia
         {
             if (e.NewValue is bool staging)
             {
-                sender.StagingDetails.SetCurrentValue(DockPanel.IsVisibleProperty, staging);
+                sender.StagingDetails.SetCurrentValue(Control.IsVisibleProperty, staging);
             }
         }
 
@@ -101,6 +106,11 @@ namespace Dawn.Avalonia
                 shellViewModel.Configuration.ValidateCommand.Execute(null);
                 shellViewModel.Updates.LoadCommand.Execute(null);
             }
+        }
+
+        private void OnClosed(object? sender, RoutedEventArgs e)
+        {
+            _disposables.Dispose();
         }
 
         private async void OnDrop(object? sender, DragEventArgs e)

@@ -1,4 +1,4 @@
-<controls:AdonisWindow x:Class="Dawn.Wpf.ChangeDetectionWindow"
+﻿<controls:AdonisWindow x:Class="Dawn.Wpf.ChangeDetectionWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
@@ -325,7 +325,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type changedetection:FilePairViewModel}">
-                <Grid Margin="0,0,0,8" adonisExtensions:LayerExtension.Layer="4">
+                <Grid Margin="0 0 0 8" adonisExtensions:LayerExtension.Layer="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="8" />
