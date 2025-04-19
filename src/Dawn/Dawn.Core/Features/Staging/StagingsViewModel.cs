@@ -214,7 +214,7 @@ namespace Dawn.Core.Features.Staging
            {
                try
                {
-                   _logViewModel.Setup();
+                   _logViewModel.Begin();
 
                    for (var i = 0; i < Items.Count; i++)
                    {
@@ -251,7 +251,7 @@ namespace Dawn.Core.Features.Staging
                        _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
                    }
 
-                   _logViewModel.Progress.Report(100);
+                   _logViewModel.Complete();
                }
                catch (Exception ex)
                {

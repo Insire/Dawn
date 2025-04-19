@@ -274,31 +274,25 @@ namespace Dawn.Core.Features.Backups
 
             _logViewModel.PrepareBegin();
 
-            var t1 = Dispatcher.Invoke(() => _onDeleting.Invoke());
-            var t2 = Task.Run(async () =>
-            {
-                if (!_backupsViewModel.IsBusy)
-                {
-                    // mass operation in progress
-                    _logViewModel.Setup();
-                }
+            await Dispatcher.Invoke(() => _onDeleting.Invoke());
 
-                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
+            _logViewModel.Begin();
 
-                await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
-                await _backupsViewModel.Remove(this).ConfigureAwait(false);
+            await Delete();
 
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
-            });
-
-            await Task.WhenAll(t1, t2).ConfigureAwait(false);
+            _logViewModel.Complete();
         }
 
         public async Task Delete()
         {
             try
             {
-                await DeleteImpl().ConfigureAwait(false);
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting backup {BackupName} in {FolderPath}", Name, FullPath);
+
+                await Task.Run(() => _fileSystem.DeleteDirectory(_fullPath, true)).ConfigureAwait(false);
+                await _backupsViewModel.Remove(this).ConfigureAwait(false);
+
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted backup {BackupName}", Name);
             }
             catch (Exception ex)
             {

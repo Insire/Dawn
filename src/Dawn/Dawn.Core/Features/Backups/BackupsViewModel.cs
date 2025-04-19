@@ -171,7 +171,7 @@ namespace Dawn.Core.Features.Backups
             }
 
             var onDeleteRequested = OnDeleteRequested;
-            if (onDeleteRequested is  null)
+            if (onDeleteRequested is null)
             {
                 return false;
             }
@@ -206,7 +206,7 @@ namespace Dawn.Core.Features.Backups
         private async Task DeleteAllImpl(CancellationToken token)
         {
             var onDeleteAllRequested = OnDeleteAllRequested;
-            if (onDeleteAllRequested is  null)
+            if (onDeleteAllRequested is null)
             {
                 return;
             }
@@ -220,11 +220,9 @@ namespace Dawn.Core.Features.Backups
             _logViewModel.PrepareBegin();
 
             var t1 = Dispatcher.Invoke(() => OnDeletingAll?.Invoke());
-
             var t2 = Task.Run(async () =>
             {
-                _logViewModel.Setup();
-
+                _logViewModel.Begin();
                 _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
 
                 try
@@ -251,8 +249,8 @@ namespace Dawn.Core.Features.Backups
                     _isMassDeleting = false;
                 }
 
-                _logViewModel.Progress.Report(100);
                 _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                _logViewModel.Complete();
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -267,15 +265,8 @@ namespace Dawn.Core.Features.Backups
 
         private async Task RestoreImpl(BackupViewModel backupViewModel, CancellationToken token)
         {
-            _logViewModel.PrepareBegin();
-
             var deploymentFolder = _configurationViewModel.DeploymentFolder;
             var backupFolder = _configurationViewModel.BackupFolder;
-            var now = DateTime.Now;
-
-            _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
-
-            var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
 
             if (!_fileSystem.DirectoryExists(deploymentFolder))
             {
@@ -291,9 +282,14 @@ namespace Dawn.Core.Features.Backups
                 return;
             }
 
+            _logViewModel.PrepareBegin();
+
+            var now = DateTime.Now;
+            var t1 = Dispatcher.Invoke(() => OnRestoring?.Invoke());
             var t2 = Task.Run(() =>
             {
-                _logViewModel.Setup();
+                _logViewModel.Begin();
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
 
                 var array = backupViewModel.Items.ToArray();
                 for (var i = 0; i < array.Length; i++)
@@ -320,8 +316,8 @@ namespace Dawn.Core.Features.Backups
                     }
                 }
 
-                _logViewModel.Progress.Report(100);
                 _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
+                _logViewModel.Complete();
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);

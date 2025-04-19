@@ -209,7 +209,7 @@ namespace Dawn.Core
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Cleaning up temporary files");
                 CleanUpFiles(tempDirectory);
 
-                _logViewModel.Progress.Report(100);
+                _logViewModel.Complete();
                 _hasUpdatedApplication = true;
 
                 var onApplicationUpdated =OnApplicationUpdated;

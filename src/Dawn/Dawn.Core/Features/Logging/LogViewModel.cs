@@ -160,10 +160,15 @@ namespace Dawn.Core.Features.Logging
             _sourceCache.Clear();
         }
 
-        public void Setup()
+        public void Begin()
         {
             _index = 0;
             Progress.Report(0);
+        }
+
+        public void Complete()
+        {
+            Progress.Report(100);
         }
 
         private void Dispose(bool disposing)
