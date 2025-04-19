@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
              xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
+             xmlns:core="clr-namespace:Dawn.Core;assembly=Dawn.Core"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
@@ -51,6 +52,8 @@
             <Button Grid.Row="4"
                     Grid.Column="0"
                     Grid.ColumnSpan="7"
+                    Command="{Binding $parent[Window].((core:ShellViewModel)DataContext).Updates.RestoreCommand}"
+                    CommandParameter="{Binding}"
                     DockPanel.Dock="Bottom"
                     ToolTip.Tip="Restore backup">
                 <avalonia:Icon Value="fa-solid fa-play" />

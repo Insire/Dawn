@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="Dawn.Avalonia.Features.Logging.LogEventView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:logging="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             x:DataType="logging:LogEventViewModel"
+             Loaded="OnLoaded"
+             mc:Ignorable="d">
+
+    <Border BorderBrush="{x:Null}" BorderThickness="0">
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Command="{Binding CopyCommand}" Header="Copy">
+                    <MenuItem.Icon>
+                        <avalonia:Icon Value="fa-solid fa-copy" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </ContextMenu>
+        </Border.ContextMenu>
+
+        <ToolTip.Tip>
+            <ToolTip>
+                <ItemsControl ItemsSource="{Binding Properties}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel IsItemsHost="True" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Key, Mode=OneWay}" />
+                                <Run Text="{Binding Value, Mode=OneWay}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ToolTip>
+        </ToolTip.Tip>
+
+        <TextBlock>
+            <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
+            <Run Text="{Binding Level, Mode=OneWay}" />
+            <Run Text="{Binding Text, Mode=OneWay}" />
+        </TextBlock>
+    </Border>
+</UserControl>
+

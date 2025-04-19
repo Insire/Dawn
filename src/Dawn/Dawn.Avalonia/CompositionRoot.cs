@@ -59,7 +59,6 @@ namespace Dawn.Avalonia
 
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
-            c.Register<LogViewModel>(Reuse.Singleton);
             c.Register<ShellViewModel>(Reuse.Singleton);
             c.Register<AboutViewModel>(Reuse.Singleton);
             c.Register<ConfigurationViewModel>(Reuse.Singleton);
