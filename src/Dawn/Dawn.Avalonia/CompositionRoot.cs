@@ -14,6 +14,7 @@ using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Filters;
+using SukiUI.Dialogs;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
@@ -50,6 +51,7 @@ namespace Dawn.Avalonia
             c.Use<ILogger>(logger);
 
             c.Use(lifetime);
+            c.Use<IClipboardService>(clipboardService);
             c.Use(SynchronizationContext.Current);
             c.Use(Assembly.GetAssembly(typeof(CompositionRoot)));
             c.Use(Process.GetCurrentProcess());
@@ -73,8 +75,8 @@ namespace Dawn.Avalonia
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
             c.Register<HttpClient>(Reuse.Singleton, made: Made.Of(() => new HttpClient()));
-            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>())));
-            c.Register<IClipboardService, ClipboardService>();
+            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>(), Arg.Of<ISukiDialogManager>())));
+            c.Register<ISukiDialogManager, SukiDialogManager>(Reuse.Singleton);
 
             c.Use(ScarletCommandBuilder.Default);
             c.Use(ScarletDispatcher.Default);

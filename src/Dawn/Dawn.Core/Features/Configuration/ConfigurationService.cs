@@ -74,7 +74,7 @@ namespace Dawn.Core.Features.Configuration
         {
             if (string.IsNullOrEmpty(_configuration.BackupFolder))
             {
-             throw new InvalidOperationException("Backup folder not set.");
+                throw new InvalidOperationException("Backup folder not set.");
             }
 
             var args = Environment.GetCommandLineArgs();
@@ -82,7 +82,6 @@ namespace Dawn.Core.Features.Configuration
             {
                 try
                 {
-
                     if (!func.Invoke())
                     {
                         continue;

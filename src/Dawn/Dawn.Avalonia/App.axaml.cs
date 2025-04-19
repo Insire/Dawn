@@ -6,7 +6,6 @@ using Dawn.Core;
 using Dawn.Core.Features.Configuration;
 using DryIoc;
 using Serilog;
-using System;
 using System.Linq;
 
 namespace Dawn.Avalonia
@@ -33,14 +32,13 @@ namespace Dawn.Avalonia
                 _applicationLifetime = desktop;
                 desktop.ShutdownRequested += OnShutDownRequested;
 
-                var container=_container = CompositionRoot.Get(desktop);
+                var container = _container = CompositionRoot.Get(desktop);
 
                 _configurationService = container.Resolve<ConfigurationService>();
                 var shell = container.Resolve<Shell>();
                 shell.DataContext = container.Resolve<ShellViewModel>();
 
                 desktop.MainWindow = shell;
-
             }
 
             base.OnFrameworkInitializationCompleted();

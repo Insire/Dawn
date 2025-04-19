@@ -1,4 +1,4 @@
-﻿namespace Dawn.Core.Features.Util
+namespace Dawn.Core.Features.Util
 {
     public static class ProgressExtensions
     {

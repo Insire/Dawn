@@ -1,6 +1,5 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Dawn.Core.Features.Util;
 using System;
 using System.Diagnostics;

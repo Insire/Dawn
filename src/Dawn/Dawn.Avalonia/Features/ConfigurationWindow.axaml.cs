@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Configuration;
@@ -8,7 +7,6 @@ using SukiUI.Controls;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Dawn.Avalonia.Features
 {
@@ -17,7 +15,6 @@ namespace Dawn.Avalonia.Features
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly IFileSystem _fileSystem;
         private readonly IClipboardService _clipboardService;
-
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -34,7 +31,6 @@ namespace Dawn.Avalonia.Features
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _clipboardService = clipboardService;
 
-
             InitializeComponent();
         }
 
@@ -49,7 +45,7 @@ namespace Dawn.Avalonia.Features
         }
 
         [RelayCommand(CanExecute = nameof(CanClose))]
-        new private void Close()
+        private new void Close()
         {
             _configurationViewModel.Validate();
             if (_configurationViewModel.HasErrors)

@@ -1,8 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Styling;
 using Dawn.Avalonia.Features;
+using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
@@ -13,8 +16,9 @@ using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Util;
 using DynamicData.Binding;
 using MvvmScarletToolkit;
-using Serilog;
+using SukiUI;
 using SukiUI.Controls;
+using SukiUI.Dialogs;
 using System;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -33,6 +37,7 @@ namespace Dawn.Avalonia
         private readonly IFileSystem _fileSystem;
         private readonly IScarletDispatcher _dispatcher;
         private readonly IClipboardService _clipboardService;
+        private readonly ISukiDialogManager _dialogManager;
         private readonly CompositeDisposable _disposables;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
@@ -53,7 +58,8 @@ namespace Dawn.Avalonia
             IFileSystem fileSystem,
             IScarletDispatcher dispatcher,
             IClipboardService clipboardService,
-            SynchronizationContext context)
+            SynchronizationContext context,
+            ISukiDialogManager dialogManager)
         {
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
             _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
@@ -62,9 +68,12 @@ namespace Dawn.Avalonia
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _dispatcher = dispatcher;
             _clipboardService = clipboardService;
+            _dialogManager = dialogManager;
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
+
+            DialogHost.Manager = dialogManager;
 
             AddHandler(DragDrop.DropEvent, OnDrop);
             AddHandler(LoadedEvent, OnLoaded);
@@ -79,6 +88,78 @@ namespace Dawn.Avalonia
                 });
 
             _disposables = new CompositeDisposable(subscription1);
+
+            _shellViewModel.Stagings.OnApplyingStagings += ShowLog;
+            _shellViewModel.Updates.OnDeleting += ShowLog;
+            _shellViewModel.Updates.OnDeletingAll += ShowLog;
+            _shellViewModel.Updates.OnRestoring += ShowLog;
+            _shellViewModel.ShowLogAction += ShowLog;
+            _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
+
+            _shellViewModel.Updates.OnDeleteRequested = () =>
+            {
+                var shouldDelete = false;
+                _dialogManager.CreateDialog()
+                    .OfType(NotificationType.Warning)
+                    .WithTitle("Are you sure?")
+                    .WithContent("This will delete all files in this backup folder. \r\nThis can not be undone.")
+                    .WithActionButton("Yes", _ => shouldDelete = true, true)
+                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .TryShow();
+
+                return shouldDelete;
+            };
+
+            _shellViewModel.Updates.OnDeleteAllRequested = () =>
+            {
+                var shouldDelete = false;
+                _dialogManager.CreateDialog()
+                    .OfType(NotificationType.Warning)
+                    .WithTitle("Are you really sure?")
+                    .WithContent("This will delete every backup. \r\nThis can not be undone.")
+                    .WithActionButton("Yes", _ => shouldDelete = true, true)
+                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .TryShow();
+
+                return shouldDelete;
+            };
+
+            _shellViewModel.OnApplicationUpdated = () =>
+            {
+                var shouldRestart = false;
+                _dialogManager.CreateDialog()
+                    .OfType(NotificationType.Information)
+                    .WithTitle("Updates have been downloaded successfully.")
+                    .WithContent("Your update has been prepared. \r\nDo you want to restart Dawn?")
+                    .WithActionButton("Yes", _ => shouldRestart = true, true)
+                    .WithActionButton("No", _ => shouldRestart = false, true)
+                    .TryShow();
+
+                return shouldRestart;
+            };
+
+            _shellViewModel.Updates.OnDeleteAllRequested = () =>
+            {
+                var shouldDelete = false;
+                _dialogManager.CreateDialog()
+                    .OfType(NotificationType.Warning)
+                    .WithTitle("Delete empty backup folder?")
+                    .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
+                    .WithActionButton("Yes", _ => shouldDelete = true, true)
+                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .TryShow();
+
+                return shouldDelete;
+            };
+
+            _shellViewModel.Updates.OnDetectChanges = (vm) => _dispatcher.Invoke(() =>
+            {
+                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel);
+
+                _ = _changeDetectionViewModel.DetectChanges(vm);
+
+                wnd.ShowDialog(this);
+            });
 
             StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
         }
@@ -138,6 +219,9 @@ namespace Dawn.Avalonia
         }
 
         private void ShowLog(object sender, RoutedEventArgs e)
+            => ShowLog();
+
+        private void ShowLog()
         {
             _dispatcher.Invoke(() =>
             {
@@ -171,15 +255,15 @@ namespace Dawn.Avalonia
 
         private void OnToggleTheme(object sender, RoutedEventArgs e)
         {
-            //var model = _configurationService.Get();
+            var model = _configurationService.Get();
+            var _theme = SukiTheme.GetInstance();
+            var isLightTheme = !(_theme.ActiveBaseTheme == ThemeVariant.Light);
 
-            //var isLightTheme = !IsLightTheme;
+            model.IsLightTheme = isLightTheme;
+            _theme.ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
+            _configurationService.Save();
 
-            //SetValue(IsLightThemeProperty, isLightTheme);
-            //model.IsLightTheme = isLightTheme;
-            //ResourceLocator.SetColorScheme(Application.Current.Resources, isLightTheme ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
-            //_configurationService.Save();
-
+            // TODO
             //SetImage();
         }
     }

@@ -1,11 +1,8 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Logging;
 using SukiUI.Controls;
-using System.Windows.Input;
 using System;
+using System.Windows.Input;
 
 namespace Dawn.Avalonia
 {

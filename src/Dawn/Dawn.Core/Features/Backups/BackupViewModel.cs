@@ -132,6 +132,7 @@ namespace Dawn.Core.Features.Backups
         }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
         private BackupViewModel(in IScarletCommandBuilder commandBuilder, BackupViewModel backupViewModel)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
             : base(commandBuilder)
@@ -242,7 +243,9 @@ namespace Dawn.Core.Features.Backups
                 {
                     var info = new ProcessStartInfo("cmd", $"/c start {FullPath}")
                     {
-                        UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
                     };
 
                     using var process = Process.Start(info)!;

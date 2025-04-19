@@ -191,7 +191,7 @@ namespace Dawn.Core
                 var tempExtractDirectory = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(asset.Name));
 
                 _log.Write(Serilog.Events.LogEventLevel.Debug, "Downloading release from {url}", asset.Url);
-                if (!await DownloadRelease(asset,tempZipFile, token).ConfigureAwait(false))
+                if (!await DownloadRelease(asset, tempZipFile, token).ConfigureAwait(false))
                 {
                     return;
                 }

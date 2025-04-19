@@ -1,4 +1,4 @@
-﻿namespace Dawn.Core.Features.Backups
+namespace Dawn.Core.Features.Backups
 {
     public sealed class BackupFileTypesViewModel : ViewModelListBase<BackupFileTypeViewModel>
     {

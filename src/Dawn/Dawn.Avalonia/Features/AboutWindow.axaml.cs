@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Dawn.Core.Features.About;
 using SukiUI.Controls;
 

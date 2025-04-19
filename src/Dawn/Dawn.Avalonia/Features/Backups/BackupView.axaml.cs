@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Dawn.Core.Features.Backups;
 
@@ -22,4 +22,3 @@ namespace Dawn.Avalonia.Features.Backups
         }
     }
 }
-

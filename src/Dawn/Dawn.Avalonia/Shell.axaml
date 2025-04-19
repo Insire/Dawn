@@ -21,7 +21,19 @@
                  DragDrop.AllowDrop="True"
                  mc:Ignorable="d">
 
+    <suki:SukiWindow.Hosts>
+        <suki:SukiDialogHost Name="DialogHost"/>
+    </suki:SukiWindow.Hosts>
+
     <suki:SukiWindow.RightWindowTitleBarControls>
+        <Button Classes="WindowControlsButton" Click="ShowAbout">
+            <icons:Icon Value="fa-solid fa-info" />
+        </Button>
+
+        <Button Classes="WindowControlsButton" Click="OnToggleTheme">
+            <icons:Icon Value="fa-solid fa-paintbrush" />
+        </Button>
+
         <Button Classes="WindowControlsButton" Click="OpenConfiguration">
             <icons:Icon Value="fa-solid fa-cog" />
         </Button>
@@ -30,8 +42,13 @@
             <icons:Icon Value="fa-solid fa-bars-staggered" />
         </Button>
 
-        <Button Classes="WindowControlsButton" Click="ShowAbout">
-            <icons:Icon Value="fa-solid fa-info" />
+        <!--  TODO  -->
+        <Button Classes="WindowControlsButton">
+            <icons:Icon Value="fa-solid fa-toggle-on" />
+        </Button>
+
+        <Button Classes="WindowControlsButton">
+            <icons:Icon Value="fa-solid fa-toggle-off" />
         </Button>
     </suki:SukiWindow.RightWindowTitleBarControls>
 

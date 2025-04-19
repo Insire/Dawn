@@ -209,35 +209,34 @@ namespace Dawn.Core.Features.Backups
             {
                 _logViewModel.Setup();
 
-                    _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                _log.Write(Serilog.Events.LogEventLevel.Warning, "Deleting all backups in {FolderPath}", _configurationViewModel.BackupFolder);
 
-                    try
+                try
+                {
+                    _isMassDeleting = true;
+
+                    for (var i = Items.Count - 1; i >= 0; i--)
                     {
-                        _isMassDeleting = true;
+                        _logViewModel.Progress.Report(i, Items.Count);
 
-                        for (var i = Items.Count - 1; i >= 0; i--)
+                        if (token.IsCancellationRequested)
                         {
-                            _logViewModel.Progress.Report(i, Items.Count);
-
-                            if (token.IsCancellationRequested)
-                            {
-                                return;
-                            }
-
-                            var item = Items[i];
-                            await item.Delete().ConfigureAwait(false);
+                            return;
                         }
 
-                        await Refresh(token).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        _isMassDeleting = false;
+                        var item = Items[i];
+                        await item.Delete().ConfigureAwait(false);
                     }
 
-                    _logViewModel.Progress.Report(100);
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                    await Refresh(token).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _isMassDeleting = false;
+                }
 
+                _logViewModel.Progress.Report(100);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -280,34 +279,33 @@ namespace Dawn.Core.Features.Backups
             {
                 _logViewModel.Setup();
 
-                    var array = backupViewModel.Items.ToArray();
-                    for (var i = 0; i < array.Length; i++)
+                var array = backupViewModel.Items.ToArray();
+                for (var i = 0; i < array.Length; i++)
+                {
+                    if (token.IsCancellationRequested)
                     {
-                        if (token.IsCancellationRequested)
-                        {
-                            return;
-                        }
-
-                        _logViewModel.Progress.Report(i, array.Length);
-
-                        var file = array[i];
-                        var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
-                        if (extension == ".zip")
-                        {
-                            RestoreArchive(file.FullPath, deploymentFolder, now, null);
-                        }
-                        else
-                        {
-                            var fileName = Path.GetFileName(file.FullPath);
-                            var restoreFileName = Path.Combine(deploymentFolder, fileName);
-
-                            RestoreFile(file.FullPath, restoreFileName, now);
-                        }
+                        return;
                     }
 
-                    _logViewModel.Progress.Report(100);
-                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
+                    _logViewModel.Progress.Report(i, array.Length);
 
+                    var file = array[i];
+                    var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
+                    if (extension == ".zip")
+                    {
+                        RestoreArchive(file.FullPath, deploymentFolder, now, null);
+                    }
+                    else
+                    {
+                        var fileName = Path.GetFileName(file.FullPath);
+                        var restoreFileName = Path.Combine(deploymentFolder, fileName);
+
+                        RestoreFile(file.FullPath, restoreFileName, now);
+                    }
+                }
+
+                _logViewModel.Progress.Report(100);
+                _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);

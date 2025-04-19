@@ -1,4 +1,4 @@
-﻿namespace Dawn.Core.Features.Filesystem
+namespace Dawn.Core.Features.Filesystem
 {
     public class DirectoryViewModel : FileSystemViewModel
     {

@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using Serilog.Events;
 using System;
 using System.Globalization;

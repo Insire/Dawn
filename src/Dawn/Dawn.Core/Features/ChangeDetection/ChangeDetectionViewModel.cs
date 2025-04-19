@@ -13,7 +13,7 @@ namespace Dawn.Core.Features.ChangeDetection
         private readonly SourceCache<FilePairViewModel, string> _sourceCache;
         private readonly ChangeDetectionService _service;
 
-        public ReadOnlyObservableCollection<FilePairViewModel> Items {[UsedImplicitly]  get; }
+        public ReadOnlyObservableCollection<FilePairViewModel> Items { [UsedImplicitly] get; }
 
         private FilePairViewModel? _selectedItem;
         public FilePairViewModel? SelectedItem

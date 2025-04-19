@@ -1,7 +1,5 @@
-﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Dawn.Core.Features.Logging;
 
 namespace Dawn.Avalonia.Features.Logging
@@ -22,4 +20,3 @@ namespace Dawn.Avalonia.Features.Logging
         }
     }
 }
-

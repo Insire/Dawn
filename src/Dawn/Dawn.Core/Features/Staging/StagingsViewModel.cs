@@ -22,7 +22,7 @@ namespace Dawn.Core.Features.Staging
         private readonly BackupsViewModel _backupsViewModel;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _log;
-        private readonly CompositeDisposable  _disposables;
+        private readonly CompositeDisposable _disposables;
 
         private bool _reuseLastBackup;
         public bool ReuseLastBackup
@@ -109,14 +109,14 @@ namespace Dawn.Core.Features.Staging
             IsEmpty = true;
 
             var subscription2 = Items
-                .WhenPropertyChanged(p=> p.Count, notifyOnInitialValue:false)
+                .WhenPropertyChanged(p => p.Count, notifyOnInitialValue: false)
                 .ObserveOn(context)
                 .Subscribe(p =>
                 {
                     IsEmpty = (p.Value == 0);
                 });
 
-            _disposables = new CompositeDisposable(subscription1,subscription2);
+            _disposables = new CompositeDisposable(subscription1, subscription2);
         }
 
         private void RemoveImpl(object? args)
@@ -139,7 +139,7 @@ namespace Dawn.Core.Features.Staging
 
         private async Task AddFilesImpl()
         {
-            if (_fileSystem.TrySelectFiles(out var files)&& files is not null)
+            if (_fileSystem.TrySelectFiles(out var files) && files is not null)
             {
                 await Add(files).ConfigureAwait(false);
             }
@@ -216,43 +216,42 @@ namespace Dawn.Core.Features.Staging
                {
                    _logViewModel.Setup();
 
-                       for (var i = 0; i < Items.Count; i++)
+                   for (var i = 0; i < Items.Count; i++)
+                   {
+                       var newFile = Items[i];
+                       _logViewModel.Progress.Report(i, Items.Count);
+
+                       if (token.IsCancellationRequested)
                        {
-                           var newFile = Items[i];
-                           _logViewModel.Progress.Report(i, Items.Count);
-
-                           if (token.IsCancellationRequested)
-                           {
-                               return;
-                           }
-
-                           var fileName = Path.GetFileName(newFile.FullPath);
-                           var deploymentFileName = Path.Combine(deploymentFolder, fileName);
-                           var backupFileName = Path.Combine(backupFileFolder, fileName);
-
-                           if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
-                           {
-                               BackupFile(newFile.FullPath, backupFileName, now, true);
-                           }
-
-                           Update(newFile.FullPath, deploymentFileName, now, _logViewModel.Progress);
+                           return;
                        }
 
-                       if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                       var fileName = Path.GetFileName(newFile.FullPath);
+                       var deploymentFileName = Path.Combine(deploymentFolder, fileName);
+                       var backupFileName = Path.Combine(backupFileFolder, fileName);
+
+                       if (backupTypes.Contains(Path.GetExtension(fileName).ToLowerInvariant()))
                        {
-                           var delete = OnEmptyDirectoryCreated?.Invoke();
-                           if (delete == true)
-                           {
-                               _fileSystem.DeleteDirectory(backupFileFolder, true);
-                           }
-                       }
-                       else
-                       {
-                           _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
+                           BackupFile(newFile.FullPath, backupFileName, now, true);
                        }
 
-                       _logViewModel.Progress.Report(100);
+                       Update(newFile.FullPath, deploymentFileName, now, _logViewModel.Progress);
+                   }
 
+                   if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
+                   {
+                       var delete = OnEmptyDirectoryCreated?.Invoke();
+                       if (delete == true)
+                       {
+                           _fileSystem.DeleteDirectory(backupFileFolder, true);
+                       }
+                   }
+                   else
+                   {
+                       _log.Write(Serilog.Events.LogEventLevel.Information, "Applied staged files to {FolderPath}", deploymentFolder);
+                   }
+
+                   _logViewModel.Progress.Report(100);
                }
                catch (Exception ex)
                {
@@ -276,7 +275,6 @@ namespace Dawn.Core.Features.Staging
 
             var reuseBackup = backups.OrderByDescending(p => p.TimeStamp).First();
             return Path.Combine(rootFolder, reuseBackup.TimeStamp.FormatAsBackup());
-
         }
 
         private bool CanApply()
