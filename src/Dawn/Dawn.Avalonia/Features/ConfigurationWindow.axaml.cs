@@ -18,8 +18,6 @@ namespace Dawn.Avalonia.Features
         private readonly IFileSystem _fileSystem;
         private readonly IClipboardService _clipboardService;
 
-        public ICommand CloseCommand { get; }
-        public ICommand CopyToClipboardCommand { get; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -36,12 +34,11 @@ namespace Dawn.Avalonia.Features
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _clipboardService = clipboardService;
 
-            CloseCommand = new RelayCommand(CloseInternal, CanClose);
-            CopyToClipboardCommand = new AsyncRelayCommand(CopyToClipboard);
 
             InitializeComponent();
         }
 
+        [RelayCommand]
         private async Task CopyToClipboard()
         {
             var json = System.Text.Json.JsonSerializer.Serialize(_configurationViewModel.Model);
@@ -51,7 +48,8 @@ namespace Dawn.Avalonia.Features
             await _clipboardService.SetDataAsync(base64);
         }
 
-        private void CloseInternal()
+        [RelayCommand(CanExecute = nameof(CanClose))]
+        new private void Close()
         {
             _configurationViewModel.Validate();
             if (_configurationViewModel.HasErrors)
@@ -59,7 +57,7 @@ namespace Dawn.Avalonia.Features
                 return;
             }
 
-            Close();
+            base.Close();
         }
 
         private bool CanClose()

@@ -13,6 +13,7 @@ using Dawn.Core.Features.Logging;
 using Dawn.Core.Features.Util;
 using DynamicData.Binding;
 using MvvmScarletToolkit;
+using Serilog;
 using SukiUI.Controls;
 using System;
 using System.Linq;
