@@ -54,7 +54,7 @@ namespace Dawn.Core.Features.Staging
         public ICommand RemoveCommand { get; }
 
         public ICommand ClearCommand { get; }
-        public Func<bool>? OnEmptyDirectoryCreated { get; set; }
+        public Func<Task<bool>>? OnEmptyDirectoryCreated { get; set; }
         public Action? OnApplyingStagings { get; set; }
 
         public StagingsViewModel(
@@ -210,7 +210,7 @@ namespace Dawn.Core.Features.Staging
 
             var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
 
-            var t2 = Task.Run(() =>
+            var t2 = Task.Run(async () =>
            {
                try
                {
@@ -240,8 +240,8 @@ namespace Dawn.Core.Features.Staging
 
                    if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
                    {
-                       var delete = OnEmptyDirectoryCreated?.Invoke();
-                       if (delete == true)
+                       var onEmptyDirectoryCreated = OnEmptyDirectoryCreated;
+                       if (onEmptyDirectoryCreated is not null && await onEmptyDirectoryCreated.Invoke())
                        {
                            _fileSystem.DeleteDirectory(backupFileFolder, true);
                        }

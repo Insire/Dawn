@@ -53,7 +53,7 @@ namespace Dawn.Core
 
         public bool IsEmpty => Stagings.IsEmpty && !Updates.HasItems;
 
-        public Func<bool>? OnApplicationUpdated { get; set; }
+        public Func<Task<bool>>? OnApplicationUpdated { get; set; }
 
         public ICommand CheckForApplicationUpdateCommand { [UsedImplicitly] get; }
 
@@ -211,7 +211,9 @@ namespace Dawn.Core
 
                 _logViewModel.Progress.Report(100);
                 _hasUpdatedApplication = true;
-                if (OnApplicationUpdated?.Invoke() == true)
+
+                var onApplicationUpdated =OnApplicationUpdated;
+                if (onApplicationUpdated is not null && await onApplicationUpdated.Invoke())
                 {
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Restarting application.");
                     Restart(thisProcess);

@@ -13,6 +13,7 @@ using Serilog;
 using System;
 using System.IO;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -151,41 +152,41 @@ namespace Dawn.Wpf
             _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
-            _shellViewModel.Updates.OnDeleteRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteRequested = () => Task.FromResult(Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete all files in this backup folder. \r\nThis can not be undone.",
                 Caption = "Are you sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Warning,
                 Buttons = MessageBoxButtons.YesNo(),
-            })) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes);
 
-            _shellViewModel.Updates.OnDeleteAllRequested = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
+            _shellViewModel.Updates.OnDeleteAllRequested = () => Task.FromResult(Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "This will delete every backup. \r\nThis can not be undone.",
                 Caption = "Are you really sure?",
                 Icon = AdonisUI.Controls.MessageBoxImage.Stop,
                 Buttons = MessageBoxButtons.YesNo(),
-            })) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes);
 
-            _shellViewModel.OnApplicationUpdated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
+            _shellViewModel.OnApplicationUpdated = () => Task.FromResult(Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "Your update has been prepared. \r\nDo you want to restart Dawn?",
                 Caption = "Updates have been downloaded successfully.",
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
                 Buttons = MessageBoxButtons.YesNo(),
-            })) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes);
 
-            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => Task.FromResult(Dispatcher.Invoke(() => AdonisUI.Controls.MessageBox.Show(new MessageBoxModel
             {
                 IsSoundEnabled = false,
                 Text = "Applying your files didnt result in a new backup. Delete empty backup folder?",
                 Caption = "Delete empty backup folder?.",
                 Icon = AdonisUI.Controls.MessageBoxImage.Information,
                 Buttons = MessageBoxButtons.YesNo(),
-            })) == AdonisUI.Controls.MessageBoxResult.Yes;
+            })) == AdonisUI.Controls.MessageBoxResult.Yes);
 
             _shellViewModel.Updates.OnDetectChanges = (vm) => Dispatcher.Invoke(() =>
             {

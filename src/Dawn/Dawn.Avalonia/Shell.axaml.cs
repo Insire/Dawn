@@ -24,6 +24,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dawn.Avalonia
 {
@@ -96,60 +97,60 @@ namespace Dawn.Avalonia
             _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
-            _shellViewModel.Updates.OnDeleteRequested = () =>
+            _shellViewModel.Updates.OnDeleteRequested = async () =>
             {
-                var shouldDelete = false;
+                var shouldDelete = new TaskCompletionSource<bool>();
                 _dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Are you sure?")
                     .WithContent("This will delete all files in this backup folder. \r\nThis can not be undone.")
-                    .WithActionButton("Yes", _ => shouldDelete = true, true)
-                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .WithActionButton("Yes", _ => shouldDelete.SetResult(true), true)
+                    .WithActionButton("No", _ => shouldDelete.SetResult(false), true)
                     .TryShow();
 
-                return shouldDelete;
+                return await shouldDelete.Task;
             };
 
-            _shellViewModel.Updates.OnDeleteAllRequested = () =>
+            _shellViewModel.Updates.OnDeleteAllRequested = async () =>
             {
-                var shouldDelete = false;
+                var shouldDelete = new TaskCompletionSource<bool>();
                 _dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Are you really sure?")
                     .WithContent("This will delete every backup. \r\nThis can not be undone.")
-                    .WithActionButton("Yes", _ => shouldDelete = true, true)
-                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .WithActionButton("Yes", _ => shouldDelete.SetResult(true), true)
+                    .WithActionButton("No", _ => shouldDelete.SetResult(false), true)
                     .TryShow();
 
-                return shouldDelete;
+                return await shouldDelete.Task;
             };
 
-            _shellViewModel.OnApplicationUpdated = () =>
+            _shellViewModel.OnApplicationUpdated = async () =>
             {
-                var shouldRestart = false;
+                var shouldRestart = new TaskCompletionSource<bool>();
                 _dialogManager.CreateDialog()
                     .OfType(NotificationType.Information)
                     .WithTitle("Updates have been downloaded successfully.")
                     .WithContent("Your update has been prepared. \r\nDo you want to restart Dawn?")
-                    .WithActionButton("Yes", _ => shouldRestart = true, true)
-                    .WithActionButton("No", _ => shouldRestart = false, true)
+                    .WithActionButton("Yes", _ => shouldRestart.SetResult(true), true)
+                    .WithActionButton("No", _ => shouldRestart.SetResult(false), true)
                     .TryShow();
 
-                return shouldRestart;
+                return await shouldRestart.Task;
             };
 
-            _shellViewModel.Updates.OnDeleteAllRequested = () =>
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = async () =>
             {
-                var shouldDelete = false;
+                var shouldDelete = new TaskCompletionSource<bool>();
                 _dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Delete empty backup folder?")
                     .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
-                    .WithActionButton("Yes", _ => shouldDelete = true, true)
-                    .WithActionButton("No", _ => shouldDelete = false, true)
+                    .WithActionButton("Yes", _ => shouldDelete.SetResult(true), true)
+                    .WithActionButton("No", _ => shouldDelete.SetResult(false), true)
                     .TryShow();
 
-                return shouldDelete;
+                return await shouldDelete.Task;
             };
 
             _shellViewModel.Updates.OnDetectChanges = (vm) => _dispatcher.Invoke(() =>

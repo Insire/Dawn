@@ -18,7 +18,7 @@ namespace Dawn.Core.Features.Backups
         private readonly ILogger _log;
         private readonly IFileSystem _fileSystem;
 
-        private readonly Func<bool> _onDeleteRequested;
+        private readonly Func<Task<bool>> _onDeleteRequested;
         private readonly Action _onDeleting;
         private readonly Func<BackupViewModel, BackupViewModel> _onMetaDataEdit;
         private readonly Action<BackupViewModel> _onDetectChanges;
@@ -80,7 +80,7 @@ namespace Dawn.Core.Features.Backups
             LogViewModel logViewModel,
             ILogger log,
             ConfigurationViewModel configurationViewModel,
-            Func<bool> onDeleteRequested,
+            Func<Task<bool>> onDeleteRequested,
             Action onDeleting,
             Func<BackupViewModel, BackupViewModel> onMetaDataEdit,
             Action<BackupViewModel> onDetectChanges)
@@ -266,8 +266,7 @@ namespace Dawn.Core.Features.Backups
 
         private async Task DeleteImpl()
         {
-            var shouldDelete = _onDeleteRequested.Invoke();
-
+            var shouldDelete = await _onDeleteRequested.Invoke();
             if (!shouldDelete)
             {
                 return;

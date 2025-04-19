@@ -20,8 +20,8 @@ namespace Dawn.Core.Features.Backups
 
         public ICommand DeleteAllCommand { get; }
 
-        public Func<bool>? OnDeleteAllRequested { get; set; }
-        public Func<bool>? OnDeleteRequested { get; set; }
+        public Func<Task<bool>>? OnDeleteAllRequested { get; set; }
+        public Func<Task<bool>>? OnDeleteRequested { get; set; }
 
         public Action? OnDeletingAll { get; set; }
         public Action? OnDeleting { get; set; }
@@ -163,9 +163,20 @@ namespace Dawn.Core.Features.Backups
             }
         }
 
-        private bool OnDeleteRequestedImpl()
+        private async Task<bool> OnDeleteRequestedImpl()
         {
-            return _isMassDeleting || (OnDeleteRequested?.Invoke() ?? false);
+            if (_isMassDeleting)
+            {
+                return true;
+            }
+
+            var onDeleteRequested = OnDeleteRequested;
+            if (onDeleteRequested is  null)
+            {
+                return false;
+            }
+
+            return await onDeleteRequested();
         }
 
         private void OnDeletingImpl()
@@ -194,8 +205,13 @@ namespace Dawn.Core.Features.Backups
 
         private async Task DeleteAllImpl(CancellationToken token)
         {
-            var shouldDeleteAll = OnDeleteAllRequested?.Invoke() ?? false;
+            var onDeleteAllRequested = OnDeleteAllRequested;
+            if (onDeleteAllRequested is  null)
+            {
+                return;
+            }
 
+            var shouldDeleteAll = await onDeleteAllRequested.Invoke();
             if (!shouldDeleteAll)
             {
                 return;
