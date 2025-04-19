@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.7" />
         <PackageReference Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True" />
         <PackageReference Include="Avalonia" Version="11.2.7" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.7" />

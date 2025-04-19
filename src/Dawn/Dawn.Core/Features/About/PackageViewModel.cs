@@ -19,6 +19,8 @@ namespace Dawn.Core.Features.About
         public string Authors { get; set; } = string.Empty;
 
         public string License { get; set; } = string.Empty;
+
+        [DisplayName("License Url")]
         public string LicenseUrl { get; set; } = string.Empty;
     }
 }
