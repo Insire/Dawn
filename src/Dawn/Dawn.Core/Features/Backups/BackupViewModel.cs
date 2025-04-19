@@ -119,7 +119,7 @@ namespace Dawn.Core.Features.Backups
                 .Build();
 
             EditMetaDataCommand = commandBuilder
-                .Create(EditMetaDataImpl, CanEditMetaDataImpl)
+                .Create(EditMetaDataImpl)
                 .WithBusyNotification(BusyStack)
                 .WithSingleExecution()
                 .Build();
@@ -230,11 +230,6 @@ namespace Dawn.Core.Features.Backups
             });
         }
 
-        private bool CanEditMetaDataImpl()
-        {
-            return true;
-        }
-
         private Task OpenExternallyImpl()
         {
             return Task.Run(() =>
@@ -254,11 +249,6 @@ namespace Dawn.Core.Features.Backups
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     using var process = Process.Start("xdg-open", FullPath);
-                    process.WaitForExit();
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    using var process = Process.Start("open", FullPath);
                     process.WaitForExit();
                 }
             });
