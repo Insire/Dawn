@@ -2,7 +2,9 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+             xmlns:avalonia1="clr-namespace:Dawn.Avalonia"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:events="clr-namespace:Serilog.Events;assembly=Serilog"
              xmlns:logging="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="450"
@@ -10,6 +12,16 @@
              x:DataType="logging:LogEventViewModel"
              Loaded="OnLoaded"
              mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <avalonia1:LogEventLevelEnumEqualityConverter x:Key="LogEventLevelEnumEqualityConverter" />
+        <events:LogEventLevel x:Key="Information">Information</events:LogEventLevel>
+        <events:LogEventLevel x:Key="Debug">Debug</events:LogEventLevel>
+        <events:LogEventLevel x:Key="Error">Error</events:LogEventLevel>
+        <events:LogEventLevel x:Key="Fatal">Fatal</events:LogEventLevel>
+        <events:LogEventLevel x:Key="Verbose">Verbose</events:LogEventLevel>
+        <events:LogEventLevel x:Key="Warning">Warning</events:LogEventLevel>
+    </UserControl.Resources>
 
     <Border BorderBrush="{x:Null}" BorderThickness="0">
         <Border.ContextMenu>
@@ -43,11 +55,37 @@
             </ToolTip>
         </ToolTip.Tip>
 
-        <TextBlock>
+        <TextBlock TextTrimming="">
+            <TextBlock.Styles>
+                <Style Selector="Run.IsInformation">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiSuccessColor}" />
+                </Style>
+                <Style Selector="Run.IsDebug">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiInformationMediumColor}" />
+                </Style>
+                <Style Selector="Run.IsError">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiDangerColor}" />
+                </Style>
+                <Style Selector="Run.IsFatal">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiDangerMediumColor}" />
+                </Style>
+                <Style Selector="Run.IsVerbose">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiInformationDarkColor}" />
+                </Style>
+                <Style Selector="Run.IsWarning">
+                    <Setter Property="Foreground" Value="{DynamicResource SukiWarningColor}" />
+                </Style>
+            </TextBlock.Styles>
             <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
-            <Run Text="{Binding Level, Mode=OneWay}" />
+            <Run
+                Classes.IsDebug="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Debug}}"
+                Classes.IsError="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Error}}"
+                Classes.IsFatal="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Fatal}}"
+                Classes.IsInformation="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Information}}"
+                Classes.IsVerbose="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Verbose}}"
+                Classes.IsWarning="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Warning}}"
+                Text="{Binding Level, Mode=OneWay}" />
             <Run Text="{Binding Text, Mode=OneWay}" />
         </TextBlock>
     </Border>
 </UserControl>
-

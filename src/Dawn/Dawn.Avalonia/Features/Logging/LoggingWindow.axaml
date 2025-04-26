@@ -15,7 +15,6 @@
                  x:DataType="core:LogViewModel"
                  CanMaximize="False"
                  CanMinimize="False"
-                 CanResize="False"
                  WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
 
