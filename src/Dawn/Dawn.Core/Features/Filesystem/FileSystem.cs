@@ -1,25 +1,21 @@
+using Serilog.Events;
 using System.IO.Compression;
 using System.Text;
 
 namespace Dawn.Core.Features.Filesystem
 {
-    public sealed class FileSystem : IFileSystem
+    public sealed class FileSystem(IFileDialogs fileDialogs) : IFileSystem
     {
-        private readonly IFileDialogs _fileDialogs;
+        private readonly IFileDialogs _fileDialogs = fileDialogs;
 
-        public FileSystem(IFileDialogs fileDialogs)
+        public Task<IReadOnlyList<string>?> TrySelectFilesAsync()
         {
-            _fileDialogs = fileDialogs;
+            return _fileDialogs.TrySelectFilesAsync();
         }
 
-        public bool TrySelectFiles(out string[]? files)
+        public Task<string?> TrySelectFolderAsync()
         {
-            return _fileDialogs.TrySelectFiles(out files);
-        }
-
-        public bool TrySelectFolder(out string? folder)
-        {
-            return _fileDialogs.TrySelectFolder(out folder);
+            return _fileDialogs.TrySelectFolderAsync();
         }
 
         public void WriteAllText(string path, string contents, Encoding encoding)
@@ -109,6 +105,7 @@ namespace Dawn.Core.Features.Filesystem
                 {
                     File.Copy(from, to, overwrite);
                 }
+
                 return true;
             }
             catch (Exception ex)
@@ -127,7 +124,8 @@ namespace Dawn.Core.Features.Filesystem
                 {
                     if (setLastWriteTime)
                     {
-                        log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", to, timeStamp);
+                        log.ForContext<T>().Write(LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", to,
+                            timeStamp);
                         File.SetLastWriteTime(to, timeStamp);
                     }
 
@@ -163,7 +161,8 @@ namespace Dawn.Core.Features.Filesystem
                         var fileName = Path.GetFileName(destinationPath);
                         if (fileName.Length == 0)
                         {
-                            log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Creating destination directory {FolderPath}", destinationPath);
+                            log.ForContext<T>().Write(LogEventLevel.Debug,
+                                "Creating destination directory {FolderPath}", destinationPath);
                             CreateDirectory(destinationPath);
                         }
                         else // is file
@@ -171,12 +170,13 @@ namespace Dawn.Core.Features.Filesystem
                             var directoryName = destinationPath.Replace(fileName, "");
                             CreateDirectory(directoryName);
 
-                            log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Extracting file {File}", destinationPath);
+                            log.ForContext<T>().Write(LogEventLevel.Debug, "Extracting file {File}", destinationPath);
                             entry.ExtractToFile(destinationPath, overwrite);
 
                             if (setLastWriteTime)
                             {
-                                log.ForContext<T>().Write(Serilog.Events.LogEventLevel.Debug, "Setting timestamp on {File} to {TimeStamp}", destinationPath, timeStamp);
+                                log.ForContext<T>().Write(LogEventLevel.Debug,
+                                    "Setting timestamp on {File} to {TimeStamp}", destinationPath, timeStamp);
                                 File.SetLastWriteTime(destinationPath, timeStamp);
                             }
                         }

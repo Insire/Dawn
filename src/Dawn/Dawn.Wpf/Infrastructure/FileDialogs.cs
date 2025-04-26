@@ -1,12 +1,14 @@
 using Dawn.Core.Features.Util;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Dawn.Wpf
 {
     public sealed class FileDialogs : IFileDialogs
     {
-        public bool TrySelectFiles(out string[]? files)
+        public Task<IReadOnlyList<string>?> TrySelectFilesAsync()
         {
             var dlg = new OpenFileDialog
             {
@@ -18,24 +20,17 @@ namespace Dawn.Wpf
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 Multiselect = true,
                 Title = "Select files",
-                ValidateNames = true,
+                ValidateNames = true
             };
 
             var result = dlg.ShowDialog();
 
-            if (result == true)
-            {
-                files = dlg.FileNames;
-            }
-            else
-            {
-                files = null;
-            }
-
-            return result ?? false;
+            return result == true
+                ? Task.FromResult<IReadOnlyList<string>?>(dlg.FileNames)
+                : Task.FromResult<IReadOnlyList<string>?>(null);
         }
 
-        public bool TrySelectFolder(out string? folder)
+        public Task<string?> TrySelectFolderAsync()
         {
             var dlg = new OpenFolderDialog
             {
@@ -43,21 +38,13 @@ namespace Dawn.Wpf
                 Title = "Select a folder",
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                 Multiselect = false,
-                AddToRecent = false,
+                AddToRecent = false
             };
 
             var result = dlg.ShowDialog();
-
-            if (result == true)
-            {
-                folder = dlg.FolderName;
-            }
-            else
-            {
-                folder = null;
-            }
-
-            return result ?? false;
+            return result == true
+                ? Task.FromResult<string?>(dlg.FolderName)
+                : Task.FromResult<string?>(null);
         }
     }
 }

@@ -6,7 +6,8 @@ namespace Dawn.Core.Features.Filesystem
     {
         internal const string MetaDataFileName = "backup.json";
 
-        bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal>? progress, bool overwrite = false, bool setLastWriteTime = false);
+        bool ExtractFor<T>(string from, string to, ILogger log, DateTime timeStamp, IProgress<decimal>? progress,
+            bool overwrite = false, bool setLastWriteTime = false);
 
         bool MoveFor<T>(string from, string to, ILogger log, bool overwrite = false);
 
@@ -14,7 +15,8 @@ namespace Dawn.Core.Features.Filesystem
 
         bool CopyFor<T>(string from, string to, ILogger log, bool overwrite = false);
 
-        bool CopyFor<T>(string from, string to, ILogger log, DateTime timeStamp, bool overwrite = false, bool setLastWriteTime = false);
+        bool CopyFor<T>(string from, string to, ILogger log, DateTime timeStamp, bool overwrite = false,
+            bool setLastWriteTime = false);
 
         void DeleteDirectory(string path, bool recursive);
 
@@ -30,9 +32,9 @@ namespace Dawn.Core.Features.Filesystem
 
         void CreateDirectory(string path);
 
-        bool TrySelectFiles(out string[]? files);
+        Task<IReadOnlyList<string>?> TrySelectFilesAsync();
 
-        bool TrySelectFolder(out string? folder);
+        Task<string?> TrySelectFolderAsync();
 
         string ReadAllText(string path, Encoding encoding);
 

@@ -2,8 +2,8 @@ namespace Dawn.Core.Features.Util
 {
     public interface IFileDialogs
     {
-        bool TrySelectFiles(out string[]? files);
+        Task<IReadOnlyList<string>?> TrySelectFilesAsync();
 
-        bool TrySelectFolder(out string? folder);
+        Task<string?> TrySelectFolderAsync();
     }
 }

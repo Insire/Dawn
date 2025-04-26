@@ -6,15 +6,16 @@ using Dawn.Core.Features.Util;
 using SukiUI.Controls;
 using System;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Dawn.Avalonia.Features
 {
     public partial class ConfigurationWindow : SukiWindow
     {
+        private readonly IClipboardService _clipboardService;
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly IFileSystem _fileSystem;
-        private readonly IClipboardService _clipboardService;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -37,7 +38,7 @@ namespace Dawn.Avalonia.Features
         [RelayCommand]
         private async Task CopyToClipboard()
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(_configurationViewModel.Model);
+            var json = JsonSerializer.Serialize(_configurationViewModel.Model);
             var bytes = Encoding.UTF8.GetBytes(json);
             var base64 = Convert.ToBase64String(bytes);
 
@@ -61,17 +62,19 @@ namespace Dawn.Avalonia.Features
             return !_configurationViewModel.HasErrors;
         }
 
-        private void SelectTargetFolder(object sender, RoutedEventArgs e)
+        private async void SelectTargetFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
+            var folder = await _fileSystem.TrySelectFolderAsync();
+            if (folder is not null)
             {
                 _configurationViewModel.DeploymentFolder = folder;
             }
         }
 
-        private void SelectBackupFolder(object sender, RoutedEventArgs e)
+        private async void SelectBackupFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
+            var folder = await _fileSystem.TrySelectFolderAsync();
+            if (folder is not null)
             {
                 _configurationViewModel.BackupFolder = folder;
             }

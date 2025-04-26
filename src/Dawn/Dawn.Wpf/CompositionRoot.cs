@@ -32,7 +32,8 @@ namespace Dawn.Wpf
             var c = new Container();
 
             var clipboardService = new ClipboardService();
-            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!, clipboardService);
+            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!,
+                clipboardService);
 
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
@@ -40,12 +41,12 @@ namespace Dawn.Wpf
                 .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
                     .WriteTo.Debug()
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                    .WriteTo.Logger(lc => lc.Filter
-                                .ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
-                                                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                                                    || Matching.FromSource<BackupViewModel>().Invoke(o)
-                                                    || Matching.FromSource<ShellViewModel>().Invoke(o))
-                                );
+                .WriteTo.Logger(lc => lc.Filter
+                    .ByIncludingOnly(o => Matching.FromSource<StagingsViewModel>().Invoke(o)
+                                          || Matching.FromSource<BackupsViewModel>().Invoke(o)
+                                          || Matching.FromSource<BackupViewModel>().Invoke(o)
+                                          || Matching.FromSource<ShellViewModel>().Invoke(o))
+                );
 
             var logger = logConfiguration.CreateLogger();
 
@@ -60,19 +61,26 @@ namespace Dawn.Wpf
             var tracker = new Tracker(new JsonFileStore(Environment.SpecialFolder.CommonApplicationData));
             tracker.Configure<Shell>()
                 .Id(_ => $"[Width={SystemParameters.VirtualScreenWidth},Height{SystemParameters.VirtualScreenHeight}]")
-                .Properties(w => new { w.Height, w.Width, w.Left, w.Top, w.WindowState })
+                .Properties(w => new
+                {
+                    w.Height,
+                    w.Width,
+                    w.Left,
+                    w.Top,
+                    w.WindowState
+                })
                 .PersistOn(nameof(Window.Closing))
                 .StopTrackingOn(nameof(Window.Closing));
             c.Use(tracker);
             c.Use<IClipboardService>(clipboardService);
 
             c.Register<ConfigurationService>(Reuse.Singleton);
-            c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
+            c.Register(Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
 
-            c.Register<HttpClient>(Reuse.Singleton, made: Made.Of(() => new HttpClient()));
+            c.Register<HttpClient>(Reuse.Singleton, Made.Of(() => new HttpClient()));
             c.Register<Shell>(Reuse.Singleton);
 
             c.Register<ShellViewModel>(Reuse.Singleton);

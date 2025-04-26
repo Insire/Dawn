@@ -57,17 +57,19 @@ namespace Dawn.Wpf
             return !_configurationViewModel.HasErrors;
         }
 
-        private void SelectTargetFolder(object sender, RoutedEventArgs e)
+        private async void SelectTargetFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
+            var folder = await _fileSystem.TrySelectFolderAsync();
+            if (folder is not null)
             {
                 _configurationViewModel.DeploymentFolder = folder;
             }
         }
 
-        private void SelectBackupFolder(object sender, RoutedEventArgs e)
+        private async void SelectBackupFolder(object sender, RoutedEventArgs e)
         {
-            if (_fileSystem.TrySelectFolder(out var folder) && !string.IsNullOrEmpty(folder))
+            var folder = await _fileSystem.TrySelectFolderAsync();
+            if (folder is not null)
             {
                 _configurationViewModel.BackupFolder = folder;
             }

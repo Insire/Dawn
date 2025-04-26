@@ -38,12 +38,12 @@ namespace Dawn.Avalonia
                 .WriteTo.Async(config => config.File("./logs/log.txt", buffered: true)
                     .WriteTo.Debug()
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                    .WriteTo.Logger(lc => lc.Filter
-                                .ByIncludingOnly((o) => Matching.FromSource<StagingsViewModel>().Invoke(o)
-                                                    || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                                                    || Matching.FromSource<BackupViewModel>().Invoke(o)
-                                                    || Matching.FromSource<ShellViewModel>().Invoke(o))
-                                );
+                .WriteTo.Logger(lc => lc.Filter
+                    .ByIncludingOnly(o => Matching.FromSource<StagingsViewModel>().Invoke(o)
+                                          || Matching.FromSource<BackupsViewModel>().Invoke(o)
+                                          || Matching.FromSource<BackupViewModel>().Invoke(o)
+                                          || Matching.FromSource<ShellViewModel>().Invoke(o))
+                );
 
             var logger = logConfiguration.CreateLogger();
 
@@ -57,7 +57,7 @@ namespace Dawn.Avalonia
             c.Use(Process.GetCurrentProcess());
 
             c.Register<ConfigurationService>(Reuse.Singleton);
-            c.Register(made: Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
+            c.Register(Made.Of(_ => ServiceInfo.Of<ConfigurationService>(), f => f.Get()));
 
             c.Register<IFileSystem, FileSystem>(Reuse.Singleton);
             c.Register<IFileDialogs, FileDialogs>(Reuse.Singleton);
@@ -74,8 +74,12 @@ namespace Dawn.Avalonia
 
             c.Register<IScarletExceptionHandler, GlobalCommandExceptionHandler>(Reuse.Singleton);
 
-            c.Register<HttpClient>(Reuse.Singleton, made: Made.Of(() => new HttpClient()));
-            c.Register<Shell>(Reuse.Singleton, made: Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(), Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(), Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>(), Arg.Of<ISukiDialogManager>())));
+            c.Register<HttpClient>(Reuse.Singleton, Made.Of(() => new HttpClient()));
+            c.Register<Shell>(Reuse.Singleton,
+                Made.Of(() => new Shell(Arg.Of<ShellViewModel>(), Arg.Of<LogViewModel>(), Arg.Of<AboutViewModel>(),
+                    Arg.Of<ChangeDetectionViewModel>(), Arg.Of<ConfigurationService>(), Arg.Of<IFileSystem>(),
+                    Arg.Of<IScarletDispatcher>(), Arg.Of<IClipboardService>(), Arg.Of<SynchronizationContext>(),
+                    Arg.Of<ISukiDialogManager>())));
             c.Register<ISukiDialogManager, SukiDialogManager>(Reuse.Singleton);
 
             c.Use(ScarletCommandBuilder.Default);
