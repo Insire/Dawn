@@ -7,7 +7,6 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:staging="clr-namespace:Dawn.Core.Features.Staging;assembly=Dawn.Core"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
-                 xmlns:system="clr-namespace:System;assembly=System.Runtime"
                  Name="RootWindow"
                  Title="{Binding Title}"
                  Width="930"
@@ -22,7 +21,7 @@
                  mc:Ignorable="d">
 
     <suki:SukiWindow.Hosts>
-        <suki:SukiDialogHost Name="DialogHost"/>
+        <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
     <suki:SukiWindow.RightWindowTitleBarControls>
@@ -42,14 +41,29 @@
             <icons:Icon Value="fa-solid fa-bars-staggered" />
         </Button>
 
-        <!--  TODO  -->
-        <Button Classes="WindowControlsButton">
-            <icons:Icon Value="fa-solid fa-toggle-on" />
-        </Button>
+        <ToggleButton BorderBrush="Transparent"
+                      Classes="Basic"
+                      IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+            <ToggleButton.Styles>
+                <Style Selector="ToggleButton icons|Icon.toggle-on">
+                    <Setter Property="IsVisible" Value="False" />
+                </Style>
+                <Style Selector="ToggleButton:checked icons|Icon.toggle-on">
+                    <Setter Property="IsVisible" Value="True" />
+                </Style>
+                <Style Selector="ToggleButton icons|Icon.toggle-off">
+                    <Setter Property="IsVisible" Value="True" />
+                </Style>
+                <Style Selector="ToggleButton:checked icons|Icon.toggle-off">
+                    <Setter Property="IsVisible" Value="False" />
+                </Style>
+            </ToggleButton.Styles>
+            <Panel>
+                <icons:Icon Classes="toggle-on" Value="fa-solid fa-toggle-on" />
+                <icons:Icon Classes="toggle-off" Value="fa-solid fa-toggle-off" />
+            </Panel>
+        </ToggleButton>
 
-        <Button Classes="WindowControlsButton">
-            <icons:Icon Value="fa-solid fa-toggle-off" />
-        </Button>
     </suki:SukiWindow.RightWindowTitleBarControls>
 
     <Grid Grid.RowDefinitions="2*,*,80">
@@ -119,9 +133,7 @@
                         CornerRadius="0"
                         IsAnimated="False"
                         IsVisible="{Binding !#RootWindow.((core:ShellViewModel)DataContext).Stagings.IsEmpty}">
-            <suki:GlassCard.Resources>
-                <system:Double x:Key="GlassOpacity">0.8</system:Double>
-            </suki:GlassCard.Resources>
+            <suki:GlassCard.Resources />
 
             <ScrollViewer>
                 <ItemsControl ItemsSource="{Binding Stagings.Items}">
@@ -162,9 +174,7 @@
                         CornerRadius="0"
                         IsAnimated="False"
                         IsVisible="{Binding !#RootWindow.((core:ShellViewModel)DataContext).Stagings.IsEmpty}">
-            <suki:GlassCard.Resources>
-                <system:Double x:Key="GlassOpacity">0.9</system:Double>
-            </suki:GlassCard.Resources>
+            <suki:GlassCard.Resources />
 
             <DockPanel>
                 <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding #RootWindow.StagingChecked, Mode=TwoWay}">

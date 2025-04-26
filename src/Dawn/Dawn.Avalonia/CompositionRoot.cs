@@ -35,7 +35,7 @@ namespace Dawn.Avalonia
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
+                .WriteTo.Async(config => config.File("./logs/log.txt", buffered: true)
                     .WriteTo.Debug()
                     .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
                     .WriteTo.Logger(lc => lc.Filter

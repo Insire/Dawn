@@ -245,15 +245,20 @@ namespace Dawn.Avalonia
         private void OnToggleTheme(object sender, RoutedEventArgs e)
         {
             var model = _configurationService.Get();
-            var _theme = SukiTheme.GetInstance();
-            var isLightTheme = !(_theme.ActiveBaseTheme == ThemeVariant.Light);
+            var theme = SukiTheme.GetInstance();
+            var isLightTheme = !(theme.ActiveBaseTheme == ThemeVariant.Light);
 
             model.IsLightTheme = isLightTheme;
-            _theme.ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
+            theme.ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
             _configurationService.Save();
 
             // TODO
             //SetImage();
+        }
+
+        private void ToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
+        {
+            Topmost = !Topmost;
         }
     }
 }
