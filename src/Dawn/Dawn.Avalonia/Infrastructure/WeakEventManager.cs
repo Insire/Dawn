@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     /// <summary>
     /// Weak event manager to subscribe and unsubscribe from events.

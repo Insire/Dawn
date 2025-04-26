@@ -11,7 +11,7 @@ using Dawn.Core.Features.Logging;
 using System;
 using System.Collections.Generic;
 
-namespace Dawn.Avalonia
+namespace Dawn.Avalonia.Infrastructure
 {
     public sealed class ViewLocator : IDataTemplate
     {
