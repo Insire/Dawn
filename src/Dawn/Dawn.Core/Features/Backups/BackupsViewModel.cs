@@ -23,13 +23,13 @@ namespace Dawn.Core.Features.Backups
         public Func<Task<bool>>? OnDeleteAllRequested { get; set; }
         public Func<Task<bool>>? OnDeleteRequested { get; set; }
 
-        public Action? OnDeletingAll { get; set; }
-        public Action? OnDeleting { get; set; }
-        public Action? OnRestoring { get; set; }
+        public Func<Task>? OnDeletingAll { get; set; }
+        public Func<Task>? OnDeleting { get; set; }
+        public Func<Task>? OnRestoring { get; set; }
 
-        public Action<BackupViewModel>? OnDetectChanges { get; set; }
+        public Func<BackupViewModel, Task>? OnDetectChanges { get; set; }
 
-        public Func<BackupViewModel, BackupViewModel>? OnMetaDataEditing { get; set; }
+        public Func<BackupViewModel, Task<BackupViewModel>>? OnMetaDataEditing { get; set; }
 
         public BackupsViewModel(
             in IScarletCommandBuilder commandBuilder,
@@ -131,12 +131,7 @@ namespace Dawn.Core.Features.Backups
                         key = date.ToString("yyyy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture);
                         if (!lookup.TryGetValue(key, out var value))
                         {
-                            var model = new BackupModel()
-                            {
-                                FullPath = directory,
-                                Name = key,
-                                TimeStamp = date
-                            };
+                            var model = new BackupModel() { FullPath = directory, Name = key, TimeStamp = date };
                             var group = _viewModelFactory.Get(model, this, OnDeleteRequestedImpl, OnDeletingImpl, OnMetaDataEditImpl, OnDetectChangesImpl);
                             var files = await Task.Run(() => _fileSystem.GetFiles(directory, "*", SearchOption.TopDirectoryOnly), token).ConfigureAwait(false);
 
@@ -179,28 +174,34 @@ namespace Dawn.Core.Features.Backups
             return await onDeleteRequested();
         }
 
-        private void OnDeletingImpl()
+        private Task OnDeletingImpl()
         {
             if (!_isMassDeleting)
             {
-                OnDeleting?.Invoke();
+                return OnDeleting is null
+                    ? Task.CompletedTask
+                    : OnDeleteRequested();
             }
+
+            return Task.CompletedTask;
         }
 
-        private BackupViewModel OnMetaDataEditImpl(BackupViewModel backup)
+        private Task<BackupViewModel> OnMetaDataEditImpl(BackupViewModel backup)
         {
             return OnMetaDataEditing!.Invoke(backup);
         }
 
-        private void OnDetectChangesImpl(BackupViewModel backup)
+        private Task OnDetectChangesImpl(BackupViewModel backup)
         {
-            OnDetectChanges?.Invoke(backup);
+            return OnDetectChanges is null
+                ? Task.CompletedTask
+                : OnDetectChanges(backup);
         }
 
         public override bool CanRefresh()
         {
             return !_configurationViewModel.HasErrors
-                && base.CanRefresh();
+                   && base.CanRefresh();
         }
 
         private async Task DeleteAllImpl(CancellationToken token)
@@ -259,8 +260,8 @@ namespace Dawn.Core.Features.Backups
         private bool CanDeleteAllImpl()
         {
             return !IsBusy
-                && !_configurationViewModel.HasErrors
-                && Items.Count > 0;
+                   && !_configurationViewModel.HasErrors
+                   && Items.Count > 0;
         }
 
         private async Task RestoreImpl(BackupViewModel backupViewModel, CancellationToken token)
@@ -342,8 +343,8 @@ namespace Dawn.Core.Features.Backups
         private bool CanRestore(BackupViewModel? backupViewModel)
         {
             return !IsBusy
-                && backupViewModel != null
-                && !_configurationViewModel.HasErrors;
+                   && backupViewModel != null
+                   && !_configurationViewModel.HasErrors;
         }
     }
 }

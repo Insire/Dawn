@@ -18,7 +18,8 @@
         <Grid ColumnDefinitions="*,8,Auto,8,Auto,8,Auto" RowDefinitions="Auto,8,*,8,Auto">
             <Button Grid.Row="0"
                     Grid.Column="0"
-                    Grid.ColumnSpan="7">
+                    Grid.ColumnSpan="7"
+                    Command="{Binding EditMetaDataCommand}">
                 <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
             </Button>
 
@@ -62,4 +63,3 @@
         </Grid>
     </suki:GlassCard>
 </UserControl>
-

@@ -17,7 +17,6 @@ namespace Dawn.Core.Features.Staging
     public sealed class StagingsViewModel : ViewModelBase
     {
         private readonly BackupsViewModel _backupsViewModel;
-
         private readonly ConfigurationViewModel _configurationViewModel;
         private readonly CompositeDisposable _disposables;
         private readonly IFileSystem _fileSystem;
@@ -25,11 +24,42 @@ namespace Dawn.Core.Features.Staging
         private readonly LogViewModel _logViewModel;
         private readonly SourceCache<StagingViewModel, string> _sourceCache;
 
-        private bool _isEmpty;
 
         private bool _reuseLastBackup;
 
+        public bool ReuseLastBackup
+        {
+            get { return _reuseLastBackup; }
+            set { SetProperty(ref _reuseLastBackup, value); }
+        }
+
         private StagingViewModel? _selectedItem;
+
+        [UsedImplicitly]
+        public StagingViewModel? SelectedItem
+        {
+            get { return _selectedItem; }
+            set { SetProperty(ref _selectedItem, value); }
+        }
+
+        private bool _isEmpty;
+
+        public bool IsEmpty
+        {
+            get { return _isEmpty; }
+            private set { SetProperty(ref _isEmpty, value); }
+        }
+
+        public ReadOnlyObservableCollection<StagingViewModel> Items { get; }
+
+        public ICommand ApplyCommand { get; }
+        public ICommand AddFilesCommand { get; }
+        public ICommand AddFolderCommand { get; }
+        public ICommand RemoveCommand { get; }
+
+        public ICommand ClearCommand { get; }
+        public Func<Task<bool>>? OnEmptyDirectoryCreated { get; set; }
+        public Func<Task>? OnApplyingStagings { get; set; }
 
         public StagingsViewModel(
             IScarletCommandBuilder commandBuilder,
@@ -94,36 +124,6 @@ namespace Dawn.Core.Features.Staging
 
             _disposables = new CompositeDisposable(subscription1, subscription2);
         }
-
-        public bool ReuseLastBackup
-        {
-            get { return _reuseLastBackup; }
-            set { SetProperty(ref _reuseLastBackup, value); }
-        }
-
-        [UsedImplicitly]
-        public StagingViewModel? SelectedItem
-        {
-            get { return _selectedItem; }
-            set { SetProperty(ref _selectedItem, value); }
-        }
-
-        public bool IsEmpty
-        {
-            get { return _isEmpty; }
-            private set { SetProperty(ref _isEmpty, value); }
-        }
-
-        public ReadOnlyObservableCollection<StagingViewModel> Items { get; }
-
-        public ICommand ApplyCommand { get; }
-        public ICommand AddFilesCommand { get; }
-        public ICommand AddFolderCommand { get; }
-        public ICommand RemoveCommand { get; }
-
-        public ICommand ClearCommand { get; }
-        public Func<Task<bool>>? OnEmptyDirectoryCreated { get; set; }
-        public Action? OnApplyingStagings { get; set; }
 
         private void RemoveImpl(object? args)
         {
@@ -218,7 +218,9 @@ namespace Dawn.Core.Features.Staging
             _fileSystem.CreateDirectory(backupFolder);
             _fileSystem.CreateDirectory(backupFileFolder);
 
-            var t1 = Dispatcher.Invoke(() => OnApplyingStagings?.Invoke());
+            var t1 = OnApplyingStagings is null
+                ? Task.CompletedTask
+                : Dispatcher.Invoke(async () => await OnApplyingStagings.Invoke());
 
             var t2 = Task.Run(async () =>
             {

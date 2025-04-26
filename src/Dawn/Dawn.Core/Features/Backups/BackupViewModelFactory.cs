@@ -17,7 +17,7 @@ namespace Dawn.Core.Features.Backups
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
-        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<Task<bool>> onDeleteRequested, Action onDeleting, Func<BackupViewModel, BackupViewModel> onMetaDataEdit, Action<BackupViewModel> onDetectChanges)
+        public BackupViewModel Get(BackupModel model, BackupsViewModel backupsViewModel, Func<Task<bool>> onDeleteRequested, Func<Task> onDeleting, Func<BackupViewModel, Task<BackupViewModel>> onMetaDataEdit, Func<BackupViewModel, Task> onDetectChanges)
         {
             return new BackupViewModel(_commandBuilder, _fileSystem, model, backupsViewModel, _logViewModel, _log, _configurationViewModel, onDeleteRequested, onDeleting, onMetaDataEdit, onDetectChanges);
         }

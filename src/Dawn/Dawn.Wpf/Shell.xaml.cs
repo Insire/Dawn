@@ -62,19 +62,24 @@ namespace Dawn.Wpf
 
         private static void OnStagingVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is Shell shell && e.NewValue is Visibility visibility)
+            if (sender is not Shell shell || e.NewValue is not Visibility visibility)
             {
-                switch (visibility)
-                {
-                    case Visibility.Visible:
-                        shell.SetCurrentValue(StagingCheckedProperty, true);
-                        break;
+                return;
+            }
 
-                    case Visibility.Collapsed:
-                    case Visibility.Hidden:
-                        shell.SetCurrentValue(StagingCheckedProperty, false);
-                        break;
-                }
+            switch (visibility)
+            {
+                case Visibility.Visible:
+                    shell.SetCurrentValue(StagingCheckedProperty, true);
+                    break;
+
+                case Visibility.Collapsed:
+                case Visibility.Hidden:
+                    shell.SetCurrentValue(StagingCheckedProperty, false);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -132,14 +137,14 @@ namespace Dawn.Wpf
                 throw new ArgumentNullException(nameof(tracker));
             }
 
-            _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
-            _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
-            _changeDetectionViewModel = changeDetectionViewModel ?? throw new ArgumentNullException(nameof(changeDetectionViewModel));
-            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _logViewModel = logViewModel;
+            _aboutViewModel = aboutViewModel;
+            _changeDetectionViewModel = changeDetectionViewModel;
+            _configurationService = configurationService;
+            _log = log;
+            _fileSystem = fileSystem;
             _clipboardService = clipboardService;
-            DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
+            DataContext = _shellViewModel = shellViewModel;
 
             InitializeComponent();
 
@@ -190,14 +195,13 @@ namespace Dawn.Wpf
 
             _shellViewModel.Updates.OnDetectChanges = (vm) => Dispatcher.Invoke(() =>
             {
-                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel)
-                {
-                    Owner = this
-                };
+                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel) { Owner = this };
 
                 _ = _changeDetectionViewModel.DetectChanges(vm);
 
                 wnd.ShowDialog();
+
+                return Task.CompletedTask;
             });
 
             SetImage();
@@ -216,7 +220,7 @@ namespace Dawn.Wpf
                 else
                 {
                     _log.Warning("Drop data type is unexpected");
-                    _log.Warning("Drop data type found: {Format}", data.GetType().FullName);
+                    _log.Warning("Drop data type found: {Format}", data?.GetType().FullName);
                 }
             }
             else
@@ -233,54 +237,44 @@ namespace Dawn.Wpf
         {
             Dispatcher.Invoke(() =>
             {
-                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService)
-                {
-                    Owner = this
-                };
+                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService) { Owner = this };
 
                 dlg.ShowDialog();
             });
         }
 
-        private void ShowLog()
+        private Task ShowLog()
         {
             Dispatcher.Invoke(() =>
             {
-                var dlg = new LoggingWindow(_logViewModel)
-                {
-                    Owner = this
-                };
+                var dlg = new LoggingWindow(_logViewModel) { Owner = this };
+
+                dlg.ShowDialog();
+            });
+
+            return Task.CompletedTask;
+        }
+
+        private void ShowAbout(object? sender, RoutedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var dlg = new AboutWindow(_aboutViewModel) { Owner = this };
 
                 dlg.ShowDialog();
             });
         }
 
-        private void ShowAbout(object sender, RoutedEventArgs e)
+        private Task<BackupViewModel> ShowEditDialog(BackupViewModel backupViewModel)
         {
             Dispatcher.Invoke(() =>
             {
-                var dlg = new AboutWindow(_aboutViewModel)
-                {
-                    Owner = this
-                };
-
-                dlg.ShowDialog();
-            });
-        }
-
-        private BackupViewModel ShowEditDialog(BackupViewModel backupViewModel)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                var dlg = new EditBackupWindow(backupViewModel)
-                {
-                    Owner = this
-                };
+                var dlg = new EditBackupWindow(backupViewModel) { Owner = this };
 
                 dlg.ShowDialog();
             });
 
-            return backupViewModel;
+            return Task.FromResult(backupViewModel);
         }
 
         private void SetImage()

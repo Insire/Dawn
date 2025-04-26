@@ -38,6 +38,7 @@ namespace Dawn.Core
         public StagingsViewModel Stagings { get; }
 
         private bool _isApplicationUpdateAvailable;
+
         public bool IsApplicationUpdateAvailable
         {
             get { return _isApplicationUpdateAvailable; }
@@ -45,6 +46,7 @@ namespace Dawn.Core
         }
 
         private bool _hasCheckedForApplicationUpdate;
+
         public bool HasCheckedForApplicationUpdate
         {
             get { return _hasCheckedForApplicationUpdate; }
@@ -60,17 +62,17 @@ namespace Dawn.Core
         public ICommand GetApplicationUpdateCommand { [UsedImplicitly] get; }
         public ICommand ShowLogCommand { [UsedImplicitly] get; }
 
-        public Action? ShowLogAction { get; set; }
+        public Func<Task>? ShowLogAction { get; set; }
 
         public ShellViewModel(ConfigurationViewModel configuration,
-                              BackupsViewModel updates,
-                              StagingsViewModel stagings,
-                              AboutViewModel aboutViewModel,
-                              LogViewModel logViewModel,
-                              ILogger log,
-                              IFileSystem fileSystem,
-                              IScarletCommandBuilder commandBuilder,
-                              SynchronizationContext context)
+            BackupsViewModel updates,
+            StagingsViewModel stagings,
+            AboutViewModel aboutViewModel,
+            LogViewModel logViewModel,
+            ILogger log,
+            IFileSystem fileSystem,
+            IScarletCommandBuilder commandBuilder,
+            SynchronizationContext context)
             : base(commandBuilder)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -212,7 +214,7 @@ namespace Dawn.Core
                 _logViewModel.Complete();
                 _hasUpdatedApplication = true;
 
-                var onApplicationUpdated =OnApplicationUpdated;
+                var onApplicationUpdated = OnApplicationUpdated;
                 if (onApplicationUpdated is not null && await onApplicationUpdated.Invoke())
                 {
                     _log.Write(Serilog.Events.LogEventLevel.Information, "Restarting application.");

@@ -16,6 +16,7 @@
                  d:DesignWidth="700"
                  x:DataType="core:ConfigurationViewModel"
                  CanMaximize="False"
+                 CanMinimize="False"
                  CanResize="False"
                  SizeToContent="Height"
                  WindowStartupLocation="CenterOwner"
@@ -86,7 +87,8 @@
                      Columns="1"
                      Rows="2">
             <CheckBox Content="Set last write time when applying update" IsChecked="{Binding UpdateTimeStampOnApply}" />
-            <CheckBox Content="Set last write time when restoring backup" IsChecked="{Binding UpdateTimeStampOnRestore}" />
+            <CheckBox Content="Set last write time when restoring backup"
+                      IsChecked="{Binding UpdateTimeStampOnRestore}" />
         </UniformGrid>
 
         <TextBlock Grid.Row="9"

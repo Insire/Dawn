@@ -19,11 +19,12 @@ namespace Dawn.Core.Features.Backups
         private readonly IFileSystem _fileSystem;
 
         private readonly Func<Task<bool>> _onDeleteRequested;
-        private readonly Action _onDeleting;
-        private readonly Func<BackupViewModel, BackupViewModel> _onMetaDataEdit;
-        private readonly Action<BackupViewModel> _onDetectChanges;
+        private readonly Func<Task> _onDeleting;
+        private readonly Func<BackupViewModel, Task<BackupViewModel>> _onMetaDataEdit;
+        private readonly Func<BackupViewModel, Task> _onDetectChanges;
 
         private readonly string _fullPath;
+
         public string FullPath
         {
             get { return _fullPath; }
@@ -31,6 +32,7 @@ namespace Dawn.Core.Features.Backups
         }
 
         private readonly string _name;
+
         public string Name
         {
             get { return _name; }
@@ -43,11 +45,11 @@ namespace Dawn.Core.Features.Backups
             }
         }
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(DisplayName))]
+        [ObservableProperty] [NotifyPropertyChangedFor(nameof(DisplayName))]
         private string? _customName;
 
         private string? _comment;
+
         public string? Comment
         {
             get { return _comment; }
@@ -55,6 +57,7 @@ namespace Dawn.Core.Features.Backups
         }
 
         private readonly DateTime _timeStamp;
+
         public DateTime TimeStamp
         {
             get { return _timeStamp; }
@@ -81,9 +84,9 @@ namespace Dawn.Core.Features.Backups
             ILogger log,
             ConfigurationViewModel configurationViewModel,
             Func<Task<bool>> onDeleteRequested,
-            Action onDeleting,
-            Func<BackupViewModel, BackupViewModel> onMetaDataEdit,
-            Action<BackupViewModel> onDetectChanges)
+            Func<Task> onDeleting,
+            Func<BackupViewModel, Task<BackupViewModel>> onMetaDataEdit,
+            Func<BackupViewModel, Task> onDetectChanges)
             : base(commandBuilder)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -198,21 +201,21 @@ namespace Dawn.Core.Features.Backups
             return _fileSystem.FileExists(GetMetaDataFileName());
         }
 
-        private Task EditMetaDataImpl()
+        private async Task EditMetaDataImpl()
         {
-            return Task.Run(() =>
+            var copy = new BackupViewModel(CommandBuilder, this);
+            copy = await _onMetaDataEdit.Invoke(copy);
+
+            Comment = copy.Comment?.Length > 0
+                ? copy.Comment
+                : null;
+
+            CustomName = copy.CustomName?.Length > 0
+                ? copy.CustomName
+                : null;
+
+            await Task.Run(() =>
             {
-                var copy = new BackupViewModel(CommandBuilder, this);
-                copy = _onMetaDataEdit.Invoke(copy);
-
-                Comment = copy.Comment?.Length > 0
-                    ? copy.Comment
-                    : null;
-
-                CustomName = copy.CustomName?.Length > 0
-                    ? copy.CustomName
-                    : null;
-
                 var fileName = GetMetaDataFileName();
                 if (CustomName is null && Comment is null && _fileSystem.FileExists(fileName))
                 {
@@ -220,11 +223,7 @@ namespace Dawn.Core.Features.Backups
                     return;
                 }
 
-                var json = JsonSerializer.Serialize(new BackupMetaDataModel()
-                {
-                    Name = CustomName,
-                    Comment = Comment
-                });
+                var json = JsonSerializer.Serialize(new BackupMetaDataModel() { Name = CustomName, Comment = Comment });
 
                 _fileSystem.WriteAllText(fileName, json, Encoding.UTF8);
             });
@@ -236,12 +235,7 @@ namespace Dawn.Core.Features.Backups
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    var info = new ProcessStartInfo("cmd", $"/c start {FullPath}")
-                    {
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
+                    var info = new ProcessStartInfo("cmd", $"/c start {FullPath}") { UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
 
                     using var process = Process.Start(info)!;
                     process.WaitForExit();
@@ -293,8 +287,8 @@ namespace Dawn.Core.Features.Backups
         private bool CanDeleteImpl()
         {
             return _configurationViewModel.HasErrors == false
-                && _fullPath.Length > 0
-                && _fileSystem.DirectoryExists(_fullPath);
+                   && _fullPath.Length > 0
+                   && _fileSystem.DirectoryExists(_fullPath);
         }
 
         private string GetDebuggerDisplay()

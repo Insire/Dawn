@@ -5,7 +5,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using Dawn.Avalonia.Features;
-using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;
@@ -38,7 +37,6 @@ namespace Dawn.Avalonia
         private readonly IFileSystem _fileSystem;
         private readonly IScarletDispatcher _dispatcher;
         private readonly IClipboardService _clipboardService;
-        private readonly ISukiDialogManager _dialogManager;
         private readonly CompositeDisposable _disposables;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
@@ -69,7 +67,6 @@ namespace Dawn.Avalonia
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _dispatcher = dispatcher;
             _clipboardService = clipboardService;
-            _dialogManager = dialogManager;
             DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
 
             InitializeComponent();
@@ -100,7 +97,7 @@ namespace Dawn.Avalonia
             _shellViewModel.Updates.OnDeleteRequested = async () =>
             {
                 var shouldDelete = new TaskCompletionSource<bool>();
-                _dialogManager.CreateDialog()
+                dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Are you sure?")
                     .WithContent("This will delete all files in this backup folder. \r\nThis can not be undone.")
@@ -113,7 +110,7 @@ namespace Dawn.Avalonia
 
             _shellViewModel.Updates.OnDeleteAllRequested = async () =>
             {
-                return await _dialogManager.CreateDialog()
+                return await dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Are you really sure?")
                     .WithContent("This will delete every backup. \r\nThis can not be undone.")
@@ -123,7 +120,7 @@ namespace Dawn.Avalonia
 
             _shellViewModel.OnApplicationUpdated = async () =>
             {
-                return await _dialogManager.CreateDialog()
+                return await dialogManager.CreateDialog()
                     .OfType(NotificationType.Information)
                     .WithTitle("Updates have been downloaded successfully.")
                     .WithContent("Your update has been prepared. \r\nDo you want to restart Dawn?")
@@ -133,7 +130,7 @@ namespace Dawn.Avalonia
 
             _shellViewModel.Stagings.OnEmptyDirectoryCreated = async () =>
             {
-                return await _dialogManager.CreateDialog()
+                return await dialogManager.CreateDialog()
                     .OfType(NotificationType.Warning)
                     .WithTitle("Delete empty backup folder?")
                     .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
@@ -207,36 +204,36 @@ namespace Dawn.Avalonia
             });
         }
 
-        private void ShowLog(object sender, RoutedEventArgs e)
-            => ShowLog();
+        private async void ShowLog(object sender, RoutedEventArgs e)
+            => await ShowLog();
 
-        private void ShowLog()
+        private async Task ShowLog()
         {
-            _dispatcher.Invoke(() =>
+            await _dispatcher.Invoke(async () =>
             {
                 var dlg = new LoggingWindow(_logViewModel);
 
-                dlg.ShowDialog(this);
+                await dlg.ShowDialog(this);
             });
         }
 
-        private void ShowAbout(object sender, RoutedEventArgs e)
+        private async void ShowAbout(object sender, RoutedEventArgs e)
         {
-            _dispatcher.Invoke(() =>
+            await _dispatcher.Invoke(async () =>
             {
                 var dlg = new AboutWindow(_aboutViewModel);
 
-                dlg.ShowDialog(this);
+                await dlg.ShowDialog(this);
             });
         }
 
-        private BackupViewModel ShowEditDialog(BackupViewModel backupViewModel)
+        private async Task<BackupViewModel> ShowEditDialog(BackupViewModel backupViewModel)
         {
-            _dispatcher.Invoke(() =>
+            await _dispatcher.Invoke(async () =>
             {
                 var dlg = new EditBackupWindow(backupViewModel);
 
-                dlg.ShowDialog(this);
+                await dlg.ShowDialog(this);
             });
 
             return backupViewModel;

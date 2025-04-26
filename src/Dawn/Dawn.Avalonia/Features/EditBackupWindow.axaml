@@ -1,14 +1,63 @@
 ﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Features.EditBackupWindow"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+                 xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
-                 Title="EditBackupWindow"
-                 d:DesignHeight="450"
-                 d:DesignWidth="800"
+                 Name="RootWindow"
+                 Title="Edit Backup"
+                 Width="700"
+                 MinWidth="700"
+                 MinHeight="100"
+                 d:DesignHeight="100"
+                 d:DesignWidth="700"
+                 x:DataType="backups:BackupViewModel"
                  CanMaximize="False"
+                 CanMinimize="False" 
                  CanResize="False"
+                 SizeToContent="Height"
+                 WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
-    Welcome to Avalonia!
+
+    <Grid ColumnDefinitions="8,Auto,8,*,8" RowDefinitions="8,32,8,32,8,8,32,8">
+        <TextBlock Grid.Row="1"
+                   Grid.Column="1"
+                   Focusable="False"
+                   Text="Name" />
+
+        <TextBox Grid.Row="1"
+                 Grid.Column="3"
+                 TabIndex="1"
+                 Text="{Binding CustomName}"
+                 ToolTip.Tip="Provide a custom name"
+                 Watermark="Rename the backup ..." />
+
+        <TextBlock Grid.Row="3"
+                   Grid.Column="1"
+                   Focusable="False"
+                   Text="Comment" />
+
+        <TextBox Grid.Row="3"
+                 Grid.Column="3"
+                 TabIndex="2"
+                 Text="{Binding Comment}"
+                 ToolTip.Tip="Comment"
+                 Watermark="Enter a comment ..." />
+
+        <DockPanel Grid.Row="5"
+                   Grid.RowSpan="3"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="5">
+            <Button Margin="8"
+                    Padding="8"
+                    HorizontalAlignment="Right"
+                    Command="{Binding #RootWindow.CloseCommand}"
+                    TabIndex="3"
+                    ToolTip.Tip="OK">
+                <avalonia:Icon Value="fa-solid fa-check" />
+            </Button>
+        </DockPanel>
+    </Grid>
 </suki:SukiWindow>
