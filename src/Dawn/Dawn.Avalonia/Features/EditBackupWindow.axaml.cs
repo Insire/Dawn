@@ -1,12 +1,13 @@
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Backups;
+using SukiUI.Controls;
 using System;
 using System.Windows.Input;
 
 namespace Dawn.Avalonia.Features
 {
-    public partial class EditBackupWindow : Window
+    public partial class EditBackupWindow : SukiWindow
     {
         private readonly BackupViewModel _backupViewModel;
 

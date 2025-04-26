@@ -13,6 +13,8 @@
                  d:DesignHeight="450"
                  d:DesignWidth="800"
                  x:DataType="core:LogViewModel"
+                 CanMaximize="False"
+                 CanResize="False"
                  WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
 
