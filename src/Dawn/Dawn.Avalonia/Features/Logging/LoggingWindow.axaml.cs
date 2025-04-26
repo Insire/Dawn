@@ -4,7 +4,7 @@ using SukiUI.Controls;
 using System;
 using System.Windows.Input;
 
-namespace Dawn.Avalonia
+namespace Dawn.Avalonia.Features.Logging
 {
     public partial class LoggingWindow : SukiWindow
     {

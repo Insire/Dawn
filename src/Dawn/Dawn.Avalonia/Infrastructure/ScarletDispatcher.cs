@@ -1,10 +1,11 @@
 using Avalonia.Threading;
+using MvvmScarletToolkit;
 using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     [Bindable(false)]
     public sealed class ScarletDispatcher : IScarletDispatcher

@@ -1,6 +1,7 @@
+using MvvmScarletToolkit;
 using System;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     /// <summary>
     /// simple wrapper around <see cref="System.Windows.Input.CommandManager"/>

@@ -1,8 +1,8 @@
-using Dawn.Avalonia.Infrastructure;
+using MvvmScarletToolkit;
 using System;
 using System.ComponentModel;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     public sealed class ScarletWeakEventManager : IScarletEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>
     {

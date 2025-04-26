@@ -24,6 +24,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ChangeDetectionWindow = Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionWindow;
+using EditBackupWindow = Dawn.Avalonia.Features.Backups.EditBackupWindow;
 
 namespace Dawn.Avalonia
 {
@@ -211,7 +213,7 @@ namespace Dawn.Avalonia
         {
             await _dispatcher.Invoke(async () =>
             {
-                var dlg = new LoggingWindow(_logViewModel);
+                var dlg = new Features.Logging.LoggingWindow(_logViewModel);
 
                 await dlg.ShowDialog(this);
             });

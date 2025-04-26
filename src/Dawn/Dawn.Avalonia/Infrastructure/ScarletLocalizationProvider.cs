@@ -1,8 +1,9 @@
+using MvvmScarletToolkit;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     public sealed class ScarletLocalizationProvider : ILocalizationProvider
     {

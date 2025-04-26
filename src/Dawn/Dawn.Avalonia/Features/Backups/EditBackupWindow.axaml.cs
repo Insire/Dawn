@@ -1,11 +1,10 @@
-using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Backups;
 using SukiUI.Controls;
 using System;
 using System.Windows.Input;
 
-namespace Dawn.Avalonia.Features
+namespace Dawn.Avalonia.Features.Backups
 {
     public partial class EditBackupWindow : SukiWindow
     {

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
@@ -6,7 +7,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MvvmScarletToolkit
+namespace Dawn.Avalonia.Infrastructure
 {
     /// <summary>
     /// Facade Service for creating CommandBuilderContext instances
@@ -28,12 +29,12 @@ namespace MvvmScarletToolkit
         public IScarletEventManager<INotifyPropertyChanged, PropertyChangedEventArgs> WeakEventManager { get; }
 
         public ScarletCommandBuilder(in IScarletDispatcher dispatcher,
-                                     in IScarletCommandManager commandManager,
-                                     in IScarletExceptionHandler exceptionHandler,
-                                     in IMessenger messenger,
-                                     in IExitService exitService,
-                                     in IScarletEventManager<INotifyPropertyChanged, PropertyChangedEventArgs> weakEventManager,
-                                     in Func<Action<bool>, IBusyStack> busyStackFactory)
+            in IScarletCommandManager commandManager,
+            in IScarletExceptionHandler exceptionHandler,
+            in IMessenger messenger,
+            in IExitService exitService,
+            in IScarletEventManager<INotifyPropertyChanged, PropertyChangedEventArgs> weakEventManager,
+            in Func<Action<bool>, IBusyStack> busyStackFactory)
         {
             Dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
             CommandManager = commandManager ?? throw new ArgumentNullException(nameof(commandManager));

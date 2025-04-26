@@ -10,6 +10,9 @@ using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Logging;
 using System;
 using System.Collections.Generic;
+using ChangeDetectionStateView = Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionStateView;
+using FileInfoView = Dawn.Avalonia.Features.ChangeDetection.FileInfoView;
+using FilePairView = Dawn.Avalonia.Features.ChangeDetection.FilePairView;
 
 namespace Dawn.Avalonia.Infrastructure
 {

@@ -1,8 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
-namespace Dawn.Avalonia.Features
+namespace Dawn.Avalonia.Features.ChangeDetection
 {
     public partial class FileInfoView : UserControl
     {
@@ -12,4 +10,3 @@ namespace Dawn.Avalonia.Features
         }
     }
 }
-

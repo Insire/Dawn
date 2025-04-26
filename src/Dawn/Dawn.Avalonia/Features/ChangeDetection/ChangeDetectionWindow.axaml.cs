@@ -3,7 +3,7 @@ using Dawn.Core.Features.ChangeDetection;
 using SukiUI.Controls;
 using System.Windows.Input;
 
-namespace Dawn.Avalonia.Features
+namespace Dawn.Avalonia.Features.ChangeDetection
 {
     public partial class ChangeDetectionWindow : SukiWindow
     {
