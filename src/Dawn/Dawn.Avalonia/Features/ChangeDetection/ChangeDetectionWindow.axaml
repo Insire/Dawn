@@ -2,19 +2,19 @@
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
-                 xmlns:changeDetection="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
+                 xmlns:changeDetection="clr-namespace:Dawn.Avalonia.Features.ChangeDetection"
+                 xmlns:changeDetectionCore="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  Name="RootWindow"
                  Title="Changes"
-                 Width="700"
-                 Height="400"
+                 Width="1500"
+                 Height="600"
                  d:DesignHeight="450"
                  d:DesignWidth="800"
-                 x:DataType="{x:Type changeDetection:ChangeDetectionViewModel}"
+                 x:DataType="{x:Type changeDetectionCore:ChangeDetectionViewModel}"
                  WindowStartupLocation="CenterOwner"
-                 WindowState="Maximized"
                  mc:Ignorable="d">
 
     <DockPanel>
@@ -45,11 +45,13 @@
             </ItemsControl.ItemsPanel>
 
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type changeDetection:FilePairViewModel}">
+                <DataTemplate DataType="{x:Type changeDetectionCore:FilePairViewModel}">
                     <Grid ColumnDefinitions="Auto,8,*">
-                        <ContentControl Content="{Binding ChangeState}" />
+                        <changeDetection:ChangeDetectionStateView DataContext="{Binding ChangeState}" />
 
-                        <TextBlock Grid.Column="2" Text="{Binding Source.Name}" />
+                        <TextBlock Grid.Column="2"
+                                   Foreground="{DynamicResource SukiText}"
+                                   Text="{Binding Source.Name}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

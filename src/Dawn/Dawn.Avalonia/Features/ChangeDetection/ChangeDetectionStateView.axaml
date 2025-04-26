@@ -1,10 +1,42 @@
 ﻿<UserControl x:Class="Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionStateView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonia="clr-namespace:Dawn.Avalonia"
+             xmlns:changeDetection="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="450"
              d:DesignWidth="800"
+             x:DataType="changeDetection:ChangeDetectionState"
              mc:Ignorable="d">
-    Welcome to Avalonia!
+
+    <UserControl.Resources>
+        <avalonia:ChangeDetectionStateEnumEqualityConverter x:Key="ChangeDetectionStateEnumEqualityConverter" />
+        <changeDetection:ChangeDetectionState x:Key="Changed">Changed</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="Identical">Identical</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="Missing">Missing</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="None">None</changeDetection:ChangeDetectionState>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Ellipse.IsNone">
+            <Setter Property="Fill" Value="{DynamicResource SukiPrimaryColor}" />
+        </Style>
+        <Style Selector="Ellipse.IsIdentical">
+            <Setter Property="Fill" Value="{DynamicResource SukiSuccessColor}" />
+        </Style>
+        <Style Selector="Ellipse.IsChanged">
+            <Setter Property="Fill" Value="{DynamicResource SukiWarningColor}" />
+        </Style>
+        <Style Selector="Ellipse.IsMissing">
+            <Setter Property="Fill" Value="{DynamicResource SukiDangerColor}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Ellipse Width="16"
+             Height="16"
+             Classes.IsChanged="{Binding Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+             Classes.IsIdentical="{Binding Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+             Classes.IsMissing="{Binding Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+             Classes.IsNone="{Binding Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}" />
 </UserControl>

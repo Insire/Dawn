@@ -1,10 +1,154 @@
 ﻿<UserControl x:Class="Dawn.Avalonia.Features.ChangeDetection.FileInfoView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonia="clr-namespace:Dawn.Avalonia"
+             xmlns:changeDetection="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:filesystem="clr-namespace:Dawn.Core.Features.Filesystem;assembly=Dawn.Core"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="450"
              d:DesignWidth="800"
+             x:DataType="filesystem:FileInfoViewModel"
              mc:Ignorable="d">
-    Welcome to Avalonia!
+
+    <UserControl.Resources>
+        <avalonia:LongToFileSizeConverter x:Key="LongToFileSizeConverter" />
+        <avalonia:ChangeDetectionStateEnumEqualityConverter x:Key="ChangeDetectionStateEnumEqualityConverter" />
+        <changeDetection:ChangeDetectionState x:Key="Changed">Changed</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="Identical">Identical</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="Missing">Missing</changeDetection:ChangeDetectionState>
+        <changeDetection:ChangeDetectionState x:Key="None">None</changeDetection:ChangeDetectionState>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.IsNone">
+            <Setter Property="Foreground" Value="{DynamicResource SukiPrimaryColor}" />
+        </Style>
+        <Style Selector="TextBlock.IsIdentical">
+            <Setter Property="Foreground" Value="{DynamicResource SukiSuccessColor}" />
+        </Style>
+        <Style Selector="TextBlock.IsChanged">
+            <Setter Property="Foreground" Value="{DynamicResource SukiWarningColor}" />
+        </Style>
+        <Style Selector="TextBlock.IsMissing">
+            <Setter Property="Foreground" Value="{DynamicResource SukiDangerColor}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="Auto,8,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+        <TextBlock Text="Name:" />
+        <TextBlock Grid.Row="0"
+                   Grid.Column="2"
+                   Text="{Binding Name}"
+                   TextTrimming="CharacterEllipsis"
+                   TextWrapping="NoWrap" />
+
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding ExistsChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding ExistsChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding ExistsChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding ExistsChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="Exists:" />
+
+        <CheckBox Grid.Row="1"
+                  Grid.Column="2"
+                  IsChecked="{Binding Exists}"
+                  IsHitTestVisible="False"
+                  IsThreeState="True" />
+
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding LengthChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding LengthChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding LengthChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding LengthChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="Length:" />
+
+        <TextBlock Grid.Row="2"
+                   Grid.Column="2"
+                   Text="{Binding Length, Converter={StaticResource LongToFileSizeConverter}, Mode=OneWay}" />
+
+        <TextBlock Grid.Row="3"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding HashChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding HashChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding HashChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding HashChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="SHA256 Hash:" />
+
+        <TextBlock Grid.Row="3"
+                   Grid.Column="2"
+                   Text="{Binding Hash}" />
+
+        <TextBlock Grid.Row="4"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding AttributesChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding AttributesChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding AttributesChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding AttributesChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="Attributes:" />
+
+        <TextBlock Grid.Row="4"
+                   Grid.Column="2"
+                   Text="{Binding Attributes}" />
+
+        <TextBlock Grid.Row="5"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding IsNetAssemblyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding IsNetAssemblyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding IsNetAssemblyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding IsNetAssemblyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text=".NET Assembly:" />
+
+        <CheckBox Grid.Row="5"
+                  Grid.Column="2"
+                  IsChecked="{Binding IsNetAssembly}"
+                  IsHitTestVisible="False"
+                  IsThreeState="True" />
+
+        <TextBlock Grid.Row="6"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding IsReadOnlyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding IsReadOnlyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding IsReadOnlyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding IsReadOnlyChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="Readonly:" />
+
+        <CheckBox Grid.Row="6"
+                  Grid.Column="2"
+                  IsChecked="{Binding IsReadOnly}"
+                  IsHitTestVisible="False"
+                  IsThreeState="True" />
+
+        <TextBlock Grid.Row="7"
+                   Grid.Column="0"
+                   Classes.IsChanged="{Binding CreationTimeChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Changed}}"
+                   Classes.IsIdentical="{Binding CreationTimeChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Identical}}"
+                   Classes.IsMissing="{Binding CreationTimeChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource Missing}}"
+                   Classes.IsNone="{Binding CreationTimeChangeState, Converter={StaticResource ChangeDetectionStateEnumEqualityConverter}, ConverterParameter={StaticResource None}}"
+                   Text="Creation time:" />
+
+        <TextBlock Grid.Row="7"
+                   Grid.Column="2"
+                   IsEnabled="False"
+                   Text="{Binding CreationTime, Mode=OneWay, StringFormat=o}" />
+
+        <TextBlock Grid.Row="8"
+                   Grid.Column="0"
+                   Text="Last access time:" />
+        <TextBlock Grid.Row="8"
+                   Grid.Column="2"
+                   IsEnabled="False"
+                   Text="{Binding LastAccessTime, Mode=OneWay}" />
+
+        <TextBlock Grid.Row="9"
+                   Grid.Column="0"
+                   Text="Last write time:" />
+        <TextBlock Grid.Row="9"
+                   Grid.Column="2"
+                   IsEnabled="False"
+                   Text="{Binding LastWriteTime, Mode=OneWay}" />
+    </Grid>
 </UserControl>
