@@ -15,7 +15,7 @@
                  d:DesignWidth="700"
                  x:DataType="backups:BackupViewModel"
                  CanMaximize="False"
-                 CanMinimize="False" 
+                 CanMinimize="False"
                  CanResize="False"
                  SizeToContent="Height"
                  WindowStartupLocation="CenterOwner"

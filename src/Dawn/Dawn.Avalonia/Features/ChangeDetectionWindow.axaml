@@ -1,16 +1,58 @@
 ﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Features.ChangeDetectionWindow"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+                 xmlns:changeDetection="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
-                 Title="ChangeDetectionWindow"
+                 Name="RootWindow"
+                 Title="Changes"
                  Width="700"
                  Height="400"
                  d:DesignHeight="450"
                  d:DesignWidth="800"
+                 x:DataType="{x:Type changeDetection:ChangeDetectionViewModel}"
                  WindowStartupLocation="CenterOwner"
+                 WindowState="Maximized"
                  mc:Ignorable="d">
-    Welcome to Avalonia!
-</suki:SukiWindow>
 
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Button Margin="8"
+                    Padding="8"
+                    HorizontalAlignment="Right"
+                    Command="{Binding #RootWindow.CloseCommand}"
+                    ToolTip.Tip="OK">
+                <avalonia:Icon Value="fa-solid fa-check" />
+            </Button>
+        </DockPanel>
+
+        <suki:GroupBox Margin="8"
+                       DockPanel.Dock="Bottom"
+                       Header="{Binding SelectedItem.Source.Name, FallbackValue=''}">
+            <ContentControl Content="{Binding SelectedItem}" />
+        </suki:GroupBox>
+
+        <ListBox Margin="8"
+                 ItemsSource="{Binding Items}"
+                 SelectedItem="{Binding SelectedItem}"
+                 SelectionMode="Single">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type changeDetection:FilePairViewModel}">
+                    <Grid ColumnDefinitions="Auto,8,*">
+                        <ContentControl Content="{Binding ChangeState}" />
+
+                        <TextBlock Grid.Column="2" Text="{Binding Source.Name}" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</suki:SukiWindow>

@@ -87,24 +87,15 @@
                      Columns="1"
                      Rows="2">
             <CheckBox Content="Set last write time when applying update" IsChecked="{Binding UpdateTimeStampOnApply}" />
-            <CheckBox Content="Set last write time when restoring backup"
-                      IsChecked="{Binding UpdateTimeStampOnRestore}" />
+            <CheckBox Content="Set last write time when restoring backup" IsChecked="{Binding UpdateTimeStampOnRestore}" />
         </UniformGrid>
 
         <TextBlock Grid.Row="9"
                    Grid.Column="1"
                    Grid.ColumnSpan="3"
-                   VerticalAlignment="Center">
-            <!-- <TextBlock.Style> -->
-            <!--     <Style TargetType="{x:Type TextBlock}"> -->
-            <!--         <Style.Triggers> -->
-            <!--             <DataTrigger Binding="{Binding IsLocalConfig}" Value="False"> -->
-            <!--                 <Setter Property="Text" Value="The configuration was provided via an external source and will not be stored locally" /> -->
-            <!--             </DataTrigger> -->
-            <!--         </Style.Triggers> -->
-            <!--     </Style> -->
-            <!-- </TextBlock.Style> -->
-        </TextBlock>
+                   VerticalAlignment="Center"
+                   IsVisible="{Binding !IsLocalConfig}"
+                   Text="The configuration was provided via an external source and will not be stored locally" />
 
         <Button Grid.Row="9"
                 Grid.Column="1"
