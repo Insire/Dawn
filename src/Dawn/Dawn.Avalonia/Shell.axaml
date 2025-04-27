@@ -87,7 +87,7 @@
         </DockPanel>
 
         <!--  Backups  -->
-        <ScrollViewer Grid.Row="0" Grid.RowSpan="2">
+        <ScrollViewer Grid.Row="0" Grid.RowSpan="4">
             <ScrollViewer.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding Stagings.AddFilesCommand}" Header="Add files">
