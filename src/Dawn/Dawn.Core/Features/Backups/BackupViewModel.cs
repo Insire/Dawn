@@ -258,7 +258,7 @@ namespace Dawn.Core.Features.Backups
 
             _logViewModel.PrepareBegin();
 
-            await Dispatcher.Invoke(() => _onDeleting.Invoke());
+            await await Dispatcher.Invoke(() => _onDeleting.Invoke());
 
             _logViewModel.Begin();
 

@@ -40,6 +40,7 @@ namespace Dawn.Avalonia
         private readonly IClipboardService _clipboardService;
         private readonly CompositeDisposable _disposables;
         private readonly ISukiDialogManager _dialogManager;
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public Shell()
@@ -71,7 +72,7 @@ namespace Dawn.Avalonia
             DataContext = _shellViewModel = shellViewModel;
 
             InitializeComponent();
-            _dialogManager = dialogManager;
+            DialogHost.Manager = _dialogManager = dialogManager;
 
             AddHandler(DragDrop.DropEvent, OnDrop);
             AddHandler(LoadedEvent, OnLoaded);
@@ -80,31 +81,21 @@ namespace Dawn.Avalonia
             var subscription1 = _shellViewModel.Stagings
                 .WhenPropertyChanged(p => p.IsEmpty, notifyOnInitialValue: false)
                 .ObserveOn(context)
-                .Subscribe(p =>
-                {
-                    SetValue(StagingCheckedProperty, !p.Value);
-                });
+                .Subscribe(p => SetValue(StagingCheckedProperty, !p.Value));
 
+            _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Stagings.OnApplyingStagings += ShowLog;
             _shellViewModel.Updates.OnDeleting += ShowLog;
             _shellViewModel.Updates.OnDeletingAll += ShowLog;
             _shellViewModel.Updates.OnRestoring += ShowLog;
-            _shellViewModel.ShowLogAction += ShowLog;
             _shellViewModel.Updates.OnMetaDataEditing += ShowEditDialog;
 
-            _shellViewModel.Updates.OnDeleteRequested = async () =>
-            {
-                var shouldDelete = new TaskCompletionSource<bool>();
-                dialogManager.CreateDialog()
-                    .OfType(NotificationType.Warning)
-                    .WithTitle("Are you sure?")
-                    .WithContent("This will delete all files in this backup folder. \r\nThis can not be undone.")
-                    .WithActionButton("Yes", _ => shouldDelete.SetResult(true), true)
-                    .WithActionButton("No", _ => shouldDelete.SetResult(false), true)
-                    .TryShow();
-
-                return await shouldDelete.Task;
-            };
+            _shellViewModel.Updates.OnDeleteRequested = () => dialogManager.CreateDialog()
+                .OfType(NotificationType.Warning)
+                .WithTitle("Are you sure?")
+                .WithContent("This will delete all files in this backup folder. \r\nThis can not be undone.")
+                .WithYesNoResult("Yes", "No")
+                .TryShowAsync();
 
             _shellViewModel.Updates.OnDeleteAllRequested = () => _dialogManager.CreateDialog()
                 .OfType(NotificationType.Warning)
@@ -120,20 +111,24 @@ namespace Dawn.Avalonia
                 .WithYesNoResult("Yes", "No")
                 .TryShowAsync();
 
-            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => _dialogManager.CreateDialog()
-                .OfType(NotificationType.Warning)
-                .WithTitle("Delete empty backup folder?")
-                .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
-                .WithYesNoResult("Yes", "No")
-                .TryShowAsync();
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = async () =>
+            {
+                using var focus = new DialogHostFocus(DialogHost, _dialogManager);
+                return await _dialogManager.CreateDialog()
+                    .OfType(NotificationType.Warning)
+                    .WithTitle("Delete empty backup folder?")
+                    .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
+                    .WithYesNoResult("Yes", "No")
+                    .TryShowAsync();
+            };
 
-            _shellViewModel.Updates.OnDetectChanges = (vm) => _dispatcher.Invoke(() =>
+            _shellViewModel.Updates.OnDetectChanges = (vm) => _dispatcher.Invoke(async () =>
             {
                 var wnd = new ChangeDetectionWindow(_changeDetectionViewModel, _dialogManager);
 
                 _ = _changeDetectionViewModel.DetectChanges(vm);
 
-                wnd.ShowDialog(this);
+                await wnd.ShowDialog(this);
             });
 
             var subscription2 = StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
@@ -159,11 +154,13 @@ namespace Dawn.Avalonia
 
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
-            if (DataContext is ShellViewModel shellViewModel)
+            if (DataContext is not ShellViewModel shellViewModel)
             {
-                shellViewModel.Configuration.ValidateCommand.Execute(null);
-                shellViewModel.Updates.LoadCommand.Execute(null);
+                return;
             }
+
+            shellViewModel.Configuration.ValidateCommand.Execute(null);
+            shellViewModel.Updates.LoadCommand.Execute(null);
         }
 
         private void OnClosed(object? sender, RoutedEventArgs e)
@@ -186,11 +183,11 @@ namespace Dawn.Avalonia
 
         private async void OpenConfiguration(object sender, RoutedEventArgs e)
         {
-            await _dispatcher.Invoke(() =>
+            await _dispatcher.Invoke(async () =>
             {
                 var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService, _dialogManager);
 
-                dlg.ShowDialog(this);
+                await dlg.ShowDialog(this);
             });
         }
 
@@ -199,11 +196,13 @@ namespace Dawn.Avalonia
 
         private async Task ShowLog()
         {
-            await _dispatcher.Invoke(async () =>
+            await _dispatcher.Invoke(() =>
             {
                 var dlg = new Features.Logging.LoggingWindow(_logViewModel, _dialogManager);
 
-                await dlg.ShowDialog(this);
+                // don't await this dialog,
+                // because we don't to wait for this dialog to close before returning control to the caller
+                dlg.ShowDialog(this);
             });
         }
 

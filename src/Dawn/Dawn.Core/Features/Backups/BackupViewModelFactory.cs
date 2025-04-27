@@ -8,7 +8,12 @@ namespace Dawn.Core.Features.Backups
         private readonly IScarletCommandBuilder _commandBuilder;
         private readonly IFileSystem _fileSystem;
 
-        public BackupViewModelFactory(ConfigurationViewModel configurationViewModel, LogViewModel logViewModel, ILogger log, IScarletCommandBuilder commandBuilder, IFileSystem fileSystem)
+        public BackupViewModelFactory(
+            ConfigurationViewModel configurationViewModel,
+            LogViewModel logViewModel,
+            ILogger log,
+            IScarletCommandBuilder commandBuilder,
+            IFileSystem fileSystem)
         {
             _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));

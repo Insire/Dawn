@@ -22,13 +22,10 @@ namespace Dawn.Core.Features.Backups
 
         public Func<Task<bool>>? OnDeleteAllRequested { get; set; }
         public Func<Task<bool>>? OnDeleteRequested { get; set; }
-
         public Func<Task>? OnDeletingAll { get; set; }
         public Func<Task>? OnDeleting { get; set; }
         public Func<Task>? OnRestoring { get; set; }
-
         public Func<BackupViewModel, Task>? OnDetectChanges { get; set; }
-
         public Func<BackupViewModel, Task<BackupViewModel>>? OnMetaDataEditing { get; set; }
 
         public BackupsViewModel(
@@ -176,7 +173,7 @@ namespace Dawn.Core.Features.Backups
 
         private Task OnDeletingImpl()
         {
-            if (!_isMassDeleting)
+            if (_isMassDeleting)
             {
                 return OnDeleting is null
                     ? Task.CompletedTask
@@ -248,10 +245,9 @@ namespace Dawn.Core.Features.Backups
                 finally
                 {
                     _isMassDeleting = false;
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
+                    _logViewModel.Complete();
                 }
-
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Deleted all backups in {FolderPath}", _configurationViewModel.BackupFolder);
-                _logViewModel.Complete();
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
@@ -292,33 +288,38 @@ namespace Dawn.Core.Features.Backups
                 _logViewModel.Begin();
                 _log.Write(Serilog.Events.LogEventLevel.Information, "Restoring backup {BackupName}", backupViewModel.Name);
 
-                var array = backupViewModel.Items.ToArray();
-                for (var i = 0; i < array.Length; i++)
+                try
                 {
-                    if (token.IsCancellationRequested)
+                    var array = backupViewModel.Items.ToArray();
+                    for (var i = 0; i < array.Length; i++)
                     {
-                        return;
-                    }
+                        if (token.IsCancellationRequested)
+                        {
+                            return;
+                        }
 
-                    _logViewModel.Progress.Report(i, array.Length);
+                        _logViewModel.Progress.Report(i, array.Length);
 
-                    var file = array[i];
-                    var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
-                    if (extension == ".zip")
-                    {
-                        RestoreArchive(file.FullPath, deploymentFolder, now, null);
-                    }
-                    else
-                    {
-                        var fileName = Path.GetFileName(file.FullPath);
-                        var restoreFileName = Path.Combine(deploymentFolder, fileName);
+                        var file = array[i];
+                        var extension = Path.GetExtension(file.FullPath).ToLowerInvariant();
+                        if (extension == ".zip")
+                        {
+                            RestoreArchive(file.FullPath, deploymentFolder, now, null);
+                        }
+                        else
+                        {
+                            var fileName = Path.GetFileName(file.FullPath);
+                            var restoreFileName = Path.Combine(deploymentFolder, fileName);
 
-                        RestoreFile(file.FullPath, restoreFileName, now);
+                            RestoreFile(file.FullPath, restoreFileName, now);
+                        }
                     }
                 }
-
-                _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
-                _logViewModel.Complete();
+                finally
+                {
+                    _log.Write(Serilog.Events.LogEventLevel.Information, "Restored backup {BackupName}", backupViewModel.Name);
+                    _logViewModel.Complete();
+                }
             }, token);
 
             await Task.WhenAll(t1, t2).ConfigureAwait(false);
