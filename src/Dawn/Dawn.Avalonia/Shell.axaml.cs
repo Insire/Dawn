@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -40,7 +39,7 @@ namespace Dawn.Avalonia
         private readonly IScarletDispatcher _dispatcher;
         private readonly IClipboardService _clipboardService;
         private readonly CompositeDisposable _disposables;
-
+        private readonly ISukiDialogManager _dialogManager;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public Shell()
@@ -62,18 +61,17 @@ namespace Dawn.Avalonia
             SynchronizationContext context,
             ISukiDialogManager dialogManager)
         {
-            _logViewModel = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
-            _aboutViewModel = aboutViewModel ?? throw new ArgumentNullException(nameof(aboutViewModel));
-            _changeDetectionViewModel = changeDetectionViewModel ?? throw new ArgumentNullException(nameof(changeDetectionViewModel));
-            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _logViewModel = logViewModel;
+            _aboutViewModel = aboutViewModel;
+            _changeDetectionViewModel = changeDetectionViewModel;
+            _configurationService = configurationService;
+            _fileSystem = fileSystem;
             _dispatcher = dispatcher;
             _clipboardService = clipboardService;
-            DataContext = _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
+            DataContext = _shellViewModel = shellViewModel;
 
             InitializeComponent();
-
-            DialogHost.Manager = dialogManager;
+            _dialogManager = dialogManager;
 
             AddHandler(DragDrop.DropEvent, OnDrop);
             AddHandler(LoadedEvent, OnLoaded);
@@ -86,8 +84,6 @@ namespace Dawn.Avalonia
                 {
                     SetValue(StagingCheckedProperty, !p.Value);
                 });
-
-            _disposables = new CompositeDisposable(subscription1);
 
             _shellViewModel.Stagings.OnApplyingStagings += ShowLog;
             _shellViewModel.Updates.OnDeleting += ShowLog;
@@ -110,46 +106,38 @@ namespace Dawn.Avalonia
                 return await shouldDelete.Task;
             };
 
-            _shellViewModel.Updates.OnDeleteAllRequested = async () =>
-            {
-                return await dialogManager.CreateDialog()
-                    .OfType(NotificationType.Warning)
-                    .WithTitle("Are you really sure?")
-                    .WithContent("This will delete every backup. \r\nThis can not be undone.")
-                    .WithYesNoResult("Yes", "No")
-                    .TryShowAsync();
-            };
+            _shellViewModel.Updates.OnDeleteAllRequested = () => _dialogManager.CreateDialog()
+                .OfType(NotificationType.Warning)
+                .WithTitle("Are you really sure?")
+                .WithContent("This will delete every backup. \r\nThis can not be undone.")
+                .WithYesNoResult("Yes", "No")
+                .TryShowAsync();
 
-            _shellViewModel.OnApplicationUpdated = async () =>
-            {
-                return await dialogManager.CreateDialog()
-                    .OfType(NotificationType.Information)
-                    .WithTitle("Updates have been downloaded successfully.")
-                    .WithContent("Your update has been prepared. \r\nDo you want to restart Dawn?")
-                    .WithYesNoResult("Yes", "No")
-                    .TryShowAsync();
-            };
+            _shellViewModel.OnApplicationUpdated = () => _dialogManager.CreateDialog()
+                .OfType(NotificationType.Information)
+                .WithTitle("Updates have been downloaded successfully.")
+                .WithContent("Your update has been prepared. \r\nDo you want to restart Dawn?")
+                .WithYesNoResult("Yes", "No")
+                .TryShowAsync();
 
-            _shellViewModel.Stagings.OnEmptyDirectoryCreated = async () =>
-            {
-                return await dialogManager.CreateDialog()
-                    .OfType(NotificationType.Warning)
-                    .WithTitle("Delete empty backup folder?")
-                    .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
-                    .WithYesNoResult("Yes", "No")
-                    .TryShowAsync();
-            };
+            _shellViewModel.Stagings.OnEmptyDirectoryCreated = () => _dialogManager.CreateDialog()
+                .OfType(NotificationType.Warning)
+                .WithTitle("Delete empty backup folder?")
+                .WithContent("Applying your files didnt result in a new backup. Delete empty backup folder?")
+                .WithYesNoResult("Yes", "No")
+                .TryShowAsync();
 
             _shellViewModel.Updates.OnDetectChanges = (vm) => _dispatcher.Invoke(() =>
             {
-                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel);
+                var wnd = new ChangeDetectionWindow(_changeDetectionViewModel, _dialogManager);
 
                 _ = _changeDetectionViewModel.DetectChanges(vm);
 
                 wnd.ShowDialog(this);
             });
 
-            StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
+            var subscription2 = StagingCheckedProperty.Changed.AddClassHandler<Shell, bool>(OnStagingCheckedChanged);
+            _disposables = new CompositeDisposable(subscription1, subscription2);
         }
 
         public static readonly StyledProperty<bool> StagingCheckedProperty =
@@ -165,7 +153,7 @@ namespace Dawn.Avalonia
         {
             if (e.NewValue is bool staging)
             {
-                sender.StagingDetails.SetCurrentValue(Control.IsVisibleProperty, staging);
+                sender.StagingDetails.SetCurrentValue(IsVisibleProperty, staging);
             }
         }
 
@@ -196,11 +184,11 @@ namespace Dawn.Avalonia
             await _shellViewModel.Stagings.Add(filesOrFolders).ConfigureAwait(false);
         }
 
-        private void OpenConfiguration(object sender, RoutedEventArgs e)
+        private async void OpenConfiguration(object sender, RoutedEventArgs e)
         {
-            _dispatcher.Invoke(() =>
+            await _dispatcher.Invoke(() =>
             {
-                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService);
+                var dlg = new ConfigurationWindow(_shellViewModel.Configuration, _fileSystem, _clipboardService, _dialogManager);
 
                 dlg.ShowDialog(this);
             });
@@ -213,7 +201,7 @@ namespace Dawn.Avalonia
         {
             await _dispatcher.Invoke(async () =>
             {
-                var dlg = new Features.Logging.LoggingWindow(_logViewModel);
+                var dlg = new Features.Logging.LoggingWindow(_logViewModel, _dialogManager);
 
                 await dlg.ShowDialog(this);
             });
@@ -223,7 +211,7 @@ namespace Dawn.Avalonia
         {
             await _dispatcher.Invoke(async () =>
             {
-                var dlg = new AboutWindow(_aboutViewModel);
+                var dlg = new AboutWindow(_aboutViewModel, _dialogManager);
 
                 await dlg.ShowDialog(this);
             });
@@ -233,7 +221,7 @@ namespace Dawn.Avalonia
         {
             await _dispatcher.Invoke(async () =>
             {
-                var dlg = new EditBackupWindow(backupViewModel);
+                var dlg = new EditBackupWindow(backupViewModel, _dialogManager);
 
                 await dlg.ShowDialog(this);
             });

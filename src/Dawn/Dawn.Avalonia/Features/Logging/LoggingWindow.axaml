@@ -20,6 +20,10 @@
 
     <!--  DataContext: LogViewModel  -->
 
+    <suki:SukiWindow.Hosts>
+        <suki:SukiDialogHost Name="DialogHost" />
+    </suki:SukiWindow.Hosts>
+
     <DockPanel>
         <!--  Notification Area  -->
         <DockPanel DockPanel.Dock="Bottom">

@@ -76,15 +76,15 @@
                     <Setter Property="Foreground" Value="{DynamicResource SukiWarningColor}" />
                 </Style>
             </TextBlock.Styles>
+
             <Run Text="{Binding Timestamp, Mode=OneWay, StringFormat='{}{0: dd.MM.yyyy HH:mm:ss.fff}'}" />
-            <Run
-                Classes.IsDebug="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Debug}}"
-                Classes.IsError="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Error}}"
-                Classes.IsFatal="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Fatal}}"
-                Classes.IsInformation="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Information}}"
-                Classes.IsVerbose="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Verbose}}"
-                Classes.IsWarning="{Binding Level,  Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Warning}}"
-                Text="{Binding Level, Mode=OneWay}" />
+            <Run Classes.IsDebug="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Debug}}"
+                 Classes.IsError="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Error}}"
+                 Classes.IsFatal="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Fatal}}"
+                 Classes.IsInformation="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Information}}"
+                 Classes.IsVerbose="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Verbose}}"
+                 Classes.IsWarning="{Binding Level, Converter={StaticResource LogEventLevelEnumEqualityConverter}, ConverterParameter={StaticResource Warning}}"
+                 Text="{Binding Level, Mode=OneWay}" />
             <Run Text="{Binding Text, Mode=OneWay}" />
         </TextBlock>
     </Border>

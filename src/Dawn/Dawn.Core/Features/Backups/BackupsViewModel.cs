@@ -180,7 +180,7 @@ namespace Dawn.Core.Features.Backups
             {
                 return OnDeleting is null
                     ? Task.CompletedTask
-                    : OnDeleteRequested();
+                    : OnDeleteRequested!.Invoke();
             }
 
             return Task.CompletedTask;

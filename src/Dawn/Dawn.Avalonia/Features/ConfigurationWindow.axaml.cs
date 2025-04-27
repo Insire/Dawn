@@ -4,6 +4,7 @@ using Dawn.Core.Features.Configuration;
 using Dawn.Core.Features.Filesystem;
 using Dawn.Core.Features.Util;
 using SukiUI.Controls;
+using SukiUI.Dialogs;
 using System;
 using System.Text;
 using System.Text.Json;
@@ -26,13 +27,19 @@ namespace Dawn.Avalonia.Features
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        public ConfigurationWindow(ConfigurationViewModel configurationViewModel, IFileSystem fileSystem, IClipboardService clipboardService)
+        public ConfigurationWindow(
+            ConfigurationViewModel configurationViewModel,
+            IFileSystem fileSystem,
+            IClipboardService clipboardService,
+            ISukiDialogManager dialogManager)
         {
             DataContext = _configurationViewModel = configurationViewModel ?? throw new ArgumentNullException(nameof(configurationViewModel));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _clipboardService = clipboardService;
 
             InitializeComponent();
+
+            DialogHost.Manager = dialogManager;
         }
 
         [RelayCommand]

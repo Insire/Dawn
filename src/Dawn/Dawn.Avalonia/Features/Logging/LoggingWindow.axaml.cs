@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.Logging;
 using SukiUI.Controls;
+using SukiUI.Dialogs;
 using System;
 using System.Windows.Input;
 
@@ -19,13 +20,17 @@ namespace Dawn.Avalonia.Features.Logging
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        public LoggingWindow(LogViewModel logViewModel)
+        public LoggingWindow(
+            LogViewModel logViewModel,
+            ISukiDialogManager dialogManager)
         {
             DataContext = logViewModel ?? throw new ArgumentNullException(nameof(logViewModel));
 
             CloseCommand = new RelayCommand(CloseImpl);
 
             InitializeComponent();
+
+            DialogHost.Manager = dialogManager;
         }
 
         private void CloseImpl()

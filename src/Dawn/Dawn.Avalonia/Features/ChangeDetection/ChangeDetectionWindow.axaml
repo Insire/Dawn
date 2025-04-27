@@ -17,6 +17,10 @@
                  WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
 
+    <suki:SukiWindow.Hosts>
+        <suki:SukiDialogHost Name="DialogHost" />
+    </suki:SukiWindow.Hosts>
+
     <DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <Button Margin="8"

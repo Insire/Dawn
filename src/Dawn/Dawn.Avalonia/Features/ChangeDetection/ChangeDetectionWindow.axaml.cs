@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Dawn.Core.Features.ChangeDetection;
 using SukiUI.Controls;
+using SukiUI.Dialogs;
 using System.Windows.Input;
 
 namespace Dawn.Avalonia.Features.ChangeDetection
@@ -19,12 +20,16 @@ namespace Dawn.Avalonia.Features.ChangeDetection
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        public ChangeDetectionWindow(ChangeDetectionViewModel changeDetectionViewModel)
+        public ChangeDetectionWindow(
+            ChangeDetectionViewModel changeDetectionViewModel,
+            ISukiDialogManager dialogManager)
         {
             DataContext = _changeDetectionViewModel = changeDetectionViewModel;
             CloseCommand = new RelayCommand(CloseInternal, CanClose);
 
             InitializeComponent();
+
+            DialogHost.Manager = dialogManager;
         }
 
         private void CloseInternal()

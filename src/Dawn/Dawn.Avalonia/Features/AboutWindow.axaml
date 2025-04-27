@@ -17,6 +17,10 @@
                  WindowStartupLocation="CenterOwner"
                  mc:Ignorable="d">
 
+    <suki:SukiWindow.Hosts>
+        <suki:SukiDialogHost Name="DialogHost" />
+    </suki:SukiWindow.Hosts>
+
     <DockPanel Margin="8">
         <TabControl>
             <TabItem Header="About">
