@@ -252,8 +252,11 @@ namespace Dawn.Core.Features.Staging
 
                     if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
                     {
-                        var onEmptyDirectoryCreated = OnEmptyDirectoryCreated;
-                        if (onEmptyDirectoryCreated is not null && await onEmptyDirectoryCreated.Invoke())
+                        var t3 = OnEmptyDirectoryCreated is null
+                            ?  Task.FromResult<Task<bool>>(Task.FromResult(false))
+                            :  Dispatcher.Invoke(async  () =>  await OnEmptyDirectoryCreated.Invoke());
+
+                        if (await await t3)
                         {
                             _fileSystem.DeleteDirectory(backupFileFolder, true);
                         }

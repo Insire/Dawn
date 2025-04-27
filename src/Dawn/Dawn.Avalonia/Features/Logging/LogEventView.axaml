@@ -39,7 +39,7 @@
                 <ItemsControl ItemsSource="{Binding Properties}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VirtualizingStackPanel IsItemsHost="True" />
+                            <VirtualizingStackPanel />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
