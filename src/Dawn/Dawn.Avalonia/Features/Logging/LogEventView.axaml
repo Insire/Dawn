@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="Dawn.Avalonia.Features.Logging.LogEventView"
+<UserControl x:Class="Dawn.Avalonia.Features.Logging.LogEventView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
-             xmlns:avalonia1="clr-namespace:Dawn.Avalonia"
+             xmlns:avalonia="clr-namespace:Dawn.Avalonia.Features.Logging;assembly=Dawn.Avalonia"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:events="clr-namespace:Serilog.Events;assembly=Serilog"
+             xmlns:icons="https://github.com/projektanker/icons.avalonia"
              xmlns:logging="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="450"
@@ -14,7 +14,7 @@
              mc:Ignorable="d">
 
     <UserControl.Resources>
-        <avalonia1:LogEventLevelEnumEqualityConverter x:Key="LogEventLevelEnumEqualityConverter" />
+        <avalonia:LogEventLevelEnumEqualityConverter x:Key="LogEventLevelEnumEqualityConverter" />
         <events:LogEventLevel x:Key="Information">Information</events:LogEventLevel>
         <events:LogEventLevel x:Key="Debug">Debug</events:LogEventLevel>
         <events:LogEventLevel x:Key="Error">Error</events:LogEventLevel>
@@ -28,7 +28,7 @@
             <ContextMenu>
                 <MenuItem Command="{Binding CopyCommand}" Header="Copy">
                     <MenuItem.Icon>
-                        <avalonia:Icon Value="fa-solid fa-copy" />
+                        <icons:Icon Value="fa-solid fa-copy" />
                     </MenuItem.Icon>
                 </MenuItem>
             </ContextMenu>

@@ -1,10 +1,10 @@
-﻿using Avalonia.Data;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Serilog.Events;
 using System;
 using System.Globalization;
 
-namespace Dawn.Avalonia
+namespace Dawn.Avalonia.Features.Logging
 {
     public sealed class LogEventLevelEnumEqualityConverter : IValueConverter
     {

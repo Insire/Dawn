@@ -1,8 +1,8 @@
-﻿using SukiUI.Controls;
+using SukiUI.Controls;
 using SukiUI.Dialogs;
 using System;
 
-namespace Dawn.Avalonia
+namespace Dawn.Avalonia.Infrastructure
 {
     public sealed class DialogHostFocus : IDisposable
     {
@@ -13,7 +13,7 @@ namespace Dawn.Avalonia
         {
             _host = host;
             _manager = manager;
-            host.Manager = null;
+            host.Manager = null!;
         }
 
         public void Dispose()

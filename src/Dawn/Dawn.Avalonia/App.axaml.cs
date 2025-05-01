@@ -1,12 +1,16 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.Configuration;
 using DryIoc;
+using MvvmScarletToolkit;
 using Serilog;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Dawn.Avalonia
 {
@@ -15,6 +19,8 @@ namespace Dawn.Avalonia
         private IClassicDesktopStyleApplicationLifetime? _applicationLifetime;
         private IContainer? _container;
         private ConfigurationService? _configurationService;
+        private JsonFileStore? _jsonFileStore;
+        private IScarletDispatcher? _dispatcher;
 
         public override void Initialize()
         {
@@ -35,13 +41,49 @@ namespace Dawn.Avalonia
                 var container = _container = CompositionRoot.Get(desktop);
 
                 _configurationService = container.Resolve<ConfigurationService>();
+                _jsonFileStore = container.Resolve<JsonFileStore>();
+                _dispatcher = container.Resolve<IScarletDispatcher>();
+
                 var shell = container.Resolve<Shell>();
                 shell.DataContext = container.Resolve<ShellViewModel>();
+                shell.Closing += OnShellClosing;
+
+                var data = _jsonFileStore.GetData<ShellWindowData>(nameof(Shell));
+                if (data != default)
+                {
+                    shell.Height = data.Height;
+                    shell.Width = data.Width;
+                    shell.Position = new PixelPoint(data.X, data.Y);
+
+                    _ = _dispatcher?.Invoke(() =>
+                    {
+                        shell.WindowState = (WindowState)data.State;
+                    }, System.Threading.CancellationToken.None);
+                }
 
                 desktop.MainWindow = shell;
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        private void OnShellClosing(object? sender, WindowClosingEventArgs e)
+        {
+            if (sender is Shell shell)
+            {
+                shell.Closing -= OnShellClosing;
+
+                var data = new ShellWindowData()
+                {
+                    Height = shell.Height,
+                    Width = shell.Width,
+                    X = shell.Position.X,
+                    Y = shell.Position.Y,
+                    State = (int)shell.WindowState,
+                };
+
+                _jsonFileStore?.SetData(nameof(Shell), data);
+            }
         }
 
         private static void DisableAvaloniaDataAnnotationValidation()

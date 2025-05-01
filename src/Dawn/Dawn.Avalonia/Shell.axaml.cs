@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
 using Dawn.Avalonia.Features;
+using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.About;
 using Dawn.Core.Features.Backups;

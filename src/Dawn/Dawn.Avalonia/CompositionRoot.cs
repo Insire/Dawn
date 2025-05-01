@@ -47,6 +47,7 @@ namespace Dawn.Avalonia
 
             var logger = logConfiguration.CreateLogger();
 
+            c.Use(new JsonFileStore(logger, System.Environment.SpecialFolder.CommonApplicationData));
             c.Use(logViewModel);
             c.Use<ILogger>(logger);
 
