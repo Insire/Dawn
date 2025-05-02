@@ -1,6 +1,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -62,13 +63,17 @@ namespace Dawn.Avalonia.Infrastructure
             var entryAssembly = Assembly.GetEntryAssembly();
             if (entryAssembly != null)
             {
-                var assemblyCompanyAttribute = (AssemblyCompanyAttribute)Attribute.GetCustomAttribute(entryAssembly, typeof(AssemblyCompanyAttribute))!;
+                var assemblyCompanyAttribute =
+                    (AssemblyCompanyAttribute)Attribute.GetCustomAttribute(entryAssembly,
+                        typeof(AssemblyCompanyAttribute))!;
                 if (!string.IsNullOrEmpty(assemblyCompanyAttribute.Company))
                 {
                     text = assemblyCompanyAttribute.Company + "\\";
                 }
 
-                var assemblyTitleAttribute = (AssemblyTitleAttribute)Attribute.GetCustomAttribute(entryAssembly, typeof(AssemblyTitleAttribute))!;
+                var assemblyTitleAttribute =
+                    (AssemblyTitleAttribute)Attribute.GetCustomAttribute(entryAssembly,
+                        typeof(AssemblyTitleAttribute))!;
                 if (!string.IsNullOrEmpty(assemblyTitleAttribute.Title))
                 {
                     text2 = assemblyTitleAttribute.Title + "\\";
@@ -107,18 +112,26 @@ namespace Dawn.Avalonia.Infrastructure
 
         public void SetData<T>(string id, T data, CancellationToken cancellationToken = default)
         {
-            var path = GetfilePath(id);
-
-            var directoryName = Path.GetDirectoryName(path)!;
-            if (!Directory.Exists(directoryName))
+            try
             {
-                Directory.CreateDirectory(directoryName);
+                var path = GetfilePath(id);
+
+                var directoryName = Path.GetDirectoryName(path)!;
+                if (!Directory.Exists(directoryName))
+                {
+                    Directory.CreateDirectory(directoryName);
+                }
+
+                var filemode = File.Exists(path) ? FileMode.Truncate : FileMode.Create;
+
+                using var filestream = File.Open(path, filemode, FileAccess.Write, FileShare.None);
+                JsonSerializer.Serialize(filestream, data);
             }
-
-            var filemode = File.Exists(path) ? FileMode.Truncate : FileMode.Create;
-
-            using var filestream = File.Open(path, filemode, FileAccess.Write, FileShare.None);
-            JsonSerializer.Serialize(filestream, data);
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
         }
 
         public IEnumerable<string> ListIds()

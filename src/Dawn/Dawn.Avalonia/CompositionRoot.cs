@@ -18,6 +18,7 @@ using SukiUI.Dialogs;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using LogEventLevel = Serilog.Events.LogEventLevel;
 
@@ -30,7 +31,8 @@ namespace Dawn.Avalonia
             var c = new Container();
 
             var clipboardService = new ClipboardService(lifetime);
-            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!, clipboardService);
+            var logViewModel = new LogViewModel(ScarletCommandBuilder.Default, SynchronizationContext.Current!,
+                clipboardService);
 
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
@@ -47,7 +49,11 @@ namespace Dawn.Avalonia
 
             var logger = logConfiguration.CreateLogger();
 
-            c.Use(new JsonFileStore(logger, System.Environment.SpecialFolder.CommonApplicationData));
+            var folder = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                ? System.Environment.SpecialFolder.ApplicationData
+                : System.Environment.SpecialFolder.CommonApplicationData;
+
+            c.Use(new JsonFileStore(logger, folder));
             c.Use(logViewModel);
             c.Use<ILogger>(logger);
 
