@@ -10,7 +10,6 @@ using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Dawn.Avalonia
 {

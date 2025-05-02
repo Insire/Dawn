@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Dawn.Avalonia.Features;
 using Dawn.Avalonia.Features.Backups;
 using Dawn.Avalonia.Features.Logging;
 using Dawn.Core.Features.Backups;

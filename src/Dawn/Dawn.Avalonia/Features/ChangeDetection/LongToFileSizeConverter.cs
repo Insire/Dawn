@@ -1,6 +1,5 @@
 ﻿using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Dawn.Core.Features.ChangeDetection;
 using Dawn.Core.Features.Util;
 using System;
 using System.Globalization;

@@ -1,14 +1,10 @@
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
 using static System.Environment;
 
 namespace Dawn.Avalonia.Infrastructure
@@ -39,16 +35,12 @@ namespace Dawn.Avalonia.Infrastructure
     public sealed class JsonFileStore
     {
         private readonly ILogger _logger;
-
-        /// <summary>
-        /// The folder in which the store files will be located.
-        /// </summary>
-        public string FolderPath { get; }
+        private readonly string _folderPath;
 
         private JsonFileStore(ILogger logger, string storeFolderPath)
         {
             _logger = logger.ForContext<JsonFileStore>();
-            FolderPath = storeFolderPath;
+            _folderPath = storeFolderPath;
         }
 
         public JsonFileStore(ILogger logger, SpecialFolder folder)
@@ -61,50 +53,52 @@ namespace Dawn.Avalonia.Infrastructure
             var text = string.Empty;
             var text2 = string.Empty;
             var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly != null)
+            if (entryAssembly == null)
             {
-                var assemblyCompanyAttribute =
-                    (AssemblyCompanyAttribute)Attribute.GetCustomAttribute(entryAssembly,
-                        typeof(AssemblyCompanyAttribute))!;
-                if (!string.IsNullOrEmpty(assemblyCompanyAttribute.Company))
-                {
-                    text = assemblyCompanyAttribute.Company + "\\";
-                }
+                return Path.Combine(GetFolderPath(baseFolder), text + text2);
+            }
 
-                var assemblyTitleAttribute =
-                    (AssemblyTitleAttribute)Attribute.GetCustomAttribute(entryAssembly,
-                        typeof(AssemblyTitleAttribute))!;
-                if (!string.IsNullOrEmpty(assemblyTitleAttribute.Title))
-                {
-                    text2 = assemblyTitleAttribute.Title + "\\";
-                }
+            var assemblyCompanyAttribute = (AssemblyCompanyAttribute)Attribute.GetCustomAttribute(entryAssembly, typeof(AssemblyCompanyAttribute))!;
+            if (!string.IsNullOrEmpty(assemblyCompanyAttribute.Company))
+            {
+                text = assemblyCompanyAttribute.Company + "\\";
+            }
+
+            var assemblyTitleAttribute =
+                (AssemblyTitleAttribute)Attribute.GetCustomAttribute(entryAssembly,
+                    typeof(AssemblyTitleAttribute))!;
+            if (!string.IsNullOrEmpty(assemblyTitleAttribute.Title))
+            {
+                text2 = assemblyTitleAttribute.Title + "\\";
             }
 
             return Path.Combine(GetFolderPath(baseFolder), text + text2);
         }
 
-        private string GetfilePath(string id)
+        private string GetFilePath(string id)
         {
-            return Path.Combine(FolderPath, id + ".json");
+            return Path.Combine(_folderPath, id + ".json");
         }
 
         public T? GetData<T>(string id, CancellationToken cancellationToken = default)
         {
-            var path = GetfilePath(id);
+            var path = GetFilePath(id);
             var data = default(T);
 
-            if (File.Exists(path))
+            if (!File.Exists(path))
             {
-                try
-                {
-                    using var filestream = File.OpenRead(path);
+                return data;
+            }
 
-                    data = JsonSerializer.Deserialize<T>(filestream);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Unexpected error when reading data from {Path}", path);
-                }
+            try
+            {
+                using var filestream = File.OpenRead(path);
+
+                data = JsonSerializer.Deserialize<T>(filestream);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Unexpected error when reading data from {Path}", path);
             }
 
             return data;
@@ -112,34 +106,27 @@ namespace Dawn.Avalonia.Infrastructure
 
         public void SetData<T>(string id, T data, CancellationToken cancellationToken = default)
         {
+            var path = GetFilePath(id);
+
             try
             {
-                var path = GetfilePath(id);
-
                 var directoryName = Path.GetDirectoryName(path)!;
                 if (!Directory.Exists(directoryName))
                 {
                     Directory.CreateDirectory(directoryName);
                 }
 
-                var filemode = File.Exists(path) ? FileMode.Truncate : FileMode.Create;
+                var fileMode = File.Exists(path)
+                    ? FileMode.Truncate
+                    : FileMode.Create;
 
-                using var filestream = File.Open(path, filemode, FileAccess.Write, FileShare.None);
+                using var filestream = File.Open(path, fileMode, FileAccess.Write, FileShare.None);
                 JsonSerializer.Serialize(filestream, data);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine(e);
-                throw;
+                _logger.Error(ex, "Unexpected error when writing data to  {Path}", path);
             }
-        }
-
-        public IEnumerable<string> ListIds()
-        {
-            return Directory.GetFiles(FolderPath, "*.json")
-                .Select(Path.GetFileNameWithoutExtension)
-                .Where(p => !string.IsNullOrEmpty(p))
-                .Select(p => p!);
         }
     }
 }
