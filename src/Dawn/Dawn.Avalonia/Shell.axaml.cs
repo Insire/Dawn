@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using ChangeDetectionWindow = Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionWindow;
 using EditBackupWindow = Dawn.Avalonia.Features.Backups.EditBackupWindow;
 using System.Runtime.Intrinsics.Arm;
+using System.Runtime.InteropServices;
 
 namespace Dawn.Avalonia
 {
@@ -245,7 +246,7 @@ namespace Dawn.Avalonia
             theme.ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
             _configurationService.Save();
 
-            SetImage();
+            RedrawWindowIconWithCurrentTheme();
         }
 
         private void ToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
@@ -253,8 +254,15 @@ namespace Dawn.Avalonia
             Topmost = !Topmost;
         }
 
-        private void SetImage()
+        private void RedrawWindowIconWithCurrentTheme()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // linux does not render window icons in taskbar,
+                // so no point in redrawing it when the theme changes
+                return;
+            }
+
             var ressource = this.FindResource("dawnDrawingImage");
             if (ressource is not DrawingImage drawingImage)
             {

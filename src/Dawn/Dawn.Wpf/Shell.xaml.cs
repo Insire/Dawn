@@ -204,7 +204,7 @@ namespace Dawn.Wpf
                 return Task.CompletedTask;
             });
 
-            SetImage();
+            RedrawWindowIconWithCurrentTheme();
         }
 
         private async void OnDrop(object sender, DragEventArgs e)
@@ -277,7 +277,7 @@ namespace Dawn.Wpf
             return Task.FromResult(backupViewModel);
         }
 
-        private void SetImage()
+        private void RedrawWindowIconWithCurrentTheme()
         {
             var ressource = Application.Current.FindResource("dawnDrawingImage");
             if (ressource is not DrawingImage drawingImage)
@@ -327,7 +327,7 @@ namespace Dawn.Wpf
 
             _configurationService.Save();
 
-            SetImage();
+            RedrawWindowIconWithCurrentTheme();
         }
     }
 }
