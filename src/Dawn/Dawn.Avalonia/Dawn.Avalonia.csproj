@@ -7,6 +7,7 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <ApplicationIcon>dawn.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -52,5 +53,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Dawn.Core\Dawn.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="dawn.ico" />
+      <Resource Include="dawn.ico" />
     </ItemGroup>
 </Project>
