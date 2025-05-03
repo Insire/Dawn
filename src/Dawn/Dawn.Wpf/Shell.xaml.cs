@@ -279,13 +279,13 @@ namespace Dawn.Wpf
 
         private void SetImage()
         {
-            var size = new Size(36, 36);
             var ressource = Application.Current.FindResource("dawnDrawingImage");
             if (ressource is not DrawingImage drawingImage)
             {
                 return;
             }
 
+            var size = new Size(36, 36);
             var image = new Image { Source = drawingImage };
             image.Measure(size);
             image.Arrange(new Rect(size));

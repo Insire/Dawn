@@ -1,7 +1,11 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using Dawn.Avalonia.Features;
 using Dawn.Avalonia.Infrastructure;
@@ -19,6 +23,7 @@ using SukiUI;
 using SukiUI.Controls;
 using SukiUI.Dialogs;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -26,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ChangeDetectionWindow = Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionWindow;
 using EditBackupWindow = Dawn.Avalonia.Features.Backups.EditBackupWindow;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Dawn.Avalonia
 {
@@ -239,13 +245,41 @@ namespace Dawn.Avalonia
             theme.ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
             _configurationService.Save();
 
-            // TODO
-            //SetImage();
+            SetImage();
         }
 
         private void ToggleButton_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
         {
             Topmost = !Topmost;
+        }
+
+        private void SetImage()
+        {
+            var ressource = this.FindResource("dawnDrawingImage");
+            if (ressource is not DrawingImage drawingImage)
+            {
+                return;
+            }
+
+            var dpi = new Vector(96, 96);
+            var size = new Size(36, 36);
+            var pixelSize = new PixelSize(36, 36);
+            var image = new Image { Source = drawingImage };
+            image.Measure(size);
+            image.Arrange(new Rect(size));
+
+            var rtb = new RenderTargetBitmap(pixelSize, dpi);
+            rtb.Render(image);
+
+            using (var memory = new MemoryStream())
+            {
+                rtb.Save(memory);
+                memory.Position = 0;
+
+                var windowIcon = new WindowIcon(memory);
+
+                SetCurrentValue(IconProperty, windowIcon);
+            }
         }
     }
 }
