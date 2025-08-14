@@ -1,16 +1,23 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.ComponentModel;
+
 namespace Dawn.Wpf
 {
-    public sealed class Package
+    public sealed class PackageViewModel : ObservableObject
     {
+        [DisplayName("Package name")]
         public string PackageName { get; set; }
 
+        [DisplayName("Version")]
         public string PackageVersion { get; set; }
 
+        [DisplayName("Url")]
         public string PackageUrl { get; set; }
 
         public string Copyright { get; set; }
 
-        public string[] Authors { get; set; }
+        [Browsable(false)]
+        public string Authors { get; set; }
 
         public string Description { get; set; }
         public string LicenseUrl { get; set; }
