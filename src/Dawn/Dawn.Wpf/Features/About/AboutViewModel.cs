@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Dawn.Wpf
 {
-    public sealed class AboutViewModel : ViewModelListBase<Package>
+    public sealed class AboutViewModel : ViewModelListBase<PackageViewModel>
     {
         public string AssemblyVersionString { get; }
         public string Copyright { get; }
@@ -39,7 +39,17 @@ namespace Dawn.Wpf
 
                 foreach (var package in JsonConvert.DeserializeObject<Package[]>(json))
                 {
-                    AddUnchecked(package);
+                    AddUnchecked(new PackageViewModel()
+                    {
+                        Authors = string.Join(", ", package.Authors),
+                        Copyright = package.Copyright,
+                        Description = package.Description,
+                        LicenseType = package.LicenseType,
+                        LicenseUrl = package.LicenseUrl,
+                        PackageName = package.PackageName,
+                        PackageUrl = package.PackageUrl,
+                        PackageVersion = package.PackageVersion
+                    });
                 }
             }
         }

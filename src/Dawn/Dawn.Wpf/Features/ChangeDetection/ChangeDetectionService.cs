@@ -37,6 +37,8 @@ namespace Dawn.Wpf
                             var deploymentFileName = Path.Combine(_configuration.DeploymentFolder, fileName);
                             var destination = new FileInfoViewModel(deploymentFileName);
                             var pair = new FilePairViewModel(fileInfo, destination);
+                            fileInfo.DisplayName = "Source";
+                            destination.DisplayName = backup.CustomName;
 
                             var info = new FileInfo(pair.Source.FullPath);
                             pair.Source.Attributes = info.Attributes;
@@ -79,6 +81,7 @@ namespace Dawn.Wpf
                             }
 
                             pair.UpdateChangeState();
+                            pair.SizeChange = (pair.Source?.Length ?? 0) - (pair.Destination?.Length ?? 0);
                             results.Add(pair);
                         }
                     }
