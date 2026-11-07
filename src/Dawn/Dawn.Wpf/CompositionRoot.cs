@@ -15,9 +15,9 @@ using Jot.Storage;
 using MvvmScarletToolkit;
 using Serilog;
 using Serilog.Events;
-using Serilog.Filters;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -38,17 +38,13 @@ namespace Dawn.Wpf
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(c => c.File("./logs/log.txt", buffered: true)
+                .WriteTo.Async(c => c.File(Path.Combine(AppContext.BaseDirectory, "logs", "log.txt"),
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 31, buffered: true)
                     .WriteTo.Debug()
-                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                .WriteTo.Logger(lc => lc.Filter
-                    .ByIncludingOnly(o => Matching.FromSource<StagingsViewModel>().Invoke(o)
-                                          || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                                          || Matching.FromSource<BackupViewModel>().Invoke(o)
-                                          || Matching.FromSource<ShellViewModel>().Invoke(o))
-                );
+                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose));
 
             var logger = logConfiguration.CreateLogger();
+            Log.Logger = logger;
 
             c.Use(logViewModel);
             c.Use<ILogger>(logger);

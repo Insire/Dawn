@@ -6,7 +6,7 @@ namespace Dawn.Core.Features.Util
     {
         public static void LogError(this ILogger log, Exception ex)
         {
-            log.Write(LogEventLevel.Error, ex, "Unexpected Error occured");
+            log.Write(LogEventLevel.Error, ex, "Unexpected error occurred");
         }
     }
 }

@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using JetBrains.Annotations;
-using Serilog.Core;
 using Serilog.Events;
-using Serilog.Parsing;
 using System.Collections.ObjectModel;
 
 namespace Dawn.Core.Features.Logging
@@ -10,7 +8,6 @@ namespace Dawn.Core.Features.Logging
     public sealed partial class LogEventViewModel : ObservableObject
     {
         private readonly LogEvent _logEvent;
-        private readonly ILogEventSink _log;
         private readonly IClipboardService _clipboardService;
 
         private string? _text;
@@ -29,19 +26,21 @@ namespace Dawn.Core.Features.Logging
         public Exception? Exception
             => _logEvent.Exception;
 
-        public ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>> Properties { [UsedImplicitly] get; }
+        private ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>>? _properties;
+        public ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>> Properties
+        {
+            [UsedImplicitly]
+            get => _properties ??= new ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(
+                new ObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(_logEvent.Properties));
+        }
 
         public long Key { get; }
 
-        public LogEventViewModel(long key, LogEvent logEvent, ILogEventSink log, IClipboardService clipboardService)
+        public LogEventViewModel(long key, LogEvent logEvent, IClipboardService clipboardService)
         {
             Key = key;
             _logEvent = logEvent ?? throw new ArgumentNullException(nameof(logEvent));
-            _log = log;
             _clipboardService = clipboardService;
-
-            var properties = new ObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(_logEvent.Properties.Select(p => new KeyValuePair<string, LogEventPropertyValue>(p.Key, p.Value)));
-            Properties = new ReadOnlyObservableCollection<KeyValuePair<string, LogEventPropertyValue>>(properties);
         }
 
         [RelayCommand]
@@ -54,7 +53,7 @@ namespace Dawn.Core.Features.Logging
 
             Text = Exception is null
                 ? _logEvent.RenderMessage()
-                : Exception.ToString();
+                : $"{_logEvent.RenderMessage()}{Environment.NewLine}{Exception}";
         }
 
         [RelayCommand(AllowConcurrentExecutions = false)]
@@ -71,7 +70,7 @@ namespace Dawn.Core.Features.Logging
             }
             catch (Exception ex)
             {
-                _log.Emit(new LogEvent(DateTimeOffset.Now, LogEventLevel.Error, ex, new MessageTemplate("Unexpected error occured, when copying data to clipboard", Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>()));
+                Log.Error(ex, "Unexpected error occurred, when copying data to clipboard");
             }
         }
     }

@@ -79,29 +79,18 @@ namespace Dawn.Core.Features.Logging
 
             var sourceObservable = _sourceCache
                 .Connect()
-                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
-                .ObserveOn(TaskPoolScheduler.Default);
+                .ObserveOn(TaskPoolScheduler.Default)
+                .Publish()
+                .RefCount();
 
             var itemsSubscription = sourceObservable
-                //.Filter(q => q.Level >= LogEventLevel.Information)
-                .Merge(sourceObservable
-                        .Filter(q => q.Level < LogEventLevel.Information))
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(_logs)
                 .Batch(TimeSpan.FromMilliseconds(500))
-                .DisposeMany()
                 .Subscribe(changes =>
                 {
-                    var changedLogEvent = default(LogEventViewModel);
-                    foreach (var change in changes)
-                    {
-                        if (change.Reason == ChangeReason.Add)
-                        {
-                            changedLogEvent = change.Current;
-                        }
-                    }
-
+                    var changedLogEvent = GetLatestAdded(changes);
                     if (changedLogEvent is null)
                     {
                         return;
@@ -116,18 +105,9 @@ namespace Dawn.Core.Features.Logging
                 .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
                 .Bind(errors)
-                .DisposeMany()
                 .Subscribe(changes =>
                 {
-                    var changedLogEvent = default(LogEventViewModel);
-                    foreach (var change in changes)
-                    {
-                        if (change.Reason == ChangeReason.Add)
-                        {
-                            changedLogEvent = change.Current;
-                        }
-                    }
-
+                    var changedLogEvent = GetLatestAdded(changes);
                     if (changedLogEvent is null)
                     {
                         return;
@@ -140,16 +120,33 @@ namespace Dawn.Core.Features.Logging
             _subscription = new CompositeDisposable(itemsSubscription, errorsSubscription, countSubscription, _sourceCache);
         }
 
+        private static LogEventViewModel? GetLatestAdded(IEnumerable<Change<LogEventViewModel, long>> changes)
+        {
+            var result = default(LogEventViewModel);
+            foreach (var change in changes)
+            {
+                if (change.Reason == ChangeReason.Add)
+                {
+                    result = change.Current;
+                }
+            }
+
+            return result;
+        }
+
         private void SetPercentage(decimal percentage)
         {
-            var newValue = Convert.ToInt32(Math.Round(percentage, 0, MidpointRounding.AwayFromZero));
-
-            _commandBuilder.Dispatcher.Invoke(() => Percentage = newValue);
+            Percentage = Convert.ToInt32(Math.Round(percentage, 0, MidpointRounding.AwayFromZero));
         }
 
         public void Emit(LogEvent logEvent)
         {
-            _sourceCache.AddOrUpdate(new LogEventViewModel(++_index, logEvent, this, _clipboardService));
+            if (_disposedValue)
+            {
+                return;
+            }
+
+            _sourceCache.AddOrUpdate(new LogEventViewModel(Interlocked.Increment(ref _index), logEvent, _clipboardService));
         }
 
         /// <summary>
@@ -162,7 +159,6 @@ namespace Dawn.Core.Features.Logging
 
         public void Begin()
         {
-            _index = 0;
             Progress.Report(0);
         }
 

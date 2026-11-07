@@ -13,9 +13,9 @@ using Dawn.Core.Features.Util;
 using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
-using Serilog.Filters;
 using SukiUI.Dialogs;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -37,17 +37,13 @@ namespace Dawn.Avalonia
             var logConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Is(LogEventLevel.Verbose)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(config => config.File("./logs/log.txt", buffered: true)
+                .WriteTo.Async(config => config.File(Path.Combine(System.AppContext.BaseDirectory, "logs", "log.txt"),
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 31, buffered: true)
                     .WriteTo.Debug()
-                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose))
-                .WriteTo.Logger(lc => lc.Filter
-                    .ByIncludingOnly(o => Matching.FromSource<StagingsViewModel>().Invoke(o)
-                                          || Matching.FromSource<BackupsViewModel>().Invoke(o)
-                                          || Matching.FromSource<BackupViewModel>().Invoke(o)
-                                          || Matching.FromSource<ShellViewModel>().Invoke(o))
-                );
+                    .WriteTo.Sink(logViewModel, LogEventLevel.Verbose));
 
             var logger = logConfiguration.CreateLogger();
+            Log.Logger = logger;
 
             var folder = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
                 ? System.Environment.SpecialFolder.ApplicationData
