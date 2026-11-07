@@ -37,7 +37,7 @@ namespace Build
         public FilePath AvaloniaLicenseFilePath
             => AvaloniaProjectFolderPath.Combine("Properties").CombineWithFilePath("licenses.json");
 
-        public const string AssemblyInfoPath = @".\src\Dawn\SharedAssemblyInfo.cs";
+        public const string AssemblyInfoPath = "./src/Dawn/SharedAssemblyInfo.cs";
 
         public const string WpfResultsPath = ResultsPath + "/wpf";
         public const string AvaloniaResultsPath = ResultsPath + "/avalonia";
