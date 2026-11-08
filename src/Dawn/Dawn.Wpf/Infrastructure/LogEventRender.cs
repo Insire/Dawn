@@ -8,7 +8,7 @@ namespace Dawn.Wpf
 {
     public sealed class LogEventRender : ConverterMarkupExtension<LogEventRender>
     {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object? value, Type? targetType, object? parameter, CultureInfo? culture)
         {
             if (value is LogEvent @event)
             {

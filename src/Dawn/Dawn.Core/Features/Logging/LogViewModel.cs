@@ -84,9 +84,8 @@ namespace Dawn.Core.Features.Logging
                 .RefCount();
 
             var itemsSubscription = sourceObservable
-                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(_logs)
+                .SortAndBind(_logs, comparer)
                 .Batch(TimeSpan.FromMilliseconds(500))
                 .Subscribe(changes =>
                 {
@@ -102,9 +101,8 @@ namespace Dawn.Core.Features.Logging
 
             var errorsSubscription = sourceObservable
                 .Filter(q => q.Level > LogEventLevel.Warning)
-                .Sort(comparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(errors)
+                .SortAndBind(errors, comparer)
                 .Subscribe(changes =>
                 {
                     var changedLogEvent = GetLatestAdded(changes);

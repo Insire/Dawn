@@ -37,9 +37,8 @@ namespace Dawn.Core.Features.ChangeDetection
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
                 .DistinctUntilChanged()
-                .Sort(SortExpressionComparer<FilePairViewModel>.Ascending(p => p.ChangeState), SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(items)
+                .SortAndBind(items, SortExpressionComparer<FilePairViewModel>.Ascending(p => p.ChangeState))
                 .DisposeMany()
                 .Subscribe(changes =>
                 {

@@ -36,7 +36,7 @@ namespace Dawn.Avalonia.Infrastructure
             invokeSynchronous = value;
         }
 
-        public async Task Invoke(Action action, CancellationToken token)
+        public async Task Invoke(Action? action, CancellationToken token)
         {
             if (action is null)
             {
@@ -52,11 +52,11 @@ namespace Dawn.Avalonia.Infrastructure
             await _dispatcherObject.InvokeAsync(action, Priority, token);
         }
 
-        public async Task<T> Invoke<T>(Func<T> action, CancellationToken token)
+        public async Task<T?> Invoke<T>(Func<T>? action, CancellationToken token)
         {
             if (action is null)
             {
-                return default!;
+                return default;
             }
 
             if (GetInvokeSynchronous())

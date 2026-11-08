@@ -85,10 +85,8 @@ namespace Dawn.Core.Features.Staging
             var subscription1 = _sourceCache
                 .Connect()
                 .ObserveOn(TaskPoolScheduler.Default)
-                .Sort(SortExpressionComparer<StagingViewModel>.Ascending(p => p.FullPath),
-                    SortOptimisations.ComparesImmutableValuesOnly)
                 .ObserveOn(context)
-                .Bind(items)
+                .SortAndBind(items, SortExpressionComparer<StagingViewModel>.Ascending(p => p.FullPath))
                 .DisposeMany()
                 .Subscribe();
 
@@ -252,11 +250,14 @@ namespace Dawn.Core.Features.Staging
 
                     if (_fileSystem.GetFiles(backupFileFolder, "*", SearchOption.TopDirectoryOnly).Length == 0)
                     {
-                        var t3 = OnEmptyDirectoryCreated is null
-                            ?  Task.FromResult<Task<bool>>(Task.FromResult(false))
-                            :  Dispatcher.Invoke(async  () =>  await OnEmptyDirectoryCreated.Invoke());
+                        var shouldDelete = false;
+                        if (OnEmptyDirectoryCreated is not null)
+                        {
+                            var request = await Dispatcher.Invoke(() => OnEmptyDirectoryCreated.Invoke());
+                            shouldDelete = request is not null && await request;
+                        }
 
-                        if (await await t3)
+                        if (shouldDelete)
                         {
                             _fileSystem.DeleteDirectory(backupFileFolder, true);
                         }
