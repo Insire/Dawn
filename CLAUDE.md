@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Dawn is a desktop utility that updates a deployment directory's contents while automatically backing up every file it overwrites, so earlier states can be restored later. Users drag files/folders/zips onto the window, stage them, then apply them as a named backup. Configuration can be injected via CLI args (`json=<base64>`, `url=<base address>`) or a local `Dawn.Wpf.Settings.json` next to the executable (see `ConfigurationService.Get()`).
 
-Target: .NET 9 (SDK pinned in `build.config`). There is no test project.
+Target: .NET 10 (SDK pinned in `build.config`). There is no test project.
 
 ## Commands
 
@@ -14,7 +14,7 @@ Target: .NET 9 (SDK pinned in `build.config`). There is no test project.
 # Day-to-day (from repo root)
 dotnet build Dawn.sln
 dotnet run --project src/Dawn/Dawn.Avalonia/Dawn.Avalonia.csproj   # cross-platform app
-dotnet run --project src/Dawn/Dawn.Wpf/Dawn.Wpf.csproj             # Windows only (net9.0-windows)
+dotnet run --project src/Dawn/Dawn.Wpf/Dawn.Wpf.csproj             # Windows only (net10.0-windows)
 
 # Format XAML (also run by the build scripts before building)
 dotnet tool restore
