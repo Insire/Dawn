@@ -8,6 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
         <ApplicationIcon>Assets\dawn.ico</ApplicationIcon>
+        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     </PropertyGroup>
 
     <ItemGroup>

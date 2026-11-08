@@ -12,6 +12,8 @@ namespace Build
     {
         public const string Platform = "AnyCPU";
         public const string BuildConfiguration = "Release";
+        public const string WpfRuntimeIdentifier = "win-x64";
+        public static readonly string[] AvaloniaRuntimeIdentifiers = { "win-x64", "linux-x64" };
 
         public DirectoryPath WpfProjectFolderPath
             => Environment.WorkingDirectory
@@ -41,6 +43,8 @@ namespace Build
 
         public const string WpfResultsPath = ResultsPath + "/wpf";
         public const string AvaloniaResultsPath = ResultsPath + "/avalonia";
+
+        public static string AvaloniaResultsPathFor(string runtimeIdentifier) => $"{AvaloniaResultsPath}/{runtimeIdentifier}";
         public const string ResultsPath = "./binaries";
 
         private VersionOracle GitVersion { get; }

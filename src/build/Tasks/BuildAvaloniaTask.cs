@@ -6,28 +6,35 @@ using Cake.Frosting;
 namespace Build
 {
     [TaskName("BuildAvalonia")]
+    [IsDependentOn(typeof(RestoreSolutionTask))]
+    [IsDependentOn(typeof(UpdateAssemblyInfoTask))]
+    [IsDependentOn(typeof(GenerateLicenseFileTask))]
     public sealed class BuildAvaloniaTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)
         {
-            var settings = new ProcessSettings()
-                .UseWorkingDirectory(".")
-                .WithArguments(builder => builder
-                    .Append("publish")
-                    .AppendQuoted(context.AvaloniaProjectFilePath.FullPath)
-                    .Append("--nologo")
-                    .Append($"-c {BuildContext.BuildConfiguration}")
-                    .Append("-r win-x64")
-                    .Append($"--output \"{BuildContext.AvaloniaResultsPath}\"")
-                    .Append("--self-contained true")
-                    .Append("-p:IncludeAllContentForSelfExtract=true")
-                    .Append("-p:PublishSingleFile=true")
-                    .Append("-p:PublishTrimmed=false")
-                    .Append("-p:PublishReadyToRun=false")
-                    .Append("-p:PublicRelease=true") // Nerdbank.GitVersioning - omit git commit ID
-                );
+            foreach (var runtimeIdentifier in BuildContext.AvaloniaRuntimeIdentifiers)
+            {
+                var settings = new ProcessSettings()
+                    .UseWorkingDirectory(".")
+                    .WithArguments(builder => builder
+                        .Append("publish")
+                        .AppendQuoted(context.AvaloniaProjectFilePath.FullPath)
+                        .Append("--nologo")
+                        .Append($"-c {BuildContext.BuildConfiguration}")
+                        .Append($"-r {runtimeIdentifier}")
+                        .Append("--no-restore")
+                        .Append($"--output \"{BuildContext.AvaloniaResultsPathFor(runtimeIdentifier)}\"")
+                        .Append("--self-contained true")
+                        .Append("-p:IncludeAllContentForSelfExtract=true")
+                        .Append("-p:PublishSingleFile=true")
+                        .Append("-p:PublishTrimmed=false")
+                        .Append("-p:PublishReadyToRun=false")
+                        .Append("-p:PublicRelease=true") // Nerdbank.GitVersioning - omit git commit ID
+                    );
 
-            context.StartProcess("dotnet", settings);
+                context.StartProcessOrThrow("dotnet", settings);
+            }
         }
     }
 }

@@ -7,12 +7,12 @@ using System.Reflection;
 
 [assembly: AssemblyCompany("SoftThorn")]
 [assembly: AssemblyProduct("Dawn")]
-[assembly: AssemblyCopyright("© 2025 Insire")]
+[assembly: AssemblyCopyright("© 2026 Insire")]
 [assembly: AssemblyTrademark("")]
 
 // Metadata Attributes
 [assembly: AssemblyMetadata("Platform", "AnyCPU")]
-[assembly: AssemblyMetadata("CompileDate", "[UTC]17.04.2025 16:44:04")]
+[assembly: AssemblyMetadata("CompileDate", "[UTC]08.11.2026 10:04:00")]
 [assembly: AssemblyMetadata("Branch", "avalonia_version")]
-[assembly: AssemblyMetadata("Commit", "a3ebbda40f0d2a5ec9d45200b9f65aef81cc0fd0")]
-[assembly: AssemblyMetadata("Version", "2.2.68-ga3ebbda40f")]
+[assembly: AssemblyMetadata("Commit", "55142bc83d31d6b93731b060e8ecfa83bb781a23")]
+[assembly: AssemblyMetadata("Version", "2.2.118-g55142bc83d")]

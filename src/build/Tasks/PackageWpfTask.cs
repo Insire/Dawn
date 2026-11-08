@@ -8,6 +8,7 @@ using System.Linq;
 namespace Build
 {
     [TaskName("PackageWpf")]
+    [IsDependentOn(typeof(BuildWpfTask))]
     public sealed class PackageWpfTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)
@@ -17,7 +18,8 @@ namespace Build
             var files = context.FileSystem
                 .GetDirectory(bin)
                 .GetFiles("*", SearchScope.Current)
-                .Select(p => p.Path);
+                .Select(p => p.Path)
+                .ToList();
 
             context.ZipCompress(bin, bin.CombineWithFilePath(new FilePath($"Dawn_{context.SemVer2}.zip")), files);
 
@@ -25,11 +27,6 @@ namespace Build
             {
                 context.DeleteFile(file);
             }
-        }
-
-        public override bool ShouldRun(BuildContext context)
-        {
-            return context.Environment.Platform.IsWindows();
         }
     }
 }

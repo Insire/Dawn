@@ -26,7 +26,7 @@ dotnet xstyler -d ./src -r -c .XamlStyler
 dotnet run --project src/build/Build.csproj -- --target=Build   # any single task by name
 ```
 
-Cake tasks (`src/build/Tasks`): `Default` → `Package` → `Build` → `CleanSolution`, `UpdateAssemblyInfo`, `GenerateLicenseFile`, `BuildWpf`/`BuildAvalonia`. WPF tasks only run on Windows. Both apps publish as self-contained single-file `win-x64`. The build's working directory is set to the repo root (`UseWorkingDirectory("../../")`).
+Cake tasks (`src/build/Tasks`): `Default` → `Package` → `Build` → `CleanSolution`, `RestoreSolution` (restores the whole solution once; the builds run with `--no-restore`, so runtime identifiers are declared in each csproj), `UpdateAssemblyInfo`, `GenerateLicenseFile`, `BuildWpf`/`BuildAvalonia`. Both apps build on every OS (WPF cross-builds on Linux via `EnableWindowsTargeting`) and publish as self-contained single-file apps: WPF for `win-x64`, Avalonia for `win-x64` (zip) and `linux-x64` (tar.gz, keeps the executable bit). The build's working directory is set to the repo root (`UseWorkingDirectory("../../")`).
 
 ## Architecture
 

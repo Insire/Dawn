@@ -3,6 +3,7 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net10.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
         <ApplicationIcon>dawn.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>

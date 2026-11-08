@@ -3,7 +3,7 @@ using Cake.Frosting;
 namespace Build
 {
     [TaskName("Build")]
-    [IsDependentOn(typeof(CleanSolutionTask))]
+    [IsDependentOn(typeof(RestoreSolutionTask))]
     [IsDependentOn(typeof(UpdateAssemblyInfoTask))]
     [IsDependentOn(typeof(GenerateLicenseFileTask))]
     [IsDependentOn(typeof(BuildWpfTask))]

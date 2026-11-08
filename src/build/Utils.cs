@@ -1,5 +1,8 @@
+using Cake.Common;
 using Cake.Common.IO;
 using Cake.Common.Solution;
+using Cake.Core;
+using Cake.Core.IO;
 using Cake.Incubator.Project;
 using System.Linq;
 
@@ -7,9 +10,24 @@ namespace Build
 {
     public static class Utils
     {
+        /// <summary>
+        /// Like <see cref="ProcessAliases.StartProcess(ICakeContext, FilePath, ProcessSettings)"/>, but fails the task on an unexpected exit code.
+        /// </summary>
+        /// <returns>The exit code of the process.</returns>
+        public static int StartProcessOrThrow(this BuildContext context, string fileName, ProcessSettings settings, params int[] additionalAcceptedExitCodes)
+        {
+            var exitCode = context.StartProcess(fileName, settings);
+            if (exitCode != 0 && !additionalAcceptedExitCodes.Contains(exitCode))
+            {
+                throw new CakeException($"'{fileName}' exited with code {exitCode}.");
+            }
+
+            return exitCode;
+        }
+
         public static void Clean(this BuildContext context, bool cleanBin, bool cleanObj, bool cleanOutput, bool cleanMisc)
         {
-            var solution = context.ParseSolution(context.WpfProjectFilePath);
+            var solution = context.ParseSolution(context.Environment.WorkingDirectory.CombineWithFilePath("Dawn.sln"));
 
             foreach (var project in solution.Projects)
             {
