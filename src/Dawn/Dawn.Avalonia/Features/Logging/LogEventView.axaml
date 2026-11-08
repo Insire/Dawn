@@ -4,7 +4,6 @@
              xmlns:avalonia="clr-namespace:Dawn.Avalonia.Features.Logging;assembly=Dawn.Avalonia"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:events="clr-namespace:Serilog.Events;assembly=Serilog"
-             xmlns:icons="https://github.com/projektanker/icons.avalonia"
              xmlns:logging="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignHeight="450"
@@ -28,7 +27,7 @@
             <ContextMenu>
                 <MenuItem Command="{Binding CopyCommand}" Header="Copy">
                     <MenuItem.Icon>
-                        <icons:Icon Value="fa-solid fa-copy" />
+                        <PathIcon Data="{StaticResource Icon.Copy}" />
                     </MenuItem.Icon>
                 </MenuItem>
             </ContextMenu>

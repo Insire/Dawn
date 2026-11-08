@@ -1,7 +1,6 @@
 ﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Features.ChangeDetection.ChangeDetectionWindow"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
                  xmlns:changeDetection="clr-namespace:Dawn.Avalonia.Features.ChangeDetection"
                  xmlns:changeDetectionCore="clr-namespace:Dawn.Core.Features.ChangeDetection;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -21,6 +20,10 @@
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding #RootWindow.CloseCommand}" Gesture="Escape" />
+    </suki:SukiWindow.KeyBindings>
+
     <DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <Button Margin="8"
@@ -28,7 +31,7 @@
                     HorizontalAlignment="Right"
                     Command="{Binding #RootWindow.CloseCommand}"
                     ToolTip.Tip="OK">
-                <avalonia:Icon Value="fa-solid fa-check" />
+                <PathIcon Data="{StaticResource Icon.Check}" />
             </Button>
         </DockPanel>
 

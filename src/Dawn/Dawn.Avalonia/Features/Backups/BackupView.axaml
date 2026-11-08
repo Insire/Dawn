@@ -1,7 +1,6 @@
 ﻿<UserControl x:Class="Dawn.Avalonia.Features.Backups.BackupView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
              xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
              xmlns:core="clr-namespace:Dawn.Core;assembly=Dawn.Core"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -33,21 +32,21 @@
                     Grid.Column="2"
                     Command="{Binding DetectChangesCommand}"
                     ToolTip.Tip="Detect and display changes">
-                <avalonia:Icon Value="fa-solid fa-right-left" />
+                <PathIcon Data="{StaticResource Icon.RightLeft}" />
             </Button>
 
             <Button Grid.Row="2"
                     Grid.Column="4"
                     Command="{Binding OpenExternallyCommand}"
                     ToolTip.Tip="Open in explorer">
-                <avalonia:Icon Value="fa-solid fa-up-right-from-square" />
+                <PathIcon Data="{StaticResource Icon.UpRightFromSquare}" />
             </Button>
 
             <Button Grid.Row="2"
                     Grid.Column="6"
                     Command="{Binding DeleteCommand}"
                     ToolTip.Tip="Delete backup">
-                <avalonia:Icon Value="fa-solid fa-trash" />
+                <PathIcon Data="{StaticResource Icon.Trash}" />
             </Button>
 
             <Button Grid.Row="4"
@@ -57,7 +56,7 @@
                     CommandParameter="{Binding}"
                     DockPanel.Dock="Bottom"
                     ToolTip.Tip="Restore backup">
-                <avalonia:Icon Value="fa-solid fa-play" />
+                <PathIcon Data="{StaticResource Icon.Play}" />
             </Button>
 
         </Grid>

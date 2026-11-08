@@ -5,6 +5,7 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
+                 Name="RootWindow"
                  Title="About"
                  Width="700"
                  Height="400"
@@ -20,6 +21,10 @@
     <suki:SukiWindow.Hosts>
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
+
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding #RootWindow.CloseCommand}" Gesture="Escape" />
+    </suki:SukiWindow.KeyBindings>
 
     <DockPanel Margin="8">
         <TabControl>

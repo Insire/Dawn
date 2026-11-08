@@ -1,7 +1,6 @@
 ﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Features.Backups.EditBackupWindow"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
                  xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -25,6 +24,10 @@
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding #RootWindow.CloseCommand}" Gesture="Escape" />
+    </suki:SukiWindow.KeyBindings>
+
     <Grid ColumnDefinitions="8,Auto,8,*,8" RowDefinitions="8,32,8,32,8,8,32,8">
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
@@ -33,10 +36,10 @@
 
         <TextBox Grid.Row="1"
                  Grid.Column="3"
+                 PlaceholderText="Rename the backup ..."
                  TabIndex="1"
                  Text="{Binding CustomName}"
-                 ToolTip.Tip="Provide a custom name"
-                 Watermark="Rename the backup ..." />
+                 ToolTip.Tip="Provide a custom name" />
 
         <TextBlock Grid.Row="3"
                    Grid.Column="1"
@@ -45,10 +48,10 @@
 
         <TextBox Grid.Row="3"
                  Grid.Column="3"
+                 PlaceholderText="Enter a comment ..."
                  TabIndex="2"
                  Text="{Binding Comment}"
-                 ToolTip.Tip="Comment"
-                 Watermark="Enter a comment ..." />
+                 ToolTip.Tip="Comment" />
 
         <DockPanel Grid.Row="5"
                    Grid.RowSpan="3"
@@ -58,9 +61,10 @@
                     Padding="8"
                     HorizontalAlignment="Right"
                     Command="{Binding #RootWindow.CloseCommand}"
+                    IsDefault="True"
                     TabIndex="3"
                     ToolTip.Tip="OK">
-                <avalonia:Icon Value="fa-solid fa-check" />
+                <PathIcon Data="{StaticResource Icon.Check}" />
             </Button>
         </DockPanel>
     </Grid>

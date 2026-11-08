@@ -1,15 +1,15 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Dawn.Avalonia.Infrastructure;
 using Dawn.Core;
 using Dawn.Core.Features.Configuration;
 using DryIoc;
 using MvvmScarletToolkit;
 using Serilog;
-using System.Linq;
+using SukiUI;
 
 namespace Dawn.Avalonia
 {
@@ -30,10 +30,6 @@ namespace Dawn.Avalonia
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
-                // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-                DisableAvaloniaDataAnnotationValidation();
-
                 _applicationLifetime = desktop;
                 desktop.ShutdownRequested += OnShutDownRequested;
 
@@ -42,6 +38,11 @@ namespace Dawn.Avalonia
                 _configurationService = container.Resolve<ConfigurationService>();
                 _jsonFileStore = container.Resolve<JsonFileStore>();
                 _dispatcher = container.Resolve<IScarletDispatcher>();
+
+                // SukiUI only resolves its theme brushes once a base theme has been applied explicitly,
+                // so apply the saved one instead of relying on the system default.
+                var isLightTheme = _configurationService.Get().IsLightTheme;
+                SukiTheme.GetInstance().ChangeBaseTheme(isLightTheme ? ThemeVariant.Light : ThemeVariant.Dark);
 
                 var shell = container.Resolve<Shell>();
                 shell.DataContext = container.Resolve<ShellViewModel>();
@@ -82,19 +83,6 @@ namespace Dawn.Avalonia
                 };
 
                 _jsonFileStore?.SetData(nameof(Shell), data);
-            }
-        }
-
-        private static void DisableAvaloniaDataAnnotationValidation()
-        {
-            // Get an array of plugins to remove
-            var dataValidationPluginsToRemove =
-                BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-            // remove each entry found
-            foreach (var plugin in dataValidationPluginsToRemove)
-            {
-                BindingPlugins.DataValidators.Remove(plugin);
             }
         }
 

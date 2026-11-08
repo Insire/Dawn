@@ -1,7 +1,6 @@
 ﻿<suki:SukiWindow x:Class="Dawn.Avalonia.Features.Logging.LoggingWindow"
                  xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
                  xmlns:core="clr-namespace:Dawn.Core.Features.Logging;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -24,6 +23,10 @@
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding #RootWindow.CloseCommand}" Gesture="Escape" />
+    </suki:SukiWindow.KeyBindings>
+
     <DockPanel>
         <!--  Notification Area  -->
         <DockPanel DockPanel.Dock="Bottom">
@@ -37,7 +40,7 @@
                     HorizontalAlignment="Right"
                     Command="{Binding #RootWindow.CloseCommand}"
                     ToolTip.Tip="OK">
-                <avalonia:Icon Value="fa-solid fa-check" />
+                <PathIcon Data="{StaticResource Icon.Check}" />
             </Button>
         </DockPanel>
 

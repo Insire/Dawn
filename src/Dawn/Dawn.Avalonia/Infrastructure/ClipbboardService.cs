@@ -1,5 +1,6 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Dawn.Core.Features.Util;
 using System;
 using System.Diagnostics;
@@ -42,12 +43,12 @@ namespace Dawn.Avalonia.Infrastructure
                 return;
             }
 
-            var dataObject = new DataObject();
-            dataObject.Set(DataFormats.Text, text);
+            var dataTransfer = new DataTransfer();
+            dataTransfer.Add(DataTransferItem.CreateText(text));
 
             try
             {
-                await clipboard.SetDataObjectAsync(dataObject);
+                await clipboard.SetDataAsync(dataTransfer);
             }
             catch (Exception ex)
             {

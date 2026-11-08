@@ -4,7 +4,6 @@
                  xmlns:backups="clr-namespace:Dawn.Core.Features.Backups;assembly=Dawn.Core"
                  xmlns:core="clr-namespace:Dawn.Core.Features.Configuration;assembly=Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:icons="https://github.com/projektanker/icons.avalonia"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
                  Name="RootWindow"
@@ -28,6 +27,10 @@
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding #RootWindow.CloseCommand}" Gesture="Escape" />
+    </suki:SukiWindow.KeyBindings>
+
     <Grid ColumnDefinitions="8,Auto,8,*,8,Auto,8" RowDefinitions="8,32,8,32,8,Auto,8,64,8,32,8">
 
         <TextBlock Grid.Row="1"
@@ -37,15 +40,15 @@
 
         <TextBox Grid.Row="1"
                  Grid.Column="3"
+                 PlaceholderText="Select the folder to update..."
                  Text="{Binding DeploymentFolder, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip.Tip="Select the folder to apply updates to"
-                 Watermark="Select the folder to update..." />
+                 ToolTip.Tip="Select the folder to apply updates to" />
         <Button Grid.Row="1"
                 Grid.Column="5"
                 Padding="8"
                 Click="SelectTargetFolder"
                 ToolTip.Tip="Select a folder">
-            <icons:Icon Value="fa-solid fa-search" />
+            <PathIcon Data="{StaticResource Icon.MagnifyingGlass}" />
         </Button>
 
         <TextBlock Grid.Row="3"
@@ -55,15 +58,15 @@
 
         <TextBox Grid.Row="3"
                  Grid.Column="3"
+                 PlaceholderText="Select a backup folder..."
                  Text="{Binding BackupFolder, UpdateSourceTrigger=PropertyChanged}"
-                 ToolTip.Tip="Select the folder to store you backups in"
-                 Watermark="Select a backup folder..." />
+                 ToolTip.Tip="Select the folder to store you backups in" />
         <Button Grid.Row="3"
                 Grid.Column="5"
                 Padding="8"
                 Click="SelectBackupFolder"
                 ToolTip.Tip="Select a folder">
-            <icons:Icon Value="fa-solid fa-search" />
+            <PathIcon Data="{StaticResource Icon.MagnifyingGlass}" />
         </Button>
 
         <ItemsControl Grid.Row="5"
@@ -107,7 +110,7 @@
                 HorizontalAlignment="Right"
                 Command="{Binding #RootWindow.CopyToClipboardCommand}"
                 ToolTip.Tip="Copy current settings to clipboard">
-            <icons:Icon Value="fa-solid fa-clipboard" />
+            <PathIcon Data="{StaticResource Icon.Clipboard}" />
         </Button>
 
         <Button Grid.Row="9"
@@ -115,7 +118,7 @@
                 Command="{Binding #RootWindow.CloseCommand}"
                 ToolTip.Tip="OK">
 
-            <icons:Icon Value="fa-solid fa-check" />
+            <PathIcon Data="{StaticResource Icon.Check}" />
         </Button>
     </Grid>
 </suki:SukiWindow>

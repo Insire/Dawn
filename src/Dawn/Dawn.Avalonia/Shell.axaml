@@ -3,7 +3,6 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:core="using:Dawn.Core"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                 xmlns:icons="https://github.com/projektanker/icons.avalonia"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:staging="clr-namespace:Dawn.Core.Features.Staging;assembly=Dawn.Core"
                  xmlns:suki="https://github.com/kikipoulet/SukiUI"
@@ -24,43 +23,89 @@
         <suki:SukiDialogHost Name="DialogHost" />
     </suki:SukiWindow.Hosts>
 
+    <suki:SukiWindow.KeyBindings>
+        <KeyBinding Command="{Binding Stagings.AddFilesCommand}" Gesture="Ctrl+O" />
+        <KeyBinding Command="{Binding Stagings.AddFolderCommand}" Gesture="Ctrl+Shift+O" />
+        <KeyBinding Command="{Binding Updates.RefreshCommand}" Gesture="F5" />
+        <KeyBinding Command="{Binding Stagings.ApplyCommand}" Gesture="Ctrl+Enter" />
+    </suki:SukiWindow.KeyBindings>
+
     <suki:SukiWindow.RightWindowTitleBarControls>
-        <Button Classes="WindowControlsButton" Click="ShowAbout">
-            <icons:Icon Value="fa-solid fa-info" />
+        <Button Classes="WindowControlsButton"
+                Click="ShowAbout"
+                Focusable="True"
+                HotKey="F1"
+                ToolTip.Tip="About (F1)">
+            <PathIcon Width="14"
+                      Height="14"
+                      Data="{StaticResource Icon.Info}" />
         </Button>
 
-        <Button Classes="WindowControlsButton" Click="OnToggleTheme">
-            <icons:Icon Value="fa-solid fa-paintbrush" />
+        <Button Classes="WindowControlsButton"
+                Click="OnToggleTheme"
+                Focusable="True"
+                HotKey="Ctrl+T"
+                ToolTip.Tip="Toggle theme (Ctrl+T)">
+            <PathIcon Width="14"
+                      Height="14"
+                      Data="{StaticResource Icon.Paintbrush}" />
         </Button>
 
-        <Button Classes="WindowControlsButton" Click="OpenConfiguration">
-            <icons:Icon Value="fa-solid fa-cog" />
+        <Button Classes="WindowControlsButton"
+                Click="OpenConfiguration"
+                Focusable="True"
+                HotKey="Ctrl+OemComma"
+                ToolTip.Tip="Configuration (Ctrl+,)">
+            <PathIcon Width="14"
+                      Height="14"
+                      Data="{StaticResource Icon.Gear}" />
         </Button>
 
-        <Button Classes="WindowControlsButton" Click="ShowLog">
-            <icons:Icon Value="fa-solid fa-bars-staggered" />
+        <Button Classes="WindowControlsButton"
+                Click="ShowLog"
+                Focusable="True"
+                HotKey="Ctrl+L"
+                ToolTip.Tip="Log (Ctrl+L)">
+            <PathIcon Width="14"
+                      Height="14"
+                      Data="{StaticResource Icon.BarsStaggered}" />
         </Button>
 
-        <ToggleButton BorderBrush="Transparent"
-                      Classes="Basic"
-                      IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+        <ToggleButton Padding="8 0"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      Classes="TopmostToggle"
+                      Focusable="True"
+                      HotKey="Ctrl+Shift+T"
+                      IsCheckedChanged="ToggleButton_OnIsCheckedChanged"
+                      ToolTip.Tip="Keep on top (Ctrl+Shift+T)">
             <ToggleButton.Styles>
-                <Style Selector="ToggleButton icons|Icon.toggle-on">
+                <Style Selector="ToggleButton.TopmostToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.TopmostToggle:checked /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.TopmostToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </Style>
+                <Style Selector="ToggleButton PathIcon.toggle-on">
                     <Setter Property="IsVisible" Value="False" />
                 </Style>
-                <Style Selector="ToggleButton:checked icons|Icon.toggle-on">
+                <Style Selector="ToggleButton:checked PathIcon.toggle-on">
                     <Setter Property="IsVisible" Value="True" />
                 </Style>
-                <Style Selector="ToggleButton icons|Icon.toggle-off">
+                <Style Selector="ToggleButton PathIcon.toggle-off">
                     <Setter Property="IsVisible" Value="True" />
                 </Style>
-                <Style Selector="ToggleButton:checked icons|Icon.toggle-off">
+                <Style Selector="ToggleButton:checked PathIcon.toggle-off">
                     <Setter Property="IsVisible" Value="False" />
                 </Style>
             </ToggleButton.Styles>
             <Panel>
-                <icons:Icon Classes="toggle-on" Value="fa-solid fa-toggle-on" />
-                <icons:Icon Classes="toggle-off" Value="fa-solid fa-toggle-off" />
+                <PathIcon Width="14"
+                          Height="14"
+                          Classes="toggle-on"
+                          Data="{StaticResource Icon.ToggleOn}" />
+                <PathIcon Width="14"
+                          Height="14"
+                          Classes="toggle-off"
+                          Data="{StaticResource Icon.ToggleOff}" />
             </Panel>
         </ToggleButton>
 
@@ -81,9 +126,9 @@
                 <Run Text="Why not drop some files here?" />
             </TextBlock>
 
-            <icons:Icon Margin="8"
-                        HorizontalAlignment="Center"
-                        Value="fa-solid fa-chevron-down" />
+            <PathIcon Margin="8"
+                      HorizontalAlignment="Center"
+                      Data="{StaticResource Icon.ChevronDown}" />
         </DockPanel>
 
         <!--  Backups  -->
@@ -92,25 +137,25 @@
                 <ContextMenu>
                     <MenuItem Command="{Binding Stagings.AddFilesCommand}" Header="Add files">
                         <MenuItem.Icon>
-                            <icons:Icon Value="fa-solid fa-plus" />
+                            <PathIcon Data="{StaticResource Icon.Plus}" />
                         </MenuItem.Icon>
                     </MenuItem>
 
                     <MenuItem Command="{Binding Stagings.AddFolderCommand}" Header="Add folder">
                         <MenuItem.Icon>
-                            <icons:Icon Value="fa-solid fa-folder-plus" />
+                            <PathIcon Data="{StaticResource Icon.FolderPlus}" />
                         </MenuItem.Icon>
                     </MenuItem>
 
                     <MenuItem Command="{Binding Updates.RefreshCommand}" Header="Refresh">
                         <MenuItem.Icon>
-                            <icons:Icon Value="fa-solid fa-rotate" />
+                            <PathIcon Data="{StaticResource Icon.Rotate}" />
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator />
                     <MenuItem Command="{Binding Updates.DeleteAllCommand}" Header="Delete all backups">
                         <MenuItem.Icon>
-                            <icons:Icon Value="fa-solid fa-trash" />
+                            <PathIcon Data="{StaticResource Icon.Trash}" />
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>
@@ -146,14 +191,14 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type staging:StagingViewModel}">
                             <DockPanel Margin="0 4 0 0" HorizontalAlignment="Stretch">
-                                <icons:Icon VerticalAlignment="Center"
-                                            DockPanel.Dock="Left"
-                                            Value="fa-solid fa-file" />
+                                <PathIcon VerticalAlignment="Center"
+                                          Data="{StaticResource Icon.File}"
+                                          DockPanel.Dock="Left" />
                                 <Button Command="{Binding #RootWindow.((core:ShellViewModel)DataContext).Stagings.RemoveCommand}"
                                         CommandParameter="{Binding}"
                                         DockPanel.Dock="Right"
                                         ToolTip.Tip="Unstage this">
-                                    <icons:Icon Value="fa-solid fa-trash" />
+                                    <PathIcon Data="{StaticResource Icon.Trash}" />
                                 </Button>
 
                                 <TextBlock Margin="8 0"
@@ -179,28 +224,28 @@
             <DockPanel>
                 <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding #RootWindow.StagingChecked, Mode=TwoWay}">
                     <ToggleButton.Styles>
-                        <Style Selector="icons|Icon.IsToggled">
-                            <Setter Property="Value" Value="fa-solid fa-chevron-up" />
+                        <Style Selector="PathIcon.IsToggled">
+                            <Setter Property="Data" Value="{StaticResource Icon.ChevronUp}" />
                         </Style>
-                        <Style Selector="icons|Icon.IsNotToggled">
-                            <Setter Property="Value" Value="fa-solid fa-chevron-down" />
+                        <Style Selector="PathIcon.IsNotToggled">
+                            <Setter Property="Data" Value="{StaticResource Icon.ChevronDown}" />
                         </Style>
                     </ToggleButton.Styles>
 
-                    <icons:Icon Classes.IsNotToggled="{Binding !#RootWindow.StagingChecked}" Classes.IsToggled="{Binding #RootWindow.StagingChecked}" />
+                    <PathIcon Classes.IsNotToggled="{Binding !#RootWindow.StagingChecked}" Classes.IsToggled="{Binding #RootWindow.StagingChecked}" />
                 </ToggleButton>
 
                 <Button Command="{Binding Stagings.ApplyCommand}"
                         DockPanel.Dock="Right"
-                        ToolTip.Tip="Apply Updates">
-                    <icons:Icon Value="fa-solid fa-file-arrow-up" />
+                        ToolTip.Tip="Apply Updates (Ctrl+Enter)">
+                    <PathIcon Data="{StaticResource Icon.FileArrowUp}" />
                 </Button>
 
                 <Button Margin="8 0"
                         Command="{Binding Stagings.ClearCommand}"
                         DockPanel.Dock="Right"
                         ToolTip.Tip="Unstage everything">
-                    <icons:Icon Value="fa-solid fa-trash" />
+                    <PathIcon Data="{StaticResource Icon.Trash}" />
                 </Button>
 
                 <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding Stagings.ReuseLastBackup}" />

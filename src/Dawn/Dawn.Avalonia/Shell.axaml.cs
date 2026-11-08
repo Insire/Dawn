@@ -178,7 +178,7 @@ namespace Dawn.Avalonia
 
         private async void OnDrop(object? sender, DragEventArgs e)
         {
-            var files = e.Data.GetFiles();
+            var files = e.DataTransfer.TryGetFiles();
             if (files == null)
             {
                 return;
@@ -281,7 +281,7 @@ namespace Dawn.Avalonia
 
             using (var memory = new MemoryStream())
             {
-                rtb.Save(memory);
+                rtb.Save(memory, new PngBitmapEncoderOptions());
                 memory.Position = 0;
 
                 var windowIcon = new WindowIcon(memory);
